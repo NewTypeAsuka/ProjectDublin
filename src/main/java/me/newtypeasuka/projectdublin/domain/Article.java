@@ -5,7 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
+
+@EntityListeners(AuditingEntityListener.class)
 @Entity // 엔티티로 지정
 @Getter // lombok의 Getter 어노테이션으로 getter 메서드 자동 생성
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // lombok의 NoArgsConstructor 어노테이션으로 기본 생성자 자동 생성(접근제한자는 protected)
@@ -32,4 +39,13 @@ public class Article {
         this.title = title;
         this.content = content;
     }
+
+    @CreatedDate // 생성일시 자동 저장
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate // 수정일시 자동 저장
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 }
