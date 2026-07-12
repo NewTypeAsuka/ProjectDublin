@@ -1,8 +1,10 @@
 package me.newtypeasuka.projectdublin.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
+import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,28 @@ public class BlogService {
     // 블로그 글 모두 조회
     public List<Article> findAll() {
         return blogRepository.findAll();
+    }
+
+    // 블로그 글 단건 조회
+    public Article findById(Long id) {
+        return blogRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+    }
+
+    // 블로그 글 삭제
+    public void delete(long id) {
+        blogRepository.deleteById(id);
+    }
+
+    // 블로그 글 수정
+    @Transactional // 트랜잭션 처리를 위해 @Transactional 어노테이션 사용
+    public Article update(long id, UpdateArticleRequest request) {
+        Article article = blogRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+
+        article.update(request.getTitle(), request.getContent());
+
+        return article;
     }
 
 }

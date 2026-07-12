@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.ArticleResponse;
+import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.service.BlogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,33 @@ public class BlogApiController {
 
         return ResponseEntity.ok()
                 .body(articles);
+    }
+
+    // 블로그 글 단건 조회 API
+    @GetMapping("/api/articles/{id}")
+    public ResponseEntity<ArticleResponse> findArticle(@PathVariable long id) { // @PathVariable 어노테이션으로 URL 경로에서 id 값을 가져옴
+        Article article = blogService.findById(id);
+
+        return ResponseEntity.ok()
+                .body(new ArticleResponse(article));
+    }
+
+    // 블로그 글 삭제 API
+    @DeleteMapping("/api/articles/{id}")
+    public ResponseEntity<Void> deleteArticle(@PathVariable long id) { // @PathVariable 어노테이션으로 URL 경로에서 id 값을 가져옴
+        blogService.delete(id);
+
+        return ResponseEntity.ok()
+                .build();
+    }
+
+    // 블로그 글 수정 API
+    @PutMapping("/api/articles/{id}")
+    public ResponseEntity<Article> updateArticle(@PathVariable long id, @RequestBody UpdateArticleRequest request) {
+        Article updatedArticle = blogService.update(id, request);
+
+        return ResponseEntity.ok()
+                .body(updatedArticle);
     }
 
 }
