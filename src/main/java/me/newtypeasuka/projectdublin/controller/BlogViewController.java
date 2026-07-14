@@ -34,7 +34,7 @@ public class BlogViewController {
         Article article = blogService.findById(id);
         model.addAttribute("article", new ArticleViewResponse(article));
 
-        return "article";
+        return "article"; // article.html 뷰 이름 반환
     }
 
     @GetMapping("/new-article")
