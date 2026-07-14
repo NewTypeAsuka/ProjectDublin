@@ -45,7 +45,7 @@ public class BlogService {
 
         article.update(request.getTitle(), request.getContent());
 
-        return article;
+        return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
     }
 
 }

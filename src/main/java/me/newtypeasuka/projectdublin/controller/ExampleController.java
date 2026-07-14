@@ -18,7 +18,7 @@ public class ExampleController {
         examplePerson.setId(1L);
         examplePerson.setName("홍길동");
         examplePerson.setAge(11);
-        examplePerson.setHobbies(List.of("축구", "농구", "야구"));
+        examplePerson.setHobbies(List.of("축구", "농구", "야구", "운동"));
 
         model.addAttribute("person", examplePerson);
         model.addAttribute("today", LocalDate.now());
