@@ -8,17 +8,13 @@ spring:
     properties:
       hibernate:
         format_sql: true # 쿼리를 보기좋게 포맷팅
-
     defer-datasource-initialization: true # 테이블 생성 후에 data.sql 실행
-
   datasource:
     url: jdbc:h2:mem:testdb # h2 데이터베이스 url(jdbc:h2:mem:xxx 형식)
     user: sa # h2 데이터베이스 사용자명
-
   h2:
     console:
         enabled: true # h2 콘솔 활성화(http://localhost:8080/h2-console)
-
 #  security:
 #    oauth2:
 #      client:
