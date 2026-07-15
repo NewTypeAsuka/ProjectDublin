@@ -19,6 +19,14 @@ spring:
     console:
         enabled: true # h2 콘솔 활성화(http://localhost:8080/h2-console)
 
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google: # 깃허브 업로드 금지
+#            client-id: 구글 클라이언트 아이디
+#            client-secret: 구글 클라이언트 시크릿
+
 jwt:
   issuer: sangzoon0102@naver.com
   secret_key: "#seoul01!!cns" # #은 주석처리 되므로, #을 포함한 문자열은 따옴표로 감싸야 함
