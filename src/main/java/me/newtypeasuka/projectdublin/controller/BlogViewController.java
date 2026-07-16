@@ -18,6 +18,7 @@ import java.util.List;
 public class BlogViewController {
 
     private final BlogService blogService;
+    
 
     @GetMapping("/articles")
     public String getArticles(Model model) {
