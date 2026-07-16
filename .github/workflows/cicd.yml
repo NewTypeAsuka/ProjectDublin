@@ -1,5 +1,6 @@
 # 깃허브 액션(CI/CD) 설정 파일
 # 2번째 시도
+# 3번째 시도
 
 # 워크플로의 이름 지정
 name: CI/CD
@@ -33,10 +34,10 @@ jobs:
         id: current-time
         with:
           format: YYYY-MM-DDTHH-mm-ss
-          ufcOffset: "+09:00"
+          utcOffset: "+09:00"
 
       - name: Set artifact
-        run: echo "artifact=$(ls .build/libs)" >> $GITHUB_ENV
+        run: echo "artifact=$(ls ./build/libs)" >> $GITHUB_ENV
 
       - name: Beanstalk Deploy
         uses: einaregilsson/beanstalk-deploy@v20
