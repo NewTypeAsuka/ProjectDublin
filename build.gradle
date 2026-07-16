@@ -42,5 +42,5 @@ test {
 
 // jar 파일 생성 설정(리소스 파일 포함하여 빌드)
 jar {
-    enabled = true
+    enabled = false
 }
