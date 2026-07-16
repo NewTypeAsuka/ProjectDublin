@@ -15,6 +15,16 @@ spring:
   h2:
     console:
         enabled: true # h2 콘솔 활성화(http://localhost:8080/h2-console)
+  security:
+    oauth2:
+      client:
+        registration:
+          google: # 깃허브 안 올라가도록 조심
+            client-id: 135004663209...
+            client-secret: GOCSPX...
+            scope:
+              - email
+              - profile
 
 jwt:
   issuer: sangzoon0102@naver.com

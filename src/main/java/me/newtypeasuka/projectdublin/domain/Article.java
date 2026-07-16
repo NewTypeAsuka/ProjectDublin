@@ -28,8 +28,12 @@ public class Article {
     @Column(name = "content", nullable = false) // content 필드를 컬럼으로 지정, null 허용하지 않음
     private String content;
 
+    @Column(name = "author", nullable = false) // author 필드를 컬럼으로 지정, null 허용하지 않음
+    private String author;
+
     @Builder // 빌더 패턴으로 객체 생성
-    public Article(String title, String content) {
+    public Article(String author, String title, String content) {
+        this.author = author;
         this.title = title;
         this.content = content;
     }
