@@ -25,6 +25,7 @@ dependencies {
     implementation('io.jsonwebtoken:jjwt:0.9.1') // JWT 라이브러리
     implementation('javax.xml.bind:jaxb-api:2.3.1') // XML 문서 객체 매핑 지원 API
     implementation('org.springframework.boot:spring-boot-starter-oauth2-client') // 구글 로그인을 위한 OAuth2 클라이언트
+    implementation('com.mysql:mysql-connector-j') // MySQL 데이터베이스 연결
     testImplementation('org.springframework.boot:spring-boot-starter-test') // 스프링부트 테스트
     testImplementation('org.springframework.security:spring-security-test') // 스프링 시큐리티 테스트
     testImplementation('org.projectlombok:lombok') // 롬복 테스트
