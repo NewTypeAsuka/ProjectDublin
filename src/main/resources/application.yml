@@ -3,6 +3,9 @@
 # xml, json, yml, properties 등 다양한 설정 파일이 존재하지만, 스프링부트에서는 yml이 가독성이 좋고, 계층 구조를 표현하기 편리하여 많이 사용됨
 
 spring:
+  config:
+    import: optional:file:.secret/application-local.yml # 로컬 환경에서만 필요한 설정을 별도의 파일로 분리해서 관리할 수 있음. .secret/application-local.yml 파일은 git에 올리지 않음
+
   jpa:
     show-sql: true # 전송 쿼리 콘솔에 출력
     properties:
@@ -20,12 +23,12 @@ spring:
       client:
         registration:
           google: # 깃허브 안 올라가도록 조심
-            client-id: 135004663209...
-            client-secret: GOCSPX...
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
 
 jwt:
   issuer: sangzoon0102@naver.com
-  secret_key: seoul # #은 주석처리 되므로, #을 포함한 문자열은 따옴표로 감싸야 함
+  secret_key: ${JWT_SECRET_KEY} # #seoul은 주석처리 되므로, #을 포함한 문자열은 따옴표로 감싸야 함

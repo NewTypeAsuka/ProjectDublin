@@ -1,6 +1,7 @@
 ### custom ###
 .secret
 .secret/
+application-local.yml
 .idea
 .idea/
 
