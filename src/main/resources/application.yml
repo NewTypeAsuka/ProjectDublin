@@ -28,4 +28,4 @@ spring:
 
 jwt:
   issuer: sangzoon0102@naver.com
-  secret_key: "#seoul01!!cns" # #은 주석처리 되므로, #을 포함한 문자열은 따옴표로 감싸야 함
+  secret_key: seoul # #은 주석처리 되므로, #을 포함한 문자열은 따옴표로 감싸야 함
