@@ -6,7 +6,7 @@
     <title>✨NewTypeBlog::로그인✨</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <style>
-        .gradient-custom {
+        .gradient-custom { /* 배경색과 애니메이션 */
             background: linear-gradient(135deg,
                 rgba(16, 185, 129, 1),
                 rgba(59, 130, 246, 1),
@@ -24,6 +24,22 @@
             75% { background-position: 0% 70%; }
             100% { background-position: 0% 50%; }
         }
+        .google-login-link.is-loading { /* 로딩 상태를 나타내는 애니메이션 */
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .google-login-loading {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.35s ease;
+            margin-top: 0;
+        }
+        .google-login-loading.is-visible {
+            max-height: 96px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body class="gradient-custom"> <!-- 배경색과 애니메이션 -->
@@ -35,14 +51,44 @@
                         <h2 class="text-white">LOGIN</h2>
                         <p class="text-white-50 mt-2 mb-5">구글 계정을 사용하여<br>로그인 해주세요</p>
                         <div class="mb-2">
-                            <a href="/oauth2/authorization/google">
+                            <a th:href="@{/oauth2/authorization/google}" href="/oauth2/authorization/google" id="google-login-link" class="google-login-link d-inline-block">
                                 <img th:src="@{/img/googleLogin.png}" src="/img/googleLogin.png" class="img-fluid" alt="Google 로그인">
                             </a>
+                            <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 요소 -->
+                                <div class="spinner-border text-light" role="status">
+                                    <span class="sr-only">로딩 중</span>
+                                </div>
+                                <p class="text-white-50 small mt-3 mb-1">로그인 테스트 중입니다</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    <script>
+        // Google 로그인 버튼 클릭 시 로딩 상태를 표시하는 스크립트
+        const googleLoginLink = document.getElementById('google-login-link');
+        const googleLoginLoading = document.getElementById('google-login-loading');
+        const TEST_LOGIN_DELAY_MS = 10000;
+
+        if (googleLoginLink && googleLoginLoading) {
+            googleLoginLink.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                if (googleLoginLink.classList.contains('is-loading')) {
+                    return;
+                }
+
+                googleLoginLink.classList.add('is-loading');
+                googleLoginLink.setAttribute('aria-disabled', 'true');
+                googleLoginLoading.classList.add('is-visible');
+
+                window.setTimeout(function () {
+                    window.location.href = googleLoginLink.href;
+                }, TEST_LOGIN_DELAY_MS);
+            });
+        }
+    </script>
 </body>
 </html>
