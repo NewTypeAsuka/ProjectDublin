@@ -1,0 +1,30 @@
+create database blog;
+
+use blog;
+
+create table article (
+    id bigint not null auto_increment,
+    author varchar(255) not null,
+    content varchar(255) not null,
+    created_at timestamp,
+    title varchar(255) not null,
+    updated_at timestamp,
+    primary key (id)
+);
+
+create table refresh_token (
+    id bigint not null auto_increment,
+    refresh_token varchar(255) not null,
+    user_id varchar(255) not null,
+    primary key (id)
+);
+
+create table user (
+    id bigint not null auto_increment,
+    created_at timestamp,
+    email varchar(255) not null,
+    nickname varchar(255),
+    password varchar(255),
+    updated_at timestamp,
+    primary key (id)
+);
