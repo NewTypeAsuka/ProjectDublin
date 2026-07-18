@@ -4,3 +4,9 @@ INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('te
 INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title4', 'test content4', 'test author4', NOW(), NOW());
 INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title5', 'test content5', 'test author5', NOW(), NOW());
 INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title6', 'test content6', 'test author6', NOW(), NOW());
+INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title7', 'test content7', 'test author7', NOW(), NOW());
+INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title8', 'test content8', 'test author8', NOW(), NOW());
+INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title9', 'test content9', 'test author9', NOW(), NOW());
+INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title10', 'test content10', 'test author10', NOW(), NOW());
+INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title11', 'test content11', 'test author11', NOW(), NOW());
+INSERT INTO article (title, content, author, created_at, updated_at) VALUES ('test title12', 'test content12', 'test author12', NOW(), NOW());
