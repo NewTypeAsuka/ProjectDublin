@@ -16,6 +16,7 @@
             <span th:if="${hobby == '운동'}">(대표 취미)</span>
         </ul>
     </div>
+    
 
     <a th:href="@{/api/articles/{id}(id=${person.id})}">글 보기</a> <!-- th:href 속성을 사용하여 동적으로 URL 생성 -->
 </body>
