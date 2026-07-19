@@ -26,6 +26,112 @@
         .site-nav .nav-link:focus {
             transform: translateY(-1px);
         }
+        .site-nav__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .site-nav__menu {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            gap: 0.15rem;
+        }
+        .site-nav-dropdown {
+            position: relative;
+            margin: 0;
+        }
+        .site-nav-dropdown > summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-width: 2.5rem;
+            height: 2.5rem;
+            padding: 0 0.8rem;
+            border-radius: 0.35rem;
+            color: rgba(255, 255, 255, 0.75);
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            transition: color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+        }
+        .site-nav-dropdown > summary::-webkit-details-marker {
+            display: none;
+        }
+        .site-nav-dropdown > summary:hover,
+        .site-nav-dropdown > summary:focus {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+            outline: none;
+        }
+        .site-nav-dropdown[open] > summary {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+        .site-nav-dropdown__icon {
+            display: inline-block;
+            width: 0.6rem;
+            height: 0.6rem;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg) translateY(-1px);
+        }
+        .site-nav-dropdown__menu {
+            position: absolute;
+            top: calc(100% + 0.45rem);
+            left: 0;
+            min-width: 13rem;
+            padding: 0.5rem;
+            border-radius: 0.8rem;
+            background-color: #ffffff;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+            z-index: 1040;
+        }
+        .site-nav-dropdown__item {
+            display: block;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.55rem;
+            font-size: 0.92rem;
+            line-height: 1.35;
+            color: #5f6b7a;
+            background-color: #f8f9fa;
+            text-decoration: none;
+        }
+        .site-nav-dropdown__item:hover,
+        .site-nav-dropdown__item:focus {
+            color: #1f2937;
+            background-color: #eef2f7;
+            text-decoration: none;
+            outline: none;
+        }
+        .site-nav__actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .site-nav__actions .btn {
+            margin: 0;
+            white-space: nowrap;
+        }
+        @media (min-width: 992px) {
+            .site-nav__inner {
+                max-width: 800px;
+            }
+        }
+        @media (min-width: 1200px) {
+            .site-nav__inner {
+                max-width: 855px;
+            }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
@@ -36,9 +142,21 @@
     </header>
 
     <nav class="navbar navbar-dark bg-secondary py-2 site-nav" id="site-nav">
-        <div class="container justify-content-center">
-            <div class="navbar-nav flex-row flex-wrap justify-content-center">
-                <a class="nav-item nav-link px-3" href="/">홈</a>
+        <div class="container site-nav__inner">
+            <div class="navbar-nav flex-row site-nav__menu">
+                <details class="site-nav-dropdown">
+                    <summary aria-label="메뉴 열기">
+                        <span>메뉴</span>
+                        <span class="site-nav-dropdown__icon" aria-hidden="true"></span>
+                    </summary>
+                    <div class="site-nav-dropdown__menu">
+                        <a class="site-nav-dropdown__item" href="/">홈</a>
+                        <!-- 추후 다른 기능으로 이동하는 링크 항목 추가 -->
+                    </div>
+                </details>
+            </div>
+            <div class="site-nav__actions">
+                <button type="button" class="btn btn-outline-light btn-sm" onclick="location.href='/logout'">로그아웃</button>
             </div>
         </div>
     </nav>
