@@ -1,6 +1,3 @@
--- WARNING: This script deletes the existing test database and all of its data.
--- Execute this file manually. It is not intended for automatic initialization.
-
 DROP DATABASE IF EXISTS blog;
 DROP DATABASE IF EXISTS BLOG;
 
