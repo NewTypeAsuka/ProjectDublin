@@ -4,7 +4,7 @@ create database ProjectDublin
 
 use ProjectDublin;
 
-create table article (
+create table posts (
     id bigint not null auto_increment,
     author varchar(255) not null,
     content varchar(255) not null,
@@ -25,4 +25,4 @@ create table users (
 );
 
 select * from users;
-select * from article;
+select * from posts;
