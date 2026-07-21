@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Table(name = "posts") // posts 테이블과 매핑
+@Table(name = "articles") // articles 테이블과 매핑
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // lombok으로 기본 생성자
 @Getter // lombok으로 getter
