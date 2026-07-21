@@ -30,12 +30,12 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
     private User saveOrUpdate(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        String email = (String) attributes.get("email");
-        String name = (String) attributes.get("name");
+        String email = (String) attributes.get("email"); // 구글에서 받아온 OAuth2User 객체에서 이메일을 가져옴
+        String name = (String) attributes.get("name"); // 구글에서 받아온 OAuth2User 객체에서 이름을 가져옴
 
         User user = userRepository.findByEmail(email)
-                .map(entity -> entity.update(name))
-                .orElse(User.builder()
+                .map(entity -> entity.update(name)) // 이메일을 확인해보니 사용자가 있으면 이름 갱신
+                .orElse(User.builder() // 이메일을 확인해보니 사용자가 없으면 새로 저장
                         .email(email)
                         .nickname(name)
                         .build());
