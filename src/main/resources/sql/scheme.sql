@@ -6,7 +6,7 @@ use ProjectDublin;
 
 create table article (
     id bigint not null auto_increment,
-    author VARCHAR(255) not null,
+    author varchar(255) not null,
     content varchar(255) not null,
     created_at timestamp,
     title varchar(255) not null,
