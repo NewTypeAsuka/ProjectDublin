@@ -25,7 +25,7 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "nickname", unique = true)
+    @Column(name = "name", unique = true)
     private String nickname;
 
     @Builder // 빌더 패턴으로 객체 생성
