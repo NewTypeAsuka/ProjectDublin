@@ -4,22 +4,22 @@ create database ProjectDublin
 
 use ProjectDublin;
 
-create table posts (
-    id bigint not null auto_increment,
-    author varchar(255) not null,
-    content varchar(255) not null,
-    created_at timestamp,
-    title varchar(255) not null,
-    updated_at timestamp,
-    primary key (id)
-);
-
 create table users (
     id bigint not null auto_increment,
     created_at timestamp,
     email varchar(255) not null,
     nickname varchar(255),
     password varchar(255),
+    updated_at timestamp,
+    primary key (id)
+);
+
+create table posts (
+    id bigint not null auto_increment,
+    author varchar(255) not null,
+    content varchar(255) not null,
+    created_at timestamp,
+    title varchar(255) not null,
     updated_at timestamp,
     primary key (id)
 );

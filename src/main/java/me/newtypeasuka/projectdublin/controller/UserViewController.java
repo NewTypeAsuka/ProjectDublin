@@ -12,10 +12,11 @@ public class UserViewController {
     public String login(Authentication authentication) {
         if (authentication != null
                 && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/articles";
+                && !(authentication instanceof AnonymousAuthenticationToken)) { // 로그인했는지 검증
+            return "redirect:/articles"; // 로그인했다면 /articles 페이지로 리다이렉트
         }
 
-        return "oauthLogin";
+        return "oauthLogin"; // 로그인이 안되었다면 oauthLogin.html 페이지로 이동
     }
+
 }

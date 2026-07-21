@@ -11,14 +11,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-@Entity
+@Table(name = "users") // users 테이블과 매핑
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // lombok으로 기본 생성자
+@Getter // lombok으로 getter
+@Entity // 엔티티로 지정
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id // id 필드를 기본키로 지정
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키를 자동으로 1씩 증가
     @Column(name = "id", updatable = false)
     private Long id;
 
@@ -28,7 +28,7 @@ public class User {
     @Column(name = "nickname", unique = true)
     private String nickname;
 
-    @Builder
+    @Builder // 빌더 패턴으로 객체 생성
     public User(String email, String nickname) {
         this.email = email;
         this.nickname = nickname;
@@ -38,4 +38,5 @@ public class User {
         this.nickname = nickname;
         return this;
     }
+
 }

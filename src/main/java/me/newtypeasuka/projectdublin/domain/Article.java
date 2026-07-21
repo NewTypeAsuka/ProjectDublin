@@ -11,11 +11,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+@Table(name = "posts") // posts 테이블과 매핑
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // lombok으로 기본 생성자
+@Getter // lombok으로 getter
 @Entity // 엔티티로 지정
-@Getter // lombok의 Getter 어노테이션으로 getter 메서드 자동 생성
-@Table(name = "posts")
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // lombok의 NoArgsConstructor 어노테이션으로 기본 생성자 자동 생성(접근제한자는 protected)
 public class Article {
 
     @Id // id 필드를 기본키로 지정
@@ -23,13 +23,13 @@ public class Article {
     @Column(name = "id", updatable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false) // title 필드를 컬럼으로 지정, null 허용하지 않음
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "content", nullable = false) // content 필드를 컬럼으로 지정, null 허용하지 않음
+    @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "author", nullable = false) // author 필드를 컬럼으로 지정, null 허용하지 않음
+    @Column(name = "author", nullable = false)
     private String author;
 
     @Builder // 빌더 패턴으로 객체 생성
