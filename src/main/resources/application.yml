@@ -26,8 +26,9 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
-              - email
-              - profile
+              # - openid # 구글에서 발급하는 불변 사용자 식별자 sub
+              - email # 구글 계정 이메일 email
+              - profile # 구글 계정 프로필 정보(전체 이름 name, 이름 given_name, 성 family_name, 프로필 사진 picture 등)
 
 jwt:
   issuer: sangzoon0102@naver.com
