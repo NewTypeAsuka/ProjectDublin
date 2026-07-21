@@ -7,14 +7,14 @@ use ProjectDublin;
 create table users (
     id bigint not null auto_increment,
     email varchar(255) not null,
-    name varchar(255),
+    nickname varchar(255),
     password varchar(255),
     created_at timestamp,
     updated_at timestamp,
     primary key (id)
 );
 
-create table posts (
+create table articles (
     id bigint not null auto_increment,
     title varchar(255) not null,
     content varchar(255) not null,
@@ -25,4 +25,4 @@ create table posts (
 );
 
 select * from users;
-select * from posts;
+select * from articles;
