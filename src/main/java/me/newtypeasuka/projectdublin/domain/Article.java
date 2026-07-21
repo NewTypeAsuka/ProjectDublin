@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Entity // 엔티티로 지정
 @Getter // lombok의 Getter 어노테이션으로 getter 메서드 자동 생성
+@Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // lombok의 NoArgsConstructor 어노테이션으로 기본 생성자 자동 생성(접근제한자는 protected)
 public class Article {
 
