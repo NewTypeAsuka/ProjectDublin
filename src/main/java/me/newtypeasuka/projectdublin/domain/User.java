@@ -19,13 +19,13 @@ public class User {
 
     @Id // id 필드를 기본키로 지정
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키를 자동으로 1씩 증가
-    @Column(name = "id", updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "nickname", unique = true)
+    @Column(name = "nickname", nullable = false)
     private String nickname;
 
     @Builder // 빌더 패턴으로 객체 생성
