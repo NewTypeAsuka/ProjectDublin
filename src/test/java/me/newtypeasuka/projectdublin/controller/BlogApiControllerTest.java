@@ -2,11 +2,10 @@ package me.newtypeasuka.projectdublin.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.newtypeasuka.projectdublin.domain.Article;
-import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
-import me.newtypeasuka.projectdublin.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -25,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,6 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc // MockMvc를 자동으로 구성하여 컨트롤러 테스트를 수행할 수 있도록 설정
 class BlogApiControllerTest {
 
+    private static final String USER_EMAIL = "user@gmail.com";
+
     @Autowired
     protected MockMvc mockMvc;
 
@@ -50,11 +54,6 @@ class BlogApiControllerTest {
     @Autowired
     BlogRepository blogRepository;
 
-    @Autowired
-    UserRepository userRepository;
-
-    User user;
-
     @BeforeEach
     public void mockMvcSetUp() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
@@ -64,14 +63,21 @@ class BlogApiControllerTest {
 
     @BeforeEach
     void setSecurityContext() {
-        userRepository.deleteAll();
-        user = userRepository.save(User.builder()
-                .email("user@gmail.com")
-                .password("test")
-                .build());
+        DefaultOAuth2User oauth2User = new DefaultOAuth2User(
+                List.of(new SimpleGrantedAuthority("ROLE_USER")),
+                Map.of("email", USER_EMAIL, "name", "Test User"),
+                "email");
 
         SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities()));
+        context.setAuthentication(new OAuth2AuthenticationToken(
+                oauth2User,
+                oauth2User.getAuthorities(),
+                "google"));
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @DisplayName("addArticle: 아티클 추가에 성공한다.")
@@ -185,7 +191,7 @@ class BlogApiControllerTest {
     private Article createDefaultArticle() {
         return blogRepository.save(Article.builder()
                 .title("title")
-                .author(user.getUsername())
+                .author(USER_EMAIL)
                 .content("content")
                 .build());
     }

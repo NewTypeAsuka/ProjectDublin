@@ -1,7 +1,6 @@
 package me.newtypeasuka.projectdublin.config;
 
 import lombok.RequiredArgsConstructor;
-import me.newtypeasuka.projectdublin.config.jwt.TokenProvider;
 import me.newtypeasuka.projectdublin.config.oauth.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import me.newtypeasuka.projectdublin.config.oauth.OAuth2SuccessHandler;
 import me.newtypeasuka.projectdublin.config.oauth.OAuth2UserCustomService;
@@ -12,11 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
@@ -26,7 +23,6 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 public class WebOAuthSecurityConfig {
 
     private final OAuth2UserCustomService oAuth2UserCustomService;
-    private final TokenProvider tokenProvider;
 
     @Bean
     public WebSecurityCustomizer configure() { // 스프링 시큐리티 기능 비활성화
@@ -49,16 +45,12 @@ public class WebOAuthSecurityConfig {
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID", "refresh_token"))
-                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                        .deleteCookies("JSESSIONID"))
                 .authorizeRequests(auth -> auth
                         .requestMatchers(
                                 new AntPathRequestMatcher("/login"),
-                                new AntPathRequestMatcher("/signup"),
-                                new AntPathRequestMatcher("/user"),
                                 new AntPathRequestMatcher("/oauth2/**"),
-                                new AntPathRequestMatcher("/login/oauth2/**"),
-                                new AntPathRequestMatcher("/api/token")
+                                new AntPathRequestMatcher("/login/oauth2/**")
                         ).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated()
                         .anyRequest().authenticated())
@@ -86,18 +78,8 @@ public class WebOAuthSecurityConfig {
     }
 
     @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
-    }
-
-    @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }
