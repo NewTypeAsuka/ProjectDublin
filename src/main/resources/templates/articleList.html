@@ -6,6 +6,15 @@
     <title>✨NewTypeBlog✨</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <style>
+        .intro-header__title-link,
+        .intro-header__title-link:visited,
+        .intro-header__title-link:hover,
+        .intro-header__title-link:focus,
+        .intro-header__title-link:active { /* NewTypeBlog 타이틀 링크 스타일 */
+            color: inherit;
+            text-decoration: none;
+        }
+
         .intro-header { /* 헤더 영역의 연출 */
             position: relative;
             overflow: hidden;
@@ -217,7 +226,9 @@
     <header class="intro-header bg-white border-bottom">
         <div class="intro-header__overlay" id="header-intro-overlay" aria-hidden="true"></div>
         <div class="container py-4 py-md-5 text-center intro-header__content">
-            <h1 class="h2 mb-2">✨NewTypeBlog✨</h1>
+            <a href="/" class="intro-header__title-link">
+                <h1 class="h2 mb-2">✨NewTypeBlog✨</h1>
+            </a>
         </div>
     </header>
 
