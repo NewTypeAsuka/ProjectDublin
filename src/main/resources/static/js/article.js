@@ -1,80 +1,79 @@
-// 삭제 기능
 const deleteButton = document.getElementById('delete-btn');
 
 if (deleteButton) {
-    deleteButton.addEventListener('click', event => {
-        let id = document.getElementById('article-id').value;
-        function success() {
+    deleteButton.addEventListener('click', () => {
+        const id = document.getElementById('article-id').value;
+        httpRequest('DELETE', `/api/articles/${id}`, null, () => {
             alert('삭제가 완료되었습니다.');
             location.replace('/articles');
-        }
-
-        function fail() {
-            alert('삭제 실패했습니다.');
-            location.replace('/articles');
-        }
-
-        httpRequest('DELETE',`/api/articles/${id}`, null, success, fail);
+        }, () => {
+            alert('삭제에 실패했습니다.');
+        });
     });
 }
 
-// 수정 기능
 const modifyButton = document.getElementById('modify-btn');
 
 if (modifyButton) {
-    modifyButton.addEventListener('click', event => {
-        let params = new URLSearchParams(location.search);
-        let id = params.get('id');
-
-        const body = JSON.stringify({
-            title: document.getElementById('title').value,
-            content: document.getElementById('content').value
-        })
-
-        function success() {
-            alert('수정 완료되었습니다.');
-            location.replace(`/articles/${id}`);
+    modifyButton.addEventListener('click', () => {
+        const id = new URLSearchParams(location.search).get('id');
+        const requestBody = createArticleRequestBody();
+        if (!requestBody) {
+            return;
         }
 
-        function fail() {
-            alert('수정 실패했습니다.');
+        httpRequest('PUT', `/api/articles/${id}`, requestBody, () => {
+            alert('수정이 완료되었습니다.');
             location.replace(`/articles/${id}`);
-        }
-
-        httpRequest('PUT',`/api/articles/${id}`, body, success, fail);
+        }, () => {
+            alert('수정에 실패했습니다.');
+        });
     });
 }
 
-// 생성 기능
 const createButton = document.getElementById('create-btn');
 
-if (createButton) {
-    // 등록 버튼을 클릭하면 /api/articles로 요청을 보낸다
-    createButton.addEventListener('click', event => {
-        const body = JSON.stringify({
-            title: document.getElementById('title').value,
-            content: document.getElementById('content').value
-        });
-        function success() {
-            alert('등록 완료되었습니다.');
-            location.replace('/articles');
-        };
-        function fail() {
-            alert('등록 실패했습니다.');
-            location.replace('/articles');
-        };
+if (createButton && document.getElementById('content')) {
+    createButton.addEventListener('click', () => {
+        const requestBody = createArticleRequestBody();
+        if (!requestBody) {
+            return;
+        }
 
-        httpRequest('POST','/api/articles', body, success, fail)
+        httpRequest('POST', '/api/articles', requestBody, article => {
+            alert('등록이 완료되었습니다.');
+            location.replace(`/articles/${article.id}`);
+        }, () => {
+            alert('등록에 실패했습니다.');
+        });
     });
 }
 
-// HTTP 요청을 보내는 함수
+function createArticleRequestBody() {
+    const title = document.getElementById('title').value.trim();
+    const content = window.articleEditor
+        ? window.articleEditor.getHtml()
+        : document.getElementById('content').value;
+
+    const contentContainer = document.createElement('div');
+    contentContainer.innerHTML = content;
+    const hasContent = contentContainer.textContent.trim()
+        || contentContainer.querySelector('iframe');
+
+    if (!title || !hasContent) {
+        alert('제목과 내용을 입력해주세요.');
+        return null;
+    }
+
+    return JSON.stringify({ title, content });
+}
+
 function httpRequest(method, url, body, success, fail) {
     const options = {
-        method: method,
+        method,
         credentials: 'same-origin',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         }
     };
 
@@ -82,16 +81,23 @@ function httpRequest(method, url, body, success, fail) {
         options.body = body;
     }
 
-    fetch(url, options).then(response => {
-        if (response.ok) {
-            return success();
-        }
+    fetch(url, options)
+        .then(async response => {
+            if (response.ok) {
+                const contentType = response.headers.get('content-type') || '';
+                const responseBody = contentType.includes('application/json')
+                    ? await response.json()
+                    : null;
+                success(responseBody);
+                return;
+            }
 
-        if (response.status === 401) {
-            location.replace('/login');
-            return;
-        }
+            if (response.status === 401) {
+                location.replace('/login');
+                return;
+            }
 
-        return fail();
-    }).catch(error => fail());
+            fail();
+        })
+        .catch(fail);
 }

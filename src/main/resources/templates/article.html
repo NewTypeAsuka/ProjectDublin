@@ -130,6 +130,14 @@
             margin: 0;
             white-space: nowrap;
         }
+        .article-content iframe {
+            max-width: 100%;
+        }
+        .article-content iframe {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            height: auto;
+        }
         @media (min-width: 992px) {
             .site-nav__inner {
                 max-width: 800px;
@@ -193,10 +201,10 @@
                                 <h1 class="h2 mb-0 text-break" th:text="${article.title}"></h1>
                             </header>
                             <section class="mb-4">
-                                <p class="mb-0 text-break" th:text="${article.content}"></p>
+                                <div class="mb-0 text-break article-content" th:utext="${article.content}"></div>
                             </section>
                             <div class="d-flex flex-wrap">
-                                <button type="button" id="modify-btn"
+                                <button type="button" id="edit-btn"
                                         th:onclick="|location.href='@{/new-article?id={articleId}(articleId=${article.id})}'|"
                                         class="btn btn-primary btn-sm mr-2 mb-2">수정</button>
                                 <button type="button" id="delete-btn"

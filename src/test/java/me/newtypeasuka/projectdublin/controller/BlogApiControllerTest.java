@@ -1,0 +1,123 @@
+package me.newtypeasuka.projectdublin.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import me.newtypeasuka.projectdublin.domain.Article;
+import me.newtypeasuka.projectdublin.domain.User;
+import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
+import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
+import me.newtypeasuka.projectdublin.repository.BlogRepository;
+import me.newtypeasuka.projectdublin.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class BlogApiControllerTest {
+
+    private static final String EMAIL = "writer@example.com";
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    BlogRepository blogRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    User user;
+
+    @BeforeEach
+    void setUp() {
+        blogRepository.deleteAll();
+        userRepository.deleteAll();
+        user = userRepository.save(User.builder()
+                .email(EMAIL)
+                .nickname("Writer")
+                .build());
+    }
+
+    @DisplayName("로그인 사용자 ID와 Summernote HTML로 글을 생성, 조회, 수정한다")
+    @Test
+    void createReadAndUpdateSummernoteArticle() throws Exception {
+        AddArticleRequest createRequest = new AddArticleRequest(
+                "Summernote title",
+                "<p>Hello <strong>Summernote</strong></p><script>alert('xss')</script>"
+        );
+
+        String createResponse = mockMvc.perform(post("/api/articles")
+                        .with(loginUser())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.authorId").value(user.getId()))
+                .andExpect(jsonPath("$.content").value("<p>Hello <strong>Summernote</strong></p>"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Long articleId = objectMapper.readTree(createResponse).get("id").asLong();
+        Article savedArticle = blogRepository.findById(articleId).orElseThrow();
+        assertThat(savedArticle.getAuthor().getId()).isEqualTo(user.getId());
+        assertThat(savedArticle.getContent()).contains("<strong>Summernote</strong>");
+        assertThat(savedArticle.getContent()).doesNotContain("<script");
+
+        mockMvc.perform(get("/api/articles/{id}", articleId).with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value(savedArticle.getContent()));
+
+        mockMvc.perform(get("/articles/{id}", articleId).with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "<strong>Summernote</strong>")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("alert('xss')"))));
+
+        UpdateArticleRequest updateRequest = new UpdateArticleRequest(
+                "Updated title",
+                "<h2>Updated</h2><iframe src=\"//www.youtube.com/embed/video-id\"></iframe>"
+        );
+
+        mockMvc.perform(put("/api/articles/{id}", articleId)
+                        .with(loginUser())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated title"))
+                .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
+                        "https://www.youtube.com/embed/video-id")));
+    }
+
+    private RequestPostProcessor loginUser() {
+        DefaultOAuth2User oauth2User = new DefaultOAuth2User(
+                List.of(new SimpleGrantedAuthority("ROLE_USER")),
+                Map.of("email", EMAIL, "name", "Writer"),
+                "email"
+        );
+        return oauth2Login().oauth2User(oauth2User);
+    }
+}

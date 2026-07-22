@@ -21,8 +21,10 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-data-jpa') // 스프링부트 JPA
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf') // 타임리프
     implementation('org.springframework.boot:spring-boot-starter-security') // 스프링 시큐리티
+    implementation('org.springframework.boot:spring-boot-starter-validation') // API 요청값 검증
     implementation('org.thymeleaf.extras:thymeleaf-extras-springsecurity6') // 타임리프에서 스프링 시큐리티 사용
     implementation('org.springframework.boot:spring-boot-starter-oauth2-client') // 구글 로그인을 위한 OAuth2 클라이언트
+    implementation('org.jsoup:jsoup:1.22.2') // Summernote HTML 정제 및 평문 미리보기 생성
     implementation('com.mysql:mysql-connector-j') // MySQL 데이터베이스 연결
     testImplementation('org.springframework.boot:spring-boot-starter-test') // 스프링부트 테스트
     testImplementation('org.springframework.security:spring-security-test') // 스프링 시큐리티 테스트

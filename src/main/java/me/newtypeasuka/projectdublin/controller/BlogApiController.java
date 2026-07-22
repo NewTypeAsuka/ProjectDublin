@@ -1,5 +1,6 @@
 package me.newtypeasuka.projectdublin.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
@@ -21,11 +22,11 @@ public class BlogApiController {
 
     // 블로그 글 작성 API
     @PostMapping("/api/articles")
-    public ResponseEntity<Article> addArticle(@RequestBody AddArticleRequest request, Principal principal) {
+    public ResponseEntity<ArticleResponse> addArticle(@Valid @RequestBody AddArticleRequest request, Principal principal) {
         Article savedArticle = blogService.save(request, principal.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedArticle);
+                .body(new ArticleResponse(savedArticle));
     }
 
     // 블로그 글 모두 조회 API
@@ -60,11 +61,12 @@ public class BlogApiController {
 
     // 블로그 글 수정 API
     @PutMapping("/api/articles/{id}")
-    public ResponseEntity<Article> updateArticle(@PathVariable long id, @RequestBody UpdateArticleRequest request) {
+    public ResponseEntity<ArticleResponse> updateArticle(@PathVariable long id,
+                                                         @Valid @RequestBody UpdateArticleRequest request) {
         Article updatedArticle = blogService.update(id, request);
 
         return ResponseEntity.ok()
-                .body(updatedArticle);
+                .body(new ArticleResponse(updatedArticle));
     }
 
 }

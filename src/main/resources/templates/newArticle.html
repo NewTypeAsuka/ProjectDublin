@@ -229,61 +229,8 @@
             window.addEventListener('resize', syncStickyNavState);
         }
 
-        function plainTextToSummernoteHtml(text) {
-            if (!text) {
-                return '';
-            }
-
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\n/g, '<br>');
-        }
-
-        function summernoteHtmlToPlainText(html) {
-            const normalizedHtml = html
-                .replace(/<br\s*\/?>/gi, '\n')
-                .replace(/<\/(p|div|li|h[1-6])>/gi, '\n');
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = normalizedHtml;
-
-            return tempDiv.textContent
-                .replace(/\u00a0/g, ' ')
-                .replace(/\n{3,}/g, '\n\n')
-                .trim();
-        }
-
-        $(function () {
-            const $content = $('#content');
-
-            if ($content.length === 0) {
-                return;
-            }
-
-            const initialPlainText = $content.val();
-
-            $content.summernote({
-                lang: 'ko-KR',
-                placeholder: '내용을 입력하세요',
-                tabsize: 2,
-                height: 360,
-                toolbar: [
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['para', ['ul', 'ol', 'paragraph']]
-                ],
-                callbacks: {
-                    onInit: function () {
-                        $content.summernote('code', plainTextToSummernoteHtml(initialPlainText));
-                        $content.val(initialPlainText);
-                    },
-                    onChange: function (contents) {
-                        $content.val(summernoteHtmlToPlainText(contents));
-                    }
-                }
-            });
-        });
     </script>
+    <script src="/js/article-editor.js"></script>
     <script src="/js/article.js"></script>
 </body>
 </html>

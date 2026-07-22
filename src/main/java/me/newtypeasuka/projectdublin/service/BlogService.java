@@ -3,9 +3,11 @@ package me.newtypeasuka.projectdublin.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
+import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
+import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +18,15 @@ import java.util.List;
 public class BlogService {
 
     private final BlogRepository blogRepository;
+    private final UserRepository userRepository;
+    private final ArticleContentSanitizer articleContentSanitizer;
 
     // 블로그 글 작성
+    @Transactional
     public Article save(AddArticleRequest request, String userName) {
-        return blogRepository.save(request.toEntity(userName));
+        User author = findUserByEmail(userName);
+        String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
+        return blogRepository.save(request.toEntity(author, sanitizedContent));
     }
 
     // 블로그 글 모두 조회
@@ -38,7 +45,7 @@ public class BlogService {
         Article article = blogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 
-        authorizeArticleAuthor(article);
+        authorizeArticleAuthor(article, findCurrentUser());
         blogRepository.delete(article);
     }
 
@@ -48,19 +55,28 @@ public class BlogService {
         Article article = blogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 
-        authorizeArticleAuthor(article);
-        article.update(request.getTitle(), request.getContent());
+        authorizeArticleAuthor(article, findCurrentUser());
+        String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
+        article.update(request.getTitle(), sanitizedContent);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
     }
 
     // 게시물을 작성한 유저인지 확인
-    private static void authorizeArticleAuthor(Article article) {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        if(!article.getAuthor().equals(userName)) {
-            throw new IllegalArgumentException("not authorized: " + userName);
+    private void authorizeArticleAuthor(Article article, User currentUser) {
+        if (!article.getAuthor().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("not authorized: " + currentUser.getEmail());
         }
+    }
+
+    private User findCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return findUserByEmail(email);
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("user not found: " + email));
     }
 
 }
