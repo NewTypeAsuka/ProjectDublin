@@ -30,7 +30,7 @@ public class WebOAuthSecurityConfig {
         return (web) -> web.ignoring()
                 .requestMatchers(toH2Console()) // filterChain 보안 필터 체인 제외
                 .requestMatchers( // filterChain 보안 필터 체인 제외
-                        new AntPathRequestMatcher("/img/**"),
+                        new AntPathRequestMatcher("/img/**"), // 브라우저는 기본적으로 /src/main/resources/static/을 정적 리소스 루트로 이용, 그러므로 /img/**
                         new AntPathRequestMatcher("/css/**"),
                         new AntPathRequestMatcher("/js/**")
                 );
