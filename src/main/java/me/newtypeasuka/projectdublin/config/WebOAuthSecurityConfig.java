@@ -28,47 +28,47 @@ public class WebOAuthSecurityConfig {
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
-                .requestMatchers(toH2Console())
-                .requestMatchers(
+                .requestMatchers(toH2Console()) // filterChain 보안 필터 체인 제외
+                .requestMatchers( // filterChain 보안 필터 체인 제외
                         new AntPathRequestMatcher("/img/**"),
                         new AntPathRequestMatcher("/css/**"),
                         new AntPathRequestMatcher("/js/**")
                 );
     }
 
-    // 로그인 설정
+    // 보안 필터 체인 설정: 보안 필터가 Controller보다 먼저 각 요청을 검사
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .csrf(AbstractHttpConfigurer::disable) // csrf 설정 비활성화 -> 나중에 켜야 할 듯?
+                .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화(OAuth2 인증이라 꺼둠)
+                .formLogin(AbstractHttpConfigurer::disable) // 이메일/비밀번호 기반 로그인 폼 비활성화
+                .logout(logout -> logout // 로그아웃 설정
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")) // /logout 요청시 로그아웃 처리 -> 현재 csrf 비활성화 상태라 GET /logout 동작 가능
                         .logoutSuccessUrl("/login") // 로그아웃 성공 시 이동할 경로 설정
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"))
+                        .invalidateHttpSession(true) /// 로그아웃 시 세션 무효화
+                        .deleteCookies("JSESSIONID")) // 로그아웃 시 JSESSIONID 쿠키 삭제
                 .authorizeRequests(auth -> auth
-                        .requestMatchers(
+                        .requestMatchers( // 로그인 없이 접근 가능한 경로 설정
                                 new AntPathRequestMatcher("/login"),
                                 new AntPathRequestMatcher("/oauth2/**"),
                                 new AntPathRequestMatcher("/login/oauth2/**")
-                        ).permitAll() // 로그인 없이 접근 가능한 경로 설정
+                        ).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated() // 로그인하지 않으면 접근 불가(401 반환)
                         .anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository()))
-                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuth2UserCustomService))
-                        .successHandler(oAuth2SuccessHandler())
+                .oauth2Login(oauth2 -> oauth2 // OAuth2 로그인 전체 흐름 설정
+                        .loginPage("/login") // 인증되지 않은 사용자가 이동할 로그인 페이지
+                        .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())) // Google 리다이렉트 전 요청 저장 및 콜백 시 복원
+                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuth2UserCustomService)) // google 사용자 정보 조회 후 내부 User 저장 및 갱신
+                        .successHandler(oAuth2SuccessHandler()) // google 로그인 성공 후 임시 쿠키 정리 및 /articles 이동
                 )
-                .exceptionHandling(exceptionHandling -> exceptionHandling
+                .exceptionHandling(exceptionHandling -> exceptionHandling // 인증 실패 상황 시 응답 흐름 설정
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                                new AntPathRequestMatcher("/api/**")
+                                new AntPathRequestMatcher("/api/**") // /api/** 경로에 인증되지 않은 사용자가 접근하면 401 상태 반환
                         )
                         .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                new LoginUrlAuthenticationEntryPoint("/login"), // /api/** 경로 외 인증되지 않은 사용자가 접근하면 /login 페이지로 이동
                                 AnyRequestMatcher.INSTANCE
                         ))
                 .build();
