@@ -3,8 +3,9 @@
     const articleId = document.getElementById('article-id')?.value;
     const likeIcon = document.getElementById('like-icon');
     const likeCount = document.getElementById('like-count');
+    const articleLikeCount = document.getElementById('article-like-count');
 
-    if (!likeButton || !articleId || !likeIcon || !likeCount) {
+    if (!likeButton || !articleId || !likeIcon || !likeCount || !articleLikeCount) {
         return;
     }
 
@@ -52,6 +53,7 @@
         liked = state.liked;
         likeIcon.textContent = liked ? '♥' : '♡';
         likeCount.textContent = state.likeCount;
+        articleLikeCount.textContent = state.likeCount;
         likeButton.classList.toggle('is-liked', liked);
         likeButton.setAttribute('aria-pressed', String(liked));
         likeButton.setAttribute('aria-label', liked ? '좋아요 취소' : '좋아요');

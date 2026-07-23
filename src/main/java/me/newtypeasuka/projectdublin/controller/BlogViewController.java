@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.dto.ArticleListViewResponse;
 import me.newtypeasuka.projectdublin.dto.ArticleViewResponse;
+import me.newtypeasuka.projectdublin.service.ArticleLikeService;
 import me.newtypeasuka.projectdublin.service.BlogService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +19,7 @@ import java.util.List;
 public class BlogViewController {
 
     private final BlogService blogService;
+    private final ArticleLikeService articleLikeService;
 
     @GetMapping("/")
     public String root() {
@@ -37,7 +39,8 @@ public class BlogViewController {
     @GetMapping("/articles/{id}")
     public String getArticle(@PathVariable Long id, Model model) {
         Article article = blogService.findByIdAndIncreaseViewCount(id);
-        model.addAttribute("article", new ArticleViewResponse(article));
+        long likeCount = articleLikeService.getLikeCount(id);
+        model.addAttribute("article", new ArticleViewResponse(article, likeCount));
 
         return "article"; // article.html 뷰 이름 반환
     }

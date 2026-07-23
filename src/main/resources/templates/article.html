@@ -233,8 +233,13 @@
                                 <div class="text-uppercase text-muted small mb-2">Article Detail</div>
                                 <h2 class="h4 mb-0">게시글</h2>
                             </div> -->
-                            <div class="text-muted small"
-                                 th:text="|Posted on ${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')} by ${article.author} · 조회수 ${article.viewCount}|"></div>
+                            <div class="text-muted small">
+                                <span th:text="|Posted on ${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')} by ${article.author}|"></span>
+                                <span aria-hidden="true"> · </span>
+                                <span th:text="|조회수 ${article.viewCount}|"></span>
+                                <span aria-hidden="true"> · </span>
+                                <span>좋아요 <span id="article-like-count" th:text="${article.likeCount}"></span></span>
+                            </div>
                         </div>
 
                         <article>

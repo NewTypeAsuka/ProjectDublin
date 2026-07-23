@@ -30,6 +30,10 @@ public class ArticleLikeService {
         return createResponse(user.getId(), articleId);
     }
 
+    public long getLikeCount(long articleId) {
+        return articleLikeRepository.countByIdArticleId(articleId);
+    }
+
     @Transactional
     public ArticleLikeResponse like(long articleId, String email) {
         User user = findUser(email);

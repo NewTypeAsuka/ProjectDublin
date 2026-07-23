@@ -1,6 +1,7 @@
 package me.newtypeasuka.projectdublin.controller;
 
 import me.newtypeasuka.projectdublin.domain.Article;
+import me.newtypeasuka.projectdublin.domain.ArticleLike;
 import me.newtypeasuka.projectdublin.domain.ArticleLikeId;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.repository.ArticleLikeRepository;
@@ -110,11 +111,16 @@ class ArticleLikeApiControllerTest {
         assertThat(articleLikeRepository.count()).isEqualTo(1);
     }
 
-    @DisplayName("게시글 상세 화면에 좋아요 버튼과 스크립트를 표시한다")
+    @DisplayName("게시글 상세 화면에 전체 좋아요 수와 좋아요 버튼을 표시한다")
     @Test
     void renderLikeButton() throws Exception {
+        articleLikeRepository.save(new ArticleLike(author, article));
+        articleLikeRepository.save(new ArticleLike(reader, article));
+
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(reader)))
                 .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-like-count\">2</span>")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"like-btn\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "src=\"/js/article-like.js\"")));
