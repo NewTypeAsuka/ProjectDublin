@@ -140,7 +140,10 @@
         }
         .article-like {
             display: flex;
+            align-items: center;
             justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
         .article-like__button {
             display: inline-flex;
@@ -177,6 +180,48 @@
             min-width: 1ch;
             color: inherit;
             font-weight: 600;
+        }
+        .article-pin__button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 0.9rem;
+            border: 1px solid #dee2e6;
+            border-radius: 999px;
+            color: #6c757d;
+            background-color: #ffffff;
+            transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+        }
+        .article-pin__button:hover,
+        .article-pin__button:focus,
+        .article-pin__button.is-pinned {
+            border-color: #ffc107;
+            color: #856404;
+            background-color: #fff9db;
+            outline: none;
+        }
+        .article-pin__button:hover,
+        .article-pin__button:focus {
+            transform: translateY(-1px);
+        }
+        .article-pin__button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+            transform: none;
+        }
+        .article-detail-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .pinned-corner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            width: 0;
+            height: 0;
+            border-top: 2.75rem solid #ffc107;
+            border-right: 2.75rem solid transparent;
         }
         @media (min-width: 992px) {
             .site-nav__inner {
@@ -225,7 +270,11 @@
     <main class="container flex-fill py-4 py-md-5">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm article-detail-card">
+                    <span id="pinned-corner" class="pinned-corner"
+                          th:classappend="${article.pinned} ? '' : ' d-none'">
+                        <span class="sr-only">고정 게시글</span>
+                    </span>
                     <div class="card-body p-4 p-md-5">
                         <input type="hidden" id="article-id" th:value="${article.id}">
                         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4">
@@ -258,6 +307,16 @@
                                     <span id="like-icon" class="article-like__icon" aria-hidden="true">♡</span>
                                     <span>좋아요</span>
                                     <span id="like-count" class="article-like__count">0</span>
+                                </button>
+                                <button type="button" id="pin-btn"
+                                        th:if="${isAdmin}"
+                                        class="article-pin__button"
+                                        th:classappend="${article.pinned} ? ' is-pinned'"
+                                        th:attr="data-pinned=${article.pinned},aria-pressed=${article.pinned}"
+                                        aria-label="글 고정">
+                                    <span aria-hidden="true">📌</span>
+                                    <span id="pin-label"
+                                          th:text="${article.pinned} ? '고정 해제' : '글 고정'"></span>
                                 </button>
                             </div>
                             <div class="d-flex flex-wrap">
@@ -295,6 +354,7 @@
         }
     </script>
     <script src="/js/article-like.js"></script>
+    <script src="/js/article-pin.js"></script>
     <script src="/js/article.js"></script>
 </body>
 </html>

@@ -17,6 +17,9 @@ import lombok.NoArgsConstructor;
 @Entity // 엔티티로 지정
 public class User {
 
+    private static final int ADMIN_ROLE = 1;
+    private static final int DEFAULT_ROLE = 2;
+
     @Id // id 필드를 기본키로 지정
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키를 자동으로 1씩 증가
     @Column(name = "id", nullable = false, updatable = false)
@@ -28,15 +31,23 @@ public class User {
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
+    @Column(name = "role", nullable = false)
+    private int role;
+
     @Builder // 빌더 패턴으로 객체 생성
-    public User(String email, String nickname) {
+    public User(String email, String nickname, Integer role) {
         this.email = email;
         this.nickname = nickname;
+        this.role = role == null ? DEFAULT_ROLE : role;
     }
 
     public User update(String nickname) {
         this.nickname = nickname;
         return this;
+    }
+
+    public boolean isAdmin() {
+        return role == ADMIN_ROLE;
     }
 
 }

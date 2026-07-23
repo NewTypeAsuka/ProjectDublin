@@ -61,6 +61,10 @@ public class Article {
         this.content = content;
     }
 
+    public void updatePinned(boolean pinned) {
+        this.pinned = pinned;
+    }
+
     @CreatedDate // 생성일시 자동 저장
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

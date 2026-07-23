@@ -12,9 +12,10 @@ import java.util.Optional;
 
 public interface BlogRepository extends JpaRepository<Article, Long> {
 
-    @Override
     @EntityGraph(attributePaths = "author")
-    List<Article> findAll();
+    @Query("SELECT article FROM Article article "
+            + "ORDER BY article.pinned DESC, article.createdAt DESC, article.id DESC")
+    List<Article> findAllPinnedFirst();
 
     @Override
     @EntityGraph(attributePaths = "author")

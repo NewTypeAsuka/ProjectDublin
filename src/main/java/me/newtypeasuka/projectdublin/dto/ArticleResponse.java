@@ -12,6 +12,7 @@ public class ArticleResponse {
     private final Long authorId;
     private final String author;
     private final long viewCount;
+    private final boolean pinned;
 
     public ArticleResponse(Article article) {
         this.id = article.getId();
@@ -20,6 +21,7 @@ public class ArticleResponse {
         this.authorId = article.getAuthor().getId();
         this.author = article.getAuthor().getNickname();
         this.viewCount = article.getViewCount();
+        this.pinned = article.isPinned();
     }
 
 }

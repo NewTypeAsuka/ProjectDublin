@@ -8,8 +8,10 @@ import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class BlogService {
 
     // 블로그 글 모두 조회
     public List<Article> findAll() {
-        return blogRepository.findAll();
+        return blogRepository.findAllPinnedFirst();
     }
 
     // 블로그 글 단건 조회
@@ -70,6 +72,23 @@ public class BlogService {
         article.update(request.getTitle(), sanitizedContent);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
+    }
+
+    @Transactional
+    public Article updatePinned(long id, boolean pinned, String email) {
+        User currentUser = findUserByEmail(email);
+        if (!currentUser.isAdmin()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "admin role required");
+        }
+
+        Article article = blogRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        article.updatePinned(pinned);
+        return article;
+    }
+
+    public boolean isAdmin(String email) {
+        return findUserByEmail(email).isAdmin();
     }
 
     // 게시물을 작성한 유저인지 확인

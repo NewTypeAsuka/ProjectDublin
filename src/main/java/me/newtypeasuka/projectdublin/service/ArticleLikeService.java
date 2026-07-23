@@ -14,6 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class ArticleLikeService {
@@ -32,6 +36,18 @@ public class ArticleLikeService {
 
     public long getLikeCount(long articleId) {
         return articleLikeRepository.countByIdArticleId(articleId);
+    }
+
+    public Map<Long, Long> getLikeCounts(Collection<Long> articleIds) {
+        if (articleIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return articleLikeRepository.countByArticleIds(articleIds).stream()
+                .collect(Collectors.toMap(
+                        articleLikeCount -> articleLikeCount.articleId(),
+                        articleLikeCount -> articleLikeCount.likeCount()
+                ));
     }
 
     @Transactional

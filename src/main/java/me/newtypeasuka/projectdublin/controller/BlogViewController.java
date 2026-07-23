@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Controller
@@ -28,8 +30,15 @@ public class BlogViewController {
 
     @GetMapping("/articles")
     public String getArticles(Model model) {
-        List<ArticleListViewResponse> articles = blogService.findAll().stream()
-                .map(ArticleListViewResponse::new)
+        List<Article> articleEntities = blogService.findAll();
+        Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(
+                articleEntities.stream().map(Article::getId).toList()
+        );
+        List<ArticleListViewResponse> articles = articleEntities.stream()
+                .map(article -> new ArticleListViewResponse(
+                        article,
+                        likeCounts.getOrDefault(article.getId(), 0L)
+                ))
                 .toList();
         model.addAttribute("articles", articles); // 블로그 글 리스트 저장
 
@@ -37,10 +46,11 @@ public class BlogViewController {
     }
 
     @GetMapping("/articles/{id}")
-    public String getArticle(@PathVariable Long id, Model model) {
+    public String getArticle(@PathVariable Long id, Model model, Principal principal) {
         Article article = blogService.findByIdAndIncreaseViewCount(id);
         long likeCount = articleLikeService.getLikeCount(id);
         model.addAttribute("article", new ArticleViewResponse(article, likeCount));
+        model.addAttribute("isAdmin", blogService.isAdmin(principal.getName()));
 
         return "article"; // article.html 뷰 이름 반환
     }
