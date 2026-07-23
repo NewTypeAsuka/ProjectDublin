@@ -79,6 +79,6 @@ public class ArticleContentSanitizer {
     }
 
     private ResponseStatusException invalidContent() {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "본문을 입력해주세요.");
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "본문을 입력해주세요");
     }
 }

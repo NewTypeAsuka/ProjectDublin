@@ -11,6 +11,7 @@ public class ArticleResponse {
     private final String content;
     private final Long authorId;
     private final String author;
+    private final long viewCount;
 
     public ArticleResponse(Article article) {
         this.id = article.getId();
@@ -18,6 +19,7 @@ public class ArticleResponse {
         this.content = article.getContent();
         this.authorId = article.getAuthor().getId();
         this.author = article.getAuthor().getNickname();
+        this.viewCount = article.getViewCount();
     }
 
 }

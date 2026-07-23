@@ -40,6 +40,16 @@ public class BlogService {
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
     }
 
+    // 게시글 상세 조회 시 조회수를 1 증가시킨 후 최신 게시글을 반환
+    @Transactional
+    public Article findByIdAndIncreaseViewCount(Long id) {
+        if (blogRepository.increaseViewCount(id) == 0) {
+            throw new IllegalArgumentException("not found: " + id);
+        }
+
+        return findById(id);
+    }
+
     // 블로그 글 삭제
     public void delete(long id) {
         Article article = blogRepository.findById(id)

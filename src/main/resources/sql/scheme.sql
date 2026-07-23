@@ -58,3 +58,5 @@ create table article_likes (
 select * from users;
 select * from articles;
 select * from article_likes;
+
+update users set role = 1 where email = 'sangzoon0102@gmail.com' and nickname = '상준';

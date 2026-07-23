@@ -88,12 +88,14 @@ class BlogApiControllerTest {
 
         mockMvc.perform(get("/api/articles/{id}", articleId).with(loginUser()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value(savedArticle.getContent()));
+                .andExpect(jsonPath("$.content").value(savedArticle.getContent()))
+                .andExpect(jsonPath("$.viewCount").value(1));
 
         mockMvc.perform(get("/articles/{id}", articleId).with(loginUser()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "<strong>Summernote</strong>")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 2")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("alert('xss')"))));
 
@@ -110,6 +112,31 @@ class BlogApiControllerTest {
                 .andExpect(jsonPath("$.title").value("Updated title"))
                 .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
                         "https://www.youtube.com/embed/video-id")));
+    }
+
+    @DisplayName("작성자가 같은 게시글을 반복 조회해도 매번 조회수가 증가한다")
+    @Test
+    void increaseViewCountOnEveryDetailView() throws Exception {
+        Article article = blogRepository.save(Article.builder()
+                .author(user)
+                .title("View count")
+                .content("<p>Content</p>")
+                .build());
+
+        mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 1")));
+
+        mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 2")));
+
+        mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 3")));
+
+        assertThat(blogRepository.findById(article.getId()).orElseThrow().getViewCount())
+                .isEqualTo(3);
     }
 
     private RequestPostProcessor loginUser() {

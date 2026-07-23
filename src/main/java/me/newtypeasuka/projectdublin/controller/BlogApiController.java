@@ -44,7 +44,7 @@ public class BlogApiController {
     // 블로그 글 단건 조회 API
     @GetMapping("/api/articles/{id}")
     public ResponseEntity<ArticleResponse> findArticle(@PathVariable long id) { // @PathVariable 어노테이션으로 URL 경로에서 id 값을 가져옴
-        Article article = blogService.findById(id);
+        Article article = blogService.findByIdAndIncreaseViewCount(id);
 
         return ResponseEntity.ok()
                 .body(new ArticleResponse(article));

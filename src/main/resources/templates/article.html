@@ -233,7 +233,8 @@
                                 <div class="text-uppercase text-muted small mb-2">Article Detail</div>
                                 <h2 class="h4 mb-0">게시글</h2>
                             </div> -->
-                            <div class="text-muted small" th:text="|Posted on ${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')} by ${article.author}|"></div>
+                            <div class="text-muted small"
+                                 th:text="|Posted on ${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')} by ${article.author} · 조회수 ${article.viewCount}|"></div>
                         </div>
 
                         <article>
