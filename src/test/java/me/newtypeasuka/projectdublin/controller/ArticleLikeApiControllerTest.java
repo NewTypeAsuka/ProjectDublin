@@ -123,7 +123,7 @@ class ArticleLikeApiControllerTest {
                         "id=\"article-like-count\">2</span>")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"like-btn\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "src=\"/js/article-like.js\"")));
+                        "src=\"/js/articleLike.js\"")));
     }
 
     private RequestPostProcessor loginUser(User user) {

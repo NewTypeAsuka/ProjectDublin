@@ -21,7 +21,7 @@ public class BlogService {
 
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
-    private final ArticleContentSanitizer articleContentSanitizer;
+    private final ArticleContentSummarizer articleContentSanitizer;
 
     // 블로그 글 작성
     @Transactional

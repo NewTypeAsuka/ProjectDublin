@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Set;
 
 @Component
-public class ArticleContentSanitizer {
+public class ArticleContentSummarizer {
 
     private static final Set<String> YOUTUBE_HOSTS = Set.of(
             "youtube.com",

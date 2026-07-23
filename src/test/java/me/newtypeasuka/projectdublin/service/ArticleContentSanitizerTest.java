@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ArticleContentSanitizerTest {
 
-    private final ArticleContentSanitizer sanitizer = new ArticleContentSanitizer();
+    private final ArticleContentSummarizer sanitizer = new ArticleContentSummarizer();
 
     @DisplayName("Summernote 서식과 YouTube 영상은 보존하고 위험한 코드는 제거한다")
     @Test
