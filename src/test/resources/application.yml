@@ -23,3 +23,13 @@ spring:
             scope:
               - email
               - profile
+
+aws:
+  s3:
+    bucket: projectdublin-test-images
+    region: ap-northeast-2
+    access-key:
+    secret-key:
+    key-prefix: articles
+    public-base-url:
+    max-file-size: 10MB

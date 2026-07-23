@@ -6,6 +6,11 @@ spring:
   config:
     import: optional:file:.secret/application-local.yml # 로컬 환경에서만 필요한 설정을 별도의 파일로 분리해서 관리할 수 있음. .secret/application-local.yml 파일은 git에 올리지 않음
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
   jpa:
     show-sql: true # 전송 쿼리 콘솔에 출력
     properties:
@@ -29,3 +34,13 @@ spring:
               # - openid # 구글에서 발급하는 불변 사용자 식별자 sub -> 이거 사용하려면 백엔드 리팩토링이 필요함..
               - email # 구글 계정 이메일 email
               - profile # 구글 계정 프로필 정보(전체 이름 name, 이름 given_name, 성 family_name, 프로필 사진 picture 등)
+
+aws:
+  s3:
+    bucket: projectdublin-image-storage-592011500003-ap-northeast-2-an
+    region: ap-northeast-2
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    key-prefix: articles
+    public-base-url:
+    max-file-size: 10MB

@@ -55,8 +55,26 @@ create table article_likes (
     index idx_article_likes_article_id (article_id)
 );
 
+create table article_images (
+    id bigint unsigned not null auto_increment,
+    article_id bigint unsigned not null,
+    s3_key varchar(512) collate utf8mb4_bin not null,
+    original_filename varchar(255) not null,
+    content_type varchar(100) not null,
+    file_size bigint unsigned not null,
+    created_at datetime not null default current_timestamp,
+    primary key (id),
+    constraint uq_article_images_s3_key unique (s3_key),
+    constraint fk_article_images_article_id
+            foreign key (article_id) references articles (id)
+            on update restrict  -- 이미지가 있으면 해당 글의 id 수정 불가능
+            on delete cascade,  -- 글이 삭제되면 해당 글의 이미지 정보도 함께 삭제
+    index idx_article_images_article_id (article_id)
+);
+
 select * from users;
 select * from articles;
 select * from article_likes;
+select * from article_images;
 
 update users set role = 1 where email = 'sangzoon0102@gmail.com' and nickname = '상준';

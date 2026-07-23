@@ -22,13 +22,16 @@ public class BlogService {
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
     private final ArticleContentSummarizer articleContentSanitizer;
+    private final ArticleImageService articleImageService;
 
     // 블로그 글 작성
     @Transactional
     public Article save(AddArticleRequest request, String userName) {
         User author = findUserByEmail(userName);
         String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
-        return blogRepository.save(request.toEntity(author, sanitizedContent));
+        Article article = blogRepository.save(request.toEntity(author, sanitizedContent));
+        articleImageService.synchronize(article);
+        return article;
     }
 
     // 블로그 글 모두 조회
@@ -53,11 +56,13 @@ public class BlogService {
     }
 
     // 블로그 글 삭제
+    @Transactional
     public void delete(long id) {
         Article article = blogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 
         authorizeArticleAuthor(article, findCurrentUser());
+        articleImageService.removeAllForArticle(article.getId());
         blogRepository.delete(article);
     }
 
@@ -70,6 +75,7 @@ public class BlogService {
         authorizeArticleAuthor(article, findCurrentUser());
         String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
         article.update(request.getTitle(), sanitizedContent);
+        articleImageService.synchronize(article);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
     }

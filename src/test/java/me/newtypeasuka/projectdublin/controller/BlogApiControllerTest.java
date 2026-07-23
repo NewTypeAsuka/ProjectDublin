@@ -5,8 +5,10 @@ import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
+import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
+import me.newtypeasuka.projectdublin.service.S3ObjectUrlResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,14 +18,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -49,10 +63,20 @@ class BlogApiControllerTest {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    ArticleImageRepository articleImageRepository;
+
+    @Autowired
+    S3ObjectUrlResolver urlResolver;
+
+    @MockBean
+    S3Client s3Client;
+
     User user;
 
     @BeforeEach
     void setUp() {
+        articleImageRepository.deleteAll();
         blogRepository.deleteAll();
         userRepository.deleteAll();
         user = userRepository.save(User.builder()
@@ -112,6 +136,56 @@ class BlogApiControllerTest {
                 .andExpect(jsonPath("$.title").value("Updated title"))
                 .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
                         "https://www.youtube.com/embed/video-id")));
+    }
+
+    @DisplayName("S3 이미지를 게시글과 연결하고 게시글 삭제 후 S3에서도 제거한다")
+    @Test
+    void mapAndDeleteArticleImage() throws Exception {
+        String key = "articles/%d/2026/07/image.png".formatted(user.getId());
+        String encodedFilename = Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString("image.png".getBytes(StandardCharsets.UTF_8));
+        when(s3Client.headObject(any(HeadObjectRequest.class))).thenReturn(
+                HeadObjectResponse.builder()
+                        .contentType("image/png")
+                        .contentLength(9L)
+                        .metadata(Map.of(
+                                "uploader-id", user.getId().toString(),
+                                "original-filename", encodedFilename
+                        ))
+                        .build()
+        );
+        AddArticleRequest createRequest = new AddArticleRequest(
+                "Image title",
+                "<p>Image content</p><img src=\"" + urlResolver.resolve(key) + "\">"
+        );
+
+        String createResponse = mockMvc.perform(post("/api/articles")
+                        .with(loginUser())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long articleId = objectMapper.readTree(createResponse).get("id").asLong();
+
+        assertThat(articleImageRepository.findAllByArticleId(articleId))
+                .singleElement()
+                .satisfies(image -> {
+                    assertThat(image.getS3Key()).isEqualTo(key);
+                    assertThat(image.getOriginalFilename()).isEqualTo("image.png");
+                    assertThat(image.getContentType()).isEqualTo("image/png");
+                    assertThat(image.getFileSize()).isEqualTo(9L);
+                });
+
+        mockMvc.perform(delete("/api/articles/{id}", articleId).with(loginUser()))
+                .andExpect(status().isOk());
+
+        assertThat(articleImageRepository.findAllByArticleId(articleId)).isEmpty();
+        verify(s3Client).deleteObject(argThat(
+                (DeleteObjectRequest request) -> request.key().equals(key)
+        ));
     }
 
     @DisplayName("작성자가 같은 게시글을 반복 조회해도 매번 조회수가 증가한다")

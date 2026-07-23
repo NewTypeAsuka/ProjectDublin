@@ -191,6 +191,9 @@
                                 <div class="form-group mb-4">
                                     <label for="content" class="small text-muted">내용</label>
                                     <textarea class="form-control" rows="12" placeholder="내용" id="content" th:text="${article.content}"></textarea>
+                                    <small id="image-upload-status"
+                                           class="d-block mt-2 text-muted"
+                                           aria-live="polite"></small>
                                 </div>
                             </section>
                             <div class="d-flex flex-wrap">

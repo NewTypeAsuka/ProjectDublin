@@ -50,6 +50,11 @@ if (createButton && document.getElementById('content')) {
 }
 
 function createArticleRequestBody() {
+    if (window.articleEditor && window.articleEditor.isUploading()) {
+        alert('이미지 업로드가 완료된 후 저장해주세요');
+        return null;
+    }
+
     const title = document.getElementById('title').value.trim();
     const content = window.articleEditor
         ? window.articleEditor.getHtml()
@@ -58,7 +63,7 @@ function createArticleRequestBody() {
     const contentContainer = document.createElement('div');
     contentContainer.innerHTML = content;
     const hasContent = contentContainer.textContent.trim()
-        || contentContainer.querySelector('iframe');
+        || contentContainer.querySelector('iframe, img');
 
     if (!title || !hasContent) {
         alert('제목과 내용을 입력해주세요');

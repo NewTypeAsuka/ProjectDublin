@@ -17,6 +17,9 @@ repositories {
 
 // 의존성 관리
 dependencies {
+    implementation platform('software.amazon.awssdk:bom:2.47.6') // AWS SDK for Java v2 모듈 버전 통일
+    implementation('software.amazon.awssdk:s3') // Summernote 이미지 S3 업로드
+    implementation('software.amazon.awssdk:url-connection-client') // S3 동기 요청용 경량 HTTP 클라이언트
     implementation('org.springframework.boot:spring-boot-starter-web') // 스프링부트 웹 개발
     implementation('org.springframework.boot:spring-boot-starter-data-jpa') // 스프링부트 JPA
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf') // 타임리프

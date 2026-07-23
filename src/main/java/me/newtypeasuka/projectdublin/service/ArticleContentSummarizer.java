@@ -22,13 +22,21 @@ public class ArticleContentSummarizer {
             "www.youtube-nocookie.com"
     );
 
+    private final S3ObjectUrlResolver s3ObjectUrlResolver;
+
     private final Safelist safelist = Safelist.relaxed()
-            .removeTags("img")
+            .addAttributes("img", "src", "alt", "title", "width", "height", "class",
+                    "loading", "decoding")
+            .addProtocols("img", "src", "https")
             .addTags("iframe")
             .addAttributes("iframe", "src", "width", "height", "title", "frameborder",
                     "allow", "allowfullscreen", "referrerpolicy")
             .addProtocols("iframe", "src", "https")
             .preserveRelativeLinks(true);
+
+    public ArticleContentSummarizer(S3ObjectUrlResolver s3ObjectUrlResolver) {
+        this.s3ObjectUrlResolver = s3ObjectUrlResolver;
+    }
 
     public String sanitize(String rawHtml) {
         if (rawHtml == null) {
@@ -38,6 +46,9 @@ public class ArticleContentSummarizer {
         Document document = Jsoup.parseBodyFragment(rawHtml);
         document.select("iframe").stream()
                 .filter(iframe -> !isAllowedYoutubeEmbed(iframe))
+                .forEach(Element::remove);
+        document.select("img").stream()
+                .filter(image -> !s3ObjectUrlResolver.isArticleImageUrl(image.attr("src")))
                 .forEach(Element::remove);
 
         Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
@@ -50,7 +61,7 @@ public class ArticleContentSummarizer {
 
         Document sanitizedDocument = Jsoup.parseBodyFragment(sanitizedHtml);
         boolean hasText = !sanitizedDocument.text().isBlank();
-        boolean hasMedia = !sanitizedDocument.select("iframe").isEmpty();
+        boolean hasMedia = !sanitizedDocument.select("iframe, img").isEmpty();
         if (!hasText && !hasMedia) {
             throw invalidContent();
         }
