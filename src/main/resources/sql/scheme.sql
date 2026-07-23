@@ -39,5 +39,22 @@ create table articles (
     index idx_article_list_created (language, pinned, created_at, id)
 );
 
+create table article_likes (
+    user_id bigint unsigned not null,
+    article_id bigint unsigned not null,
+    created_at datetime not null default current_timestamp,
+    primary key (user_id, article_id),
+    constraint fk_article_likes_user_id
+            foreign key (user_id) references users (id)
+            on update restrict  -- 좋아요가 있으면 해당 사용자의 id 수정 불가능
+            on delete cascade,  -- 사용자가 삭제되면 해당 사용자의 좋아요도 함께 삭제
+    constraint fk_article_likes_article_id
+            foreign key (article_id) references articles (id)
+            on update restrict  -- 좋아요가 있으면 해당 글의 id 수정 불가능
+            on delete cascade,  -- 글이 삭제되면 해당 글의 좋아요도 함께 삭제
+    index idx_article_likes_article_id (article_id)
+);
+
 select * from users;
 select * from articles;
+select * from article_likes;
