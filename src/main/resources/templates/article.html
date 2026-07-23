@@ -138,6 +138,46 @@
             width: 100%;
             height: auto;
         }
+        .article-like {
+            display: flex;
+            justify-content: center;
+        }
+        .article-like__button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 0.9rem;
+            border: 1px solid #dee2e6;
+            border-radius: 999px;
+            color: #6c757d;
+            background-color: #ffffff;
+            transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        }
+        .article-like__button:hover,
+        .article-like__button:focus {
+            border-color: #e03131;
+            color: #e03131;
+            outline: none;
+            transform: translateY(-1px);
+        }
+        .article-like__button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+            transform: none;
+        }
+        .article-like__button.is-liked {
+            border-color: #e03131;
+            color: #e03131;
+        }
+        .article-like__icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .article-like__count {
+            min-width: 1ch;
+            color: inherit;
+            font-weight: 600;
+        }
         @media (min-width: 992px) {
             .site-nav__inner {
                 max-width: 800px;
@@ -203,6 +243,17 @@
                             <section class="mb-4">
                                 <div class="mb-0 text-break article-content" th:utext="${article.content}"></div>
                             </section>
+                            <div class="article-like border-top pt-4 mb-4">
+                                <button type="button" id="like-btn"
+                                        class="article-like__button"
+                                        aria-label="좋아요"
+                                        aria-pressed="false"
+                                        disabled>
+                                    <span id="like-icon" class="article-like__icon" aria-hidden="true">♡</span>
+                                    <span>좋아요</span>
+                                    <span id="like-count" class="article-like__count">0</span>
+                                </button>
+                            </div>
                             <div class="d-flex flex-wrap">
                                 <button type="button" id="edit-btn"
                                         th:onclick="|location.href='@{/new-article?id={articleId}(articleId=${article.id})}'|"
@@ -237,6 +288,7 @@
             window.addEventListener('resize', syncStickyNavState);
         }
     </script>
+    <script src="/js/article-like.js"></script>
     <script src="/js/article.js"></script>
 </body>
 </html>
