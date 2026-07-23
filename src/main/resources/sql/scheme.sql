@@ -19,16 +19,6 @@ create table users (
 );
 
 create table articles (
-    id bigint not null auto_increment,
-    title varchar(255) not null,
-    content varchar(255) not null,
-    author varchar(255) not null,
-    created_at timestamp,
-    updated_at timestamp,
-    primary key (id)
-);
-
-create table articles (
     id bigint unsigned not null auto_increment,
     author_id bigint unsigned not null,
     title varchar(255) not null,

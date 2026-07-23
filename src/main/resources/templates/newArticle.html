@@ -179,10 +179,10 @@
                     <div class="card-body p-4 p-md-5">
                         <article>
                             <input type="hidden" id="article-id" th:value="${article.id}"> <!-- 아이디 정보 저장 -->
-                            <header class="mb-4">
+                            <!-- <header class="mb-4">
                                 <div class="text-uppercase text-muted small mb-2">Editor</div>
                                 <h2 class="h4 mb-0" th:text="${article.id} != null ? '글 수정' : '새 글 작성'">새 글 작성</h2>
-                            </header>
+                            </header> -->
                             <section>
                                 <div class="form-group mb-4">
                                     <label for="title" class="small text-muted">제목</label>
@@ -230,7 +230,7 @@
         }
 
     </script>
-    <script src="/js/article-editor.js"></script>
+    <script src="/js/summernote.js"></script>
     <script src="/js/article.js"></script>
 </body>
 </html>

@@ -4,10 +4,10 @@ if (deleteButton) {
     deleteButton.addEventListener('click', () => {
         const id = document.getElementById('article-id').value;
         httpRequest('DELETE', `/api/articles/${id}`, null, () => {
-            alert('삭제가 완료되었습니다.');
+            alert('삭제가 완료되었습니다');
             location.replace('/articles');
         }, () => {
-            alert('삭제에 실패했습니다.');
+            alert('삭제에 실패했습니다');
         });
     });
 }
@@ -23,10 +23,10 @@ if (modifyButton) {
         }
 
         httpRequest('PUT', `/api/articles/${id}`, requestBody, () => {
-            alert('수정이 완료되었습니다.');
+            alert('수정이 완료되었습니다');
             location.replace(`/articles/${id}`);
         }, () => {
-            alert('수정에 실패했습니다.');
+            alert('수정에 실패했습니다');
         });
     });
 }
@@ -41,10 +41,10 @@ if (createButton && document.getElementById('content')) {
         }
 
         httpRequest('POST', '/api/articles', requestBody, article => {
-            alert('등록이 완료되었습니다.');
+            alert('등록이 완료되었습니다');
             location.replace(`/articles/${article.id}`);
         }, () => {
-            alert('등록에 실패했습니다.');
+            alert('등록에 실패했습니다');
         });
     });
 }
@@ -61,7 +61,7 @@ function createArticleRequestBody() {
         || contentContainer.querySelector('iframe');
 
     if (!title || !hasContent) {
-        alert('제목과 내용을 입력해주세요.');
+        alert('제목과 내용을 입력해주세요');
         return null;
     }
 
