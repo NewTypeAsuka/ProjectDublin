@@ -8,8 +8,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 11MB
+      max-file-size: 50MB # 파일 업로드 최대 크기 설정. application.yml에서 설정한 값보다 큰 파일을 업로드하면 500 에러 발생
+      max-request-size: 50MB # 파일 업로드 최대 크기 설정. application.yml에서 설정한 값보다 큰 파일을 업로드하면 500 에러 발생
 
   jpa:
     show-sql: true # 전송 쿼리 콘솔에 출력
@@ -42,5 +42,5 @@ aws:
     secret-key: ${AWS_SECRET_ACCESS_KEY}
     key-prefix: projectdublin/articles # key-prefix/[사용자id]/[연도]/[월]/[uuid].[확장자] 형식으로 저장됨. key-prefix는 프로젝트별로 다르게 설정 가능
     public-base-url:
-    max-file-size: 10MB
+    max-file-size: 50MB # 파일 업로드 최대 크기 설정. application.yml에서 설정한 값보다 큰 파일을 업로드하면 500 에러 발생
     
