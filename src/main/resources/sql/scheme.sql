@@ -75,7 +75,7 @@ create table article_images (
 create table comments (
     id bigint unsigned not null auto_increment,
     article_id bigint unsigned not null,
-    author_id bigint unsigned not null,
+    commenter_id bigint unsigned not null,
     parent_id bigint unsigned null,
     depth tinyint unsigned not null default 1 comment '1: 댓글 / 2: 대댓글',
     content text not null,
@@ -92,8 +92,8 @@ create table comments (
             foreign key (article_id) references articles (id)
             on update restrict  -- 댓글이 있으면 해당 글의 id 수정 불가능
             on delete cascade,  -- 글이 삭제되면 댓글도 함께 삭제
-    constraint fk_comments_author_id
-            foreign key (author_id) references users (id)
+    constraint fk_comments_commenter_id
+            foreign key (commenter_id) references users (id)
             on update restrict  -- 댓글이 있으면 해당 작성자의 id 수정 불가능
             on delete restrict, -- 댓글이 있으면 해당 작성자 삭제 불가능
     constraint fk_comments_parent_id
@@ -101,7 +101,7 @@ create table comments (
             on update restrict  -- 대댓글이 있으면 부모 댓글의 id 수정 불가능
             on delete restrict, -- 대댓글이 있으면 부모 댓글을 실제 삭제할 수 없음(삭제된 댓글입니다로 처리)
     index idx_comments_article_parent_created (article_id, parent_id, created_at, id),
-    index idx_comments_author_id (author_id),
+    index idx_comments_commenter_id (commenter_id),
     index idx_comments_parent_id (parent_id)
 );
 

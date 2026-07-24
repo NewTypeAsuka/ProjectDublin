@@ -220,6 +220,87 @@
             border-top: 2.75rem solid #ffc107;
             border-right: 2.75rem solid transparent;
         }
+        .article-comments__textarea {
+            min-height: 7rem;
+            resize: vertical;
+        }
+        .article-comments__counter {
+            font-variant-numeric: tabular-nums;
+        }
+        .comment-list {
+            border-top: 1px solid #e9ecef;
+        }
+        .comment-item {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .comment-item__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.55rem;
+        }
+        .comment-item__author {
+            color: #343a40;
+            font-weight: 600;
+        }
+        .comment-item__date {
+            color: #868e96;
+            font-size: 0.82rem;
+        }
+        .comment-item__content {
+            margin-bottom: 0.65rem;
+            color: #495057;
+            line-height: 1.65;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+        .comment-item__content--deleted {
+            color: #868e96;
+            font-style: italic;
+        }
+        .comment-item__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .comment-item__actions .btn {
+            padding: 0.15rem 0.45rem;
+            font-size: 0.78rem;
+        }
+        .comment-replies {
+            margin-top: 1rem;
+            margin-left: 2rem;
+            padding-left: 1rem;
+            border-left: 3px solid #e9ecef;
+        }
+        .comment-replies .comment-item {
+            padding: 1rem;
+            border: 0;
+            border-radius: 0.65rem;
+            background-color: #f8f9fa;
+        }
+        .comment-replies .comment-item + .comment-item {
+            margin-top: 0.75rem;
+        }
+        .comment-inline-form {
+            margin-top: 0.9rem;
+            padding: 0.9rem;
+            border-radius: 0.65rem;
+            background-color: #f8f9fa;
+        }
+        .comment-inline-form textarea {
+            min-height: 5.5rem;
+            resize: vertical;
+        }
+        @media (max-width: 575.98px) {
+            .comment-replies {
+                margin-left: 0.5rem;
+                padding-left: 0.75rem;
+            }
+        }
         @media (min-width: 992px) {
             .site-nav__inner {
                 max-width: 800px;
@@ -320,6 +401,47 @@
                         </article>
                     </div>
                 </div>
+
+                <section class="card border-0 shadow-sm mt-4 article-comments"
+                         id="article-comments"
+                         aria-labelledby="comment-heading">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h2 class="h5 mb-0" id="comment-heading">
+                                댓글 <span id="comment-count" class="text-muted">0</span>
+                            </h2>
+                        </div>
+
+                        <form id="comment-form" novalidate>
+                            <label class="sr-only" for="comment-content">댓글 내용</label>
+                            <textarea id="comment-content"
+                                      class="form-control article-comments__textarea"
+                                      data-max-length="1000"
+                                      placeholder="댓글을 입력해주세요"
+                                      aria-describedby="comment-length"
+                                      required></textarea>
+                            <div class="d-flex align-items-center justify-content-between mt-2">
+                                <span id="comment-length"
+                                      class="small text-muted article-comments__counter">0 / 1000</span>
+                                <button type="submit"
+                                        id="comment-submit"
+                                        class="btn btn-primary btn-sm">댓글 등록</button>
+                            </div>
+                        </form>
+
+                        <div id="comment-message"
+                             class="alert d-none mt-3 mb-0"
+                             role="status"
+                             aria-live="polite"></div>
+                        <div id="comment-loading"
+                             class="py-4 text-center text-muted">댓글을 불러오는 중입니다...</div>
+                        <div id="comment-list" class="comment-list d-none"></div>
+                        <p id="comment-empty"
+                           class="d-none py-4 mb-0 text-center text-muted">
+                            아직 작성된 댓글이 없습니다.
+                        </p>
+                    </div>
+                </section>
             </div>
         </div>
     </main>
@@ -346,6 +468,7 @@
     </script>
     <script src="/js/articleLike.js"></script>
     <script src="/js/articlePin.js"></script>
+    <script src="/js/articleComment.js"></script>
     <script src="/js/article.js"></script>
 </body>
 </html>
