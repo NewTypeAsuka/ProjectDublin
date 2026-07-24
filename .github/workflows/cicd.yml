@@ -31,7 +31,7 @@ jobs:
       - name: Generate deployment package # 5. .jar 파일과 Nginx 설정이 담긴 .platform 폴더를 모아 deploy-package.zip으로 압축 -> nginx 추가 설정을 위해서
         run: |
           mkdir -p deploy
-          cp build/libs/*SNAPSHOT.jar deploy/application.jar
+          find build/libs -name "*.jar" ! -name "*plain.jar" -exec cp {} deploy/application.jar \;
           cp -r .platform deploy/
           cd deploy && zip -r deploy-package.zip .
 
