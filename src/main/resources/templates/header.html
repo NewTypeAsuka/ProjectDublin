@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- 공통 헤더의 스타일을 각 화면의 head에 삽입한다. -->
+    <style th:fragment="styles">
+        .intro-header__title-link,
+        .intro-header__title-link:visited,
+        .intro-header__title-link:active {
+            color: #334155;
+            text-decoration: none;
+        }
+        .intro-header__title-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+        .intro-header__title-link:hover,
+        .intro-header__title-link:focus {
+            color: #0369a1;
+            text-decoration: none;
+        }
+        .intro-header__title-link:focus-visible {
+            outline: 3px solid rgba(3, 105, 161, 0.35);
+            outline-offset: 3px;
+        }
+        .intro-header__title {
+            margin-bottom: 0;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .site-header {
+            background: linear-gradient(135deg,
+                #f4f9fc,
+                #e3f0f6,
+                #cfe5f1,
+                #edf6fa
+            );
+            background-size: 240% 240%;
+            animation: headerGradientAnimation 30s ease-in-out infinite;
+        }
+        @keyframes headerGradientAnimation {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 30%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 70%; }
+            100% { background-position: 0% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .site-header {
+                animation: none;
+            }
+            .intro-header__title-link {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 모든 게시글 화면에서 사용하는 공통 브랜드 헤더다. -->
+    <header th:fragment="siteHeader" class="site-header border-bottom">
+        <div class="container py-4 py-md-5 text-center">
+            <a href="/" class="intro-header__title-link">
+                <h1 class="h2 intro-header__title">NewTypeBlog</h1>
+            </a>
+        </div>
+    </header>
+</body>
+</html>
