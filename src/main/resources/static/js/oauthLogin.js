@@ -30,6 +30,6 @@ if (loginMessage) {
             loginMessageIndex = (loginMessageIndex + 1) % loginMessages.length;
             loginMessage.innerHTML = loginMessages[loginMessageIndex];
             loginMessage.classList.remove('is-changing');
-        }, 350);
-    }, 5000);
+        }, 800); // 0.8초 후에 문구 교체
+    }, 10000); // 10초마다 문구 교체
 }

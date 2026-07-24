@@ -10,13 +10,12 @@
         /* 배경색과 애니메이션 */
         .gradient-custom {
             background: linear-gradient(135deg,
-                rgba(16, 185, 129, 1),
-                rgba(59, 130, 246, 1),
-                rgba(99, 102, 241, 1),
-                rgba(236, 72, 153, 1),
-                rgba(251, 191, 36, 1)
+                #e0f2fe,
+                #7dd3fc,
+                #38bdf8,
+                #bae6fd
             );
-            background-size: 300% 300%;
+            background-size: 240% 240%;
             animation: gradientAnimation 30s ease-in-out infinite;
         }
         @keyframes gradientAnimation {
@@ -27,10 +26,22 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* 로그인 카드 상단에 블로그 이름을 표시하는 별도 영역 */
+        .login-brand {
+            padding: 1.25rem 1.5rem;
+            background-color: #f0f9ff;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+            color: #334155;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-align: center;
+        }
+
         /* 로그인 안내 문구 전환 */
         .login-message {
             min-height: 3rem;
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            transition: opacity 0.8s ease, transform 0.8s ease; /* 0.8초의 부드러운 전환 효과 */
         }
         .login-message.is-changing {
             opacity: 0;
@@ -65,19 +76,20 @@
     <section class="container vh-100">
         <div class="row h-100 justify-content-center align-items-center">
             <div class="col-11 col-sm-9 col-md-7 col-lg-5 col-xl-4">
-                <div class="card bg-dark rounded-lg">
+                <div class="card bg-white rounded-lg">
+                    <div class="login-brand">NewTypeBlog</div>
                     <div class="card-body p-4 p-sm-5 text-center">
-                        <h2 class="text-white">LOGIN</h2>
-                        <p id="login-message" class="login-message text-white-50 mt-2 mb-5">구글 계정을 사용하여<br>로그인 해주세요</p> <!-- 로그인 안내 문구 전환 -->
+                        <h2 class="text-dark">LOGIN</h2>
+                        <p id="login-message" class="login-message text-secondary mt-2 mb-5">구글 계정을 사용하여<br>로그인 해주세요</p> <!-- 로그인 안내 문구 전환 -->
                         <div class="mb-2">
                             <a th:href="@{/oauth2/authorization/google}" href="/oauth2/authorization/google" id="google-login-link" class="google-login-link d-inline-block">
                                 <img th:src="@{/img/googleLogin.png}" src="/img/googleLogin.png" class="img-fluid" alt="Google 로그인">
                             </a>
                             <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 애니메이션 -->
-                                <div class="spinner-border text-light" role="status">
+                                <div class="spinner-border text-primary" role="status">
                                     <span class="sr-only">로딩 중</span>
                                 </div>
-                                <p class="text-white-50 small mt-3 mb-1">로그인 중입니다</p>
+                                <p class="text-secondary small mt-3 mb-1">로그인 중입니다</p>
                             </div>
                         </div>
                     </div>
