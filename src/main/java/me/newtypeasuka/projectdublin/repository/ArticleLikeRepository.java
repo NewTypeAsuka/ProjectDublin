@@ -1,7 +1,7 @@
 package me.newtypeasuka.projectdublin.repository;
 
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
-import me.newtypeasuka.projectdublin.domain.ArticleLikeId;
+import me.newtypeasuka.projectdublin.domain.ArticleLike.ArticleLikeId;
 import me.newtypeasuka.projectdublin.dto.ArticleLikeCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

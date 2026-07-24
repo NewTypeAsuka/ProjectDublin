@@ -1,6 +1,7 @@
 package me.newtypeasuka.projectdublin.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -10,11 +11,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Table(name = "article_likes")
@@ -45,5 +49,19 @@ public class ArticleLike {
         this.id = new ArticleLikeId(user.getId(), article.getId());
         this.user = user;
         this.article = article;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @EqualsAndHashCode
+    @Getter
+    @Embeddable
+    public static class ArticleLikeId implements Serializable {
+
+        @Column(name = "user_id", nullable = false)
+        private Long userId;
+
+        @Column(name = "article_id", nullable = false)
+        private Long articleId;
     }
 }

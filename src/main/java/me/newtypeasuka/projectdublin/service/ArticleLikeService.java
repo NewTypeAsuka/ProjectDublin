@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
-import me.newtypeasuka.projectdublin.domain.ArticleLikeId;
+import me.newtypeasuka.projectdublin.domain.ArticleLike.ArticleLikeId;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ArticleLikeResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleLikeRepository;
