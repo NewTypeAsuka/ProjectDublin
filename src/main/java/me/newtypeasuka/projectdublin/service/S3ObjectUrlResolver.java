@@ -1,7 +1,7 @@
 package me.newtypeasuka.projectdublin.service;
 
 import lombok.RequiredArgsConstructor;
-import me.newtypeasuka.projectdublin.config.S3StorageProperties;
+import me.newtypeasuka.projectdublin.config.S3Config.S3StorageProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import software.amazon.awssdk.services.s3.S3Utilities;

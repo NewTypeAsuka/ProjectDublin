@@ -6,7 +6,7 @@ import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
 import me.newtypeasuka.projectdublin.domain.ArticleLike.ArticleLikeId;
 import me.newtypeasuka.projectdublin.domain.User;
-import me.newtypeasuka.projectdublin.dto.ArticleLikeResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.LikeResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleLikeRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
@@ -27,7 +27,7 @@ public class ArticleLikeService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ArticleLikeResponse getStatus(long articleId, String email) {
+    public LikeResponse getStatus(long articleId, String email) {
         User user = findUser(email);
         findArticle(articleId);
 
@@ -45,13 +45,13 @@ public class ArticleLikeService {
 
         return articleLikeRepository.countByArticleIds(articleIds).stream()
                 .collect(Collectors.toMap(
-                        articleLikeCount -> articleLikeCount.articleId(),
-                        articleLikeCount -> articleLikeCount.likeCount()
+                        articleLikeCount -> articleLikeCount.getArticleId(),
+                        articleLikeCount -> articleLikeCount.getLikeCount()
                 ));
     }
 
     @Transactional
-    public ArticleLikeResponse like(long articleId, String email) {
+    public LikeResponse like(long articleId, String email) {
         User user = findUser(email);
         Article article = findArticle(articleId);
         ArticleLikeId id = new ArticleLikeId(user.getId(), articleId);
@@ -64,7 +64,7 @@ public class ArticleLikeService {
     }
 
     @Transactional
-    public ArticleLikeResponse unlike(long articleId, String email) {
+    public LikeResponse unlike(long articleId, String email) {
         User user = findUser(email);
         findArticle(articleId);
         ArticleLikeId id = new ArticleLikeId(user.getId(), articleId);
@@ -73,14 +73,14 @@ public class ArticleLikeService {
             articleLikeRepository.deleteById(id);
         }
 
-        return new ArticleLikeResponse(false, articleLikeRepository.countByIdArticleId(articleId));
+        return new LikeResponse(false, articleLikeRepository.countByIdArticleId(articleId));
     }
 
-    private ArticleLikeResponse createResponse(Long userId, Long articleId) {
+    private LikeResponse createResponse(Long userId, Long articleId) {
         ArticleLikeId id = new ArticleLikeId(userId, articleId);
         boolean liked = articleLikeRepository.existsById(id);
         long likeCount = articleLikeRepository.countByIdArticleId(articleId);
-        return new ArticleLikeResponse(liked, likeCount);
+        return new LikeResponse(liked, likeCount);
     }
 
     private User findUser(String email) {

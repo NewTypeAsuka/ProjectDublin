@@ -1,10 +1,10 @@
 package me.newtypeasuka.projectdublin.service;
 
-import me.newtypeasuka.projectdublin.config.S3StorageProperties;
+import me.newtypeasuka.projectdublin.config.S3Config.S3StorageProperties;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.User;
-import me.newtypeasuka.projectdublin.dto.ArticleImageUploadResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,7 +107,7 @@ class ArticleImageServiceTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
-        ArticleImageUploadResponse response = articleImageService.upload(image, EMAIL);
+        ImageUploadResponse response = articleImageService.upload(image, EMAIL);
 
         ArgumentCaptor<PutObjectRequest> requestCaptor =
                 ArgumentCaptor.forClass(PutObjectRequest.class);

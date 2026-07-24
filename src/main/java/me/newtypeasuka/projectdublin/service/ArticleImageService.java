@@ -2,11 +2,11 @@ package me.newtypeasuka.projectdublin.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.newtypeasuka.projectdublin.config.S3StorageProperties;
+import me.newtypeasuka.projectdublin.config.S3Config.S3StorageProperties;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.User;
-import me.newtypeasuka.projectdublin.dto.ArticleImageUploadResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.jsoup.Jsoup;
@@ -63,7 +63,7 @@ public class ArticleImageService {
     private final ArticleImageRepository articleImageRepository;
     private final UserRepository userRepository;
 
-    public ArticleImageUploadResponse upload(MultipartFile image, String email) {
+    public ImageUploadResponse upload(MultipartFile image, String email) {
         validateSize(image);
         User uploader = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -107,7 +107,7 @@ public class ArticleImageService {
             );
         }
 
-        return new ArticleImageUploadResponse(urlResolver.resolve(key));
+        return new ImageUploadResponse(urlResolver.resolve(key));
     }
 
     public void synchronize(Article article) {

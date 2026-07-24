@@ -1,9 +1,14 @@
 package me.newtypeasuka.projectdublin.config;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
+import org.springframework.validation.annotation.Validated;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -14,7 +19,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Utilities;
 
 @Configuration
-@EnableConfigurationProperties(S3StorageProperties.class)
+@EnableConfigurationProperties(S3Config.S3StorageProperties.class)
 public class S3Config {
 
     @Bean
@@ -51,5 +56,18 @@ public class S3Config {
         return S3Utilities.builder()
                 .region(Region.of(properties.region()))
                 .build();
+    }
+
+    @Validated
+    @ConfigurationProperties(prefix = "aws.s3")
+    public record S3StorageProperties(
+            @NotBlank String bucket,
+            @NotBlank String region,
+            String accessKey,
+            String secretKey,
+            @NotBlank String keyPrefix,
+            String publicBaseUrl,
+            @NotNull DataSize maxFileSize
+    ) {
     }
 }

@@ -2,7 +2,6 @@ package me.newtypeasuka.projectdublin.repository;
 
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
 import me.newtypeasuka.projectdublin.domain.ArticleLike.ArticleLikeId;
-import me.newtypeasuka.projectdublin.dto.ArticleLikeCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,10 +13,16 @@ public interface ArticleLikeRepository extends JpaRepository<ArticleLike, Articl
 
     long countByIdArticleId(Long articleId);
 
-    @Query("SELECT new me.newtypeasuka.projectdublin.dto.ArticleLikeCount("
-            + "articleLike.article.id, COUNT(articleLike)) "
+    @Query("SELECT articleLike.article.id AS articleId, COUNT(articleLike) AS likeCount "
             + "FROM ArticleLike articleLike "
             + "WHERE articleLike.article.id IN :articleIds "
             + "GROUP BY articleLike.article.id")
     List<ArticleLikeCount> countByArticleIds(@Param("articleIds") Collection<Long> articleIds);
+
+    interface ArticleLikeCount {
+
+        Long getArticleId();
+
+        long getLikeCount();
+    }
 }

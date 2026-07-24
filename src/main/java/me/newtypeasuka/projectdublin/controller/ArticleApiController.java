@@ -2,9 +2,9 @@ package me.newtypeasuka.projectdublin.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
-import me.newtypeasuka.projectdublin.dto.ArticleImageUploadResponse;
-import me.newtypeasuka.projectdublin.dto.ArticleLikeResponse;
-import me.newtypeasuka.projectdublin.dto.ArticlePinResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.LikeResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.PinResponse;
 import me.newtypeasuka.projectdublin.service.ArticleImageService;
 import me.newtypeasuka.projectdublin.service.ArticleLikeService;
 import me.newtypeasuka.projectdublin.service.BlogService;
@@ -36,7 +36,7 @@ public class ArticleApiController {
             value = "/images",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ResponseEntity<ArticleImageUploadResponse> upload(
+    public ResponseEntity<ImageUploadResponse> upload(
             @RequestParam("image") MultipartFile image,
             Principal principal
     ) {
@@ -45,34 +45,34 @@ public class ArticleApiController {
     }
 
     @GetMapping("/{articleId}/likes")
-    public ResponseEntity<ArticleLikeResponse> getLikeStatus(@PathVariable long articleId,
-                                                             Principal principal) {
+    public ResponseEntity<LikeResponse> getLikeStatus(@PathVariable long articleId,
+                                                      Principal principal) {
         return ResponseEntity.ok(articleLikeService.getStatus(articleId, principal.getName()));
     }
 
     @PutMapping("/{articleId}/likes")
-    public ResponseEntity<ArticleLikeResponse> like(@PathVariable long articleId,
-                                                    Principal principal) {
+    public ResponseEntity<LikeResponse> like(@PathVariable long articleId,
+                                             Principal principal) {
         return ResponseEntity.ok(articleLikeService.like(articleId, principal.getName()));
     }
 
     @DeleteMapping("/{articleId}/likes")
-    public ResponseEntity<ArticleLikeResponse> unlike(@PathVariable long articleId,
-                                                      Principal principal) {
+    public ResponseEntity<LikeResponse> unlike(@PathVariable long articleId,
+                                               Principal principal) {
         return ResponseEntity.ok(articleLikeService.unlike(articleId, principal.getName()));
     }
 
     @PutMapping("/{articleId}/pin")
-    public ResponseEntity<ArticlePinResponse> pin(@PathVariable long articleId,
-                                                  Principal principal) {
+    public ResponseEntity<PinResponse> pin(@PathVariable long articleId,
+                                           Principal principal) {
         Article article = blogService.updatePinned(articleId, true, principal.getName());
-        return ResponseEntity.ok(new ArticlePinResponse(article.isPinned()));
+        return ResponseEntity.ok(new PinResponse(article.isPinned()));
     }
 
     @DeleteMapping("/{articleId}/pin")
-    public ResponseEntity<ArticlePinResponse> unpin(@PathVariable long articleId,
-                                                    Principal principal) {
+    public ResponseEntity<PinResponse> unpin(@PathVariable long articleId,
+                                             Principal principal) {
         Article article = blogService.updatePinned(articleId, false, principal.getName());
-        return ResponseEntity.ok(new ArticlePinResponse(article.isPinned()));
+        return ResponseEntity.ok(new PinResponse(article.isPinned()));
     }
 }

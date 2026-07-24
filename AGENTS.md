@@ -99,6 +99,22 @@
 - 게시글의 작성, 조회, 수정, 삭제와 같은 핵심 CRUD API는 `BlogApiController`에서 관리하고, 글 고정, 이미지 첨부, 좋아요와 같은 게시글 부가 기능 API는 `ArticleApiController` 하나에서 관리한다.
 - 사용하는 Service나 테이블이 다르다는 이유만으로 Controller를 분리하지 않는다. URL의 기준 리소스, 기능의 목적, 권한과 요청 흐름이 충분히 독립적일 때만 별도 Controller 분리를 고려한다.
 
+## DTO와 record 관리 기준
+
+- Java 코드는 작은 DTO나 record마다 파일을 기계적으로 분리하지 않고, 동일한 리소스와 기능에 속하는 요청 및 응답 타입을 기능별 DTO 컨테이너의 `public` 중첩 타입으로 모아 관리한다.
+- 같은 Controller에서 사용하는 작고 단순한 응답 record는 `ArticleApiDto`와 같은 하나의 DTO 클래스 안에 묶는다.
+- Repository나 Service 한 곳에서만 사용하는 projection 또는 값 타입은 가능한 한 해당 기능을 소유한 클래스의 중첩 타입으로 작성한다.
+- 여러 계층에서 사용하는 DTO를 Controller 내부 타입으로 작성하여 Service가 Controller에 의존하게 만들지 않는다. 이런 DTO는 `dto` 패키지의 기능별 컨테이너에 작성한다.
+- 변환 및 검증 로직이 복잡하거나 여러 기능에서 독립적으로 재사용되어 별도 책임이 명확한 타입만 별도 파일로 분리한다.
+
+## 계층별 Java 파일 응집도 기준
+
+- `config`, `controller`, `domain`, `dto`, `repository`, `util` 등의 계층은 관련된 작은 타입과 유사 기능을 현재 프로젝트 수준의 비교적 높은 응집도로 묶어 관리하고, 파일을 과도하게 세분화하지 않는다.
+- `service`는 비즈니스 로직이 길어지기 쉬우므로 다른 Java 계층보다 조금 더 느슨한 응집도를 적용하며, JavaScript 파일처럼 사용자가 인식하는 세부 기능 단위로 파일을 나누어 관리한다.
+- 같은 Controller나 리소스에서 사용하는 기능이라는 이유만으로 Service까지 하나로 합치지 않는다. 예를 들어 좋아요와 이미지 첨부가 모두 `ArticleApiController`에 속하더라도 각각 `ArticleLikeService`, `ArticleImageService`로 관리할 수 있다.
+- 하나의 Service 안에서는 동일 기능의 조회, 등록, 수정, 삭제와 관련 검증 및 보조 메서드를 함께 관리하고, 메서드마다 Service 클래스를 새로 만드는 식의 과도한 분리는 피한다.
+- Service 분리는 단순한 코드 줄 수보다 기능의 목적, 사용하는 외부 시스템과 Repository, 트랜잭션 및 권한 흐름, 변경 이유와 테스트 범위가 독립적인지를 기준으로 판단한다.
+
 ## 나의 요청사항
 
 - 새로운 기능을 추가할 시 간단한 주석으로 해당 코드가 어떤 기능을 하는지 적어둔다.

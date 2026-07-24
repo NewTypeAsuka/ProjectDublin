@@ -4,7 +4,7 @@ import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
 import me.newtypeasuka.projectdublin.domain.ArticleLike.ArticleLikeId;
 import me.newtypeasuka.projectdublin.domain.User;
-import me.newtypeasuka.projectdublin.dto.ArticleImageUploadResponse;
+import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleLikeRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
@@ -93,7 +93,7 @@ class ArticleApiControllerTest {
                 new byte[]{0x01}
         );
         when(articleImageService.upload(any(), any()))
-                .thenReturn(new ArticleImageUploadResponse(
+                .thenReturn(new ImageUploadResponse(
                         "https://projectdublin-test-images.s3.ap-northeast-2.amazonaws.com/"
                                 + "articles/2026/07/image.png"
                 ));

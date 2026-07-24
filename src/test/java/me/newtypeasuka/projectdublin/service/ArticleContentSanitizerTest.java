@@ -1,6 +1,6 @@
 package me.newtypeasuka.projectdublin.service;
 
-import me.newtypeasuka.projectdublin.config.S3StorageProperties;
+import me.newtypeasuka.projectdublin.config.S3Config.S3StorageProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.unit.DataSize;
