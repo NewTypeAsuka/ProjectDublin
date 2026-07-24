@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
     <title>✨NewTypeBlog::로그인✨</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
     <style>
-        .gradient-custom { /* 배경색과 애니메이션 */
+        /* 배경색과 애니메이션 */
+        .gradient-custom {
             background: linear-gradient(135deg,
                 rgba(16, 185, 129, 1),
                 rgba(59, 130, 246, 1),
@@ -25,7 +27,23 @@
             100% { background-position: 0% 50%; }
         }
 
-        .google-login-link.is-loading { /* 로딩 상태를 나타내는 애니메이션 */
+        /* 로그인 안내 문구 전환 */
+        .login-message {
+            min-height: 3rem;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .login-message.is-changing {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .login-message {
+                transition: none;
+            }
+        }
+
+        /* 로딩 상태를 나타내는 애니메이션 */
+        .google-login-link.is-loading {
             pointer-events: none;
             opacity: 0.7;
         }
@@ -50,12 +68,12 @@
                 <div class="card bg-dark rounded-lg">
                     <div class="card-body p-4 p-sm-5 text-center">
                         <h2 class="text-white">LOGIN</h2>
-                        <p class="text-white-50 mt-2 mb-5">구글 계정을 사용하여<br>로그인 해주세요</p>
+                        <p id="login-message" class="login-message text-white-50 mt-2 mb-5">구글 계정을 사용하여<br>로그인 해주세요</p> <!-- 로그인 안내 문구 전환 -->
                         <div class="mb-2">
                             <a th:href="@{/oauth2/authorization/google}" href="/oauth2/authorization/google" id="google-login-link" class="google-login-link d-inline-block">
                                 <img th:src="@{/img/googleLogin.png}" src="/img/googleLogin.png" class="img-fluid" alt="Google 로그인">
                             </a>
-                            <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 요소 -->
+                            <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 애니메이션 -->
                                 <div class="spinner-border text-light" role="status">
                                     <span class="sr-only">로딩 중</span>
                                 </div>
