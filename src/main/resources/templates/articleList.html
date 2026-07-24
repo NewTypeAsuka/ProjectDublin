@@ -7,56 +7,58 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
     <style>
+        /* NewTypeBlog 타이틀 링크 스타일 */
         .intro-header__title-link,
         .intro-header__title-link:visited,
-        .intro-header__title-link:hover,
-        .intro-header__title-link:focus,
-        .intro-header__title-link:active { /* NewTypeBlog 타이틀 링크 스타일 */
-            color: inherit;
+        .intro-header__title-link:active {
+            color: #334155;
             text-decoration: none;
         }
+        .intro-header__title-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+        .intro-header__title-link:hover,
+        .intro-header__title-link:focus { /* 호버 및 포커스 시 색상 변경 */
+            color: #0369a1;
+            text-decoration: none;
+        }
+        .intro-header__title-link:focus-visible {
+            outline: 3px solid rgba(3, 105, 161, 0.35);
+            outline-offset: 3px;
+        }
+        .intro-header__title {
+            margin-bottom: 0;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
 
-        .intro-header { /* 헤더 영역의 연출 */
-            position: relative;
-            overflow: hidden;
-            background-color: #ffffff;
-        }
-        .intro-header__content {
-            position: relative;
-            z-index: 1;
-        }
-        .intro-header__overlay {
-            position: absolute;
-            inset: 0;
+        /* 그라데이션 헤더 */
+        .intro-header {
             background: linear-gradient(135deg,
-                rgba(16, 185, 129, 0.38),
-                rgba(59, 130, 246, 0.36),
-                rgba(99, 102, 241, 0.34),
-                rgba(236, 72, 153, 0.30),
-                rgba(251, 191, 36, 0.28)
+                #f4f9fc,
+                #e3f0f6,
+                #cfe5f1,
+                #edf6fa
             );
-            background-size: 260% 260%;
-            pointer-events: none;
-            animation: headerIntroMotion 30s ease-out forwards, headerIntroFade 1.1s ease forwards 28.9s;
+            background-size: 240% 240%;
+            animation: headerGradientAnimation 30s ease-in-out infinite;
         }
-        @keyframes headerIntroMotion {
+        @keyframes headerGradientAnimation {
             0% { background-position: 0% 50%; }
             25% { background-position: 100% 30%; }
             50% { background-position: 100% 100%; }
             75% { background-position: 0% 70%; }
             100% { background-position: 0% 50%; }
         }
-        @keyframes headerIntroFade {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .intro-header__overlay.is-finished {
-            display: none;
-        }
         @media (prefers-reduced-motion: reduce) {
-            .intro-header__overlay {
+            .intro-header {
                 animation: none;
-                opacity: 0;
+            }
+            .intro-header__title-link {
+                transition: none;
             }
         }
 
@@ -259,11 +261,10 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
-    <header class="intro-header bg-white border-bottom">
-        <div class="intro-header__overlay" id="header-intro-overlay" aria-hidden="true"></div>
-        <div class="container py-4 py-md-5 text-center intro-header__content">
+    <header class="intro-header border-bottom">
+        <div class="container py-4 py-md-5 text-center">
             <a href="/" class="intro-header__title-link">
-                <h1 class="h2 mb-2">NewTypeBlog</h1>
+                <h1 class="h2 intro-header__title">NewTypeBlog</h1>
             </a>
         </div>
     </header>
@@ -329,17 +330,10 @@
         </div>
     </footer>
 
-    <!-- 헤더 소개 오버레이 스크립트 -->
+    <!-- 스크롤에 따른 내비게이션 상태 변경 -->
     <script>
-        const headerIntroOverlay = document.getElementById('header-intro-overlay');
         const introHeader = document.querySelector('.intro-header');
         const siteNav = document.getElementById('site-nav');
-
-        if (headerIntroOverlay) {
-            window.setTimeout(function () {
-                headerIntroOverlay.classList.add('is-finished');
-            }, 30000); // 30초 후에 헤더 애니메이션 연출을 제거
-        }
 
         if (introHeader && siteNav) {
             const syncStickyNavState = function () {

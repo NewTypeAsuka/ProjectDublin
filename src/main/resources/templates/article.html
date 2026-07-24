@@ -7,13 +7,59 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
     <style>
+        /* NewTypeBlog 타이틀 링크 스타일 */
         .intro-header__title-link,
         .intro-header__title-link:visited,
-        .intro-header__title-link:hover,
-        .intro-header__title-link:focus,
-        .intro-header__title-link:active { /* NewTypeBlog 타이틀 링크 스타일 */
-            color: inherit;
+        .intro-header__title-link:active {
+            color: #334155;
             text-decoration: none;
+        }
+        .intro-header__title-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+        .intro-header__title-link:hover,
+        .intro-header__title-link:focus { /* 호버 및 포커스 시 색상 변경 */
+            color: #0369a1;
+            text-decoration: none;
+        }
+        .intro-header__title-link:focus-visible {
+            outline: 3px solid rgba(3, 105, 161, 0.35);
+            outline-offset: 3px;
+        }
+        .intro-header__title {
+            margin-bottom: 0;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        /* 그라데이션 헤더 */
+        .site-header {
+            background: linear-gradient(135deg,
+                #f4f9fc,
+                #e3f0f6,
+                #cfe5f1,
+                #edf6fa
+            );
+            background-size: 240% 240%;
+            animation: headerGradientAnimation 30s ease-in-out infinite;
+        }
+        @keyframes headerGradientAnimation {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 30%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 70%; }
+            100% { background-position: 0% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .site-header {
+                animation: none;
+            }
+            .intro-header__title-link {
+                transition: none;
+            }
         }
 
         .site-nav { /* 스크롤 시 nav 영역이 사라지지 않고 상단에 고정되도록 설정 */
@@ -241,10 +287,10 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
-    <header class="site-header bg-white border-bottom">
+    <header class="site-header border-bottom">
         <div class="container py-4 py-md-5 text-center">
             <a href="/" class="intro-header__title-link">
-                <h1 class="h2 mb-2">NewTypeBlog</h1>
+                <h1 class="h2 intro-header__title">NewTypeBlog</h1>
             </a>
         </div>
     </header>
