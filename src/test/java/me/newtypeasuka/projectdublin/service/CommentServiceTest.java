@@ -101,7 +101,8 @@ class CommentServiceTest {
     @Test
     void softDeleteRootWithReply() {
         CommentResponse root = createComment(article, member, "삭제할 원문");
-        CommentResponse reply = createReply(article, root, other, "남아 있는 대댓글");
+        CommentResponse firstReply = createReply(article, root, other, "첫 번째 대댓글");
+        CommentResponse lastReply = createReply(article, root, member, "마지막 대댓글");
 
         commentService.deleteComment(article.getId(), root.id(), member.getEmail());
 
@@ -116,7 +117,8 @@ class CommentServiceTest {
         assertThat(comments.get(0).editable()).isFalse();
         assertThat(comments.get(0).deletable()).isFalse();
         assertThat(comments.get(0).replies()).extracting(CommentResponse::id)
-                .containsExactly(reply.id());
+                .containsExactly(firstReply.id(), lastReply.id());
+        assertThat(commentService.getCommentCount(article.getId())).isEqualTo(2);
 
         assertStatus(
                 HttpStatus.BAD_REQUEST,
@@ -136,6 +138,20 @@ class CommentServiceTest {
                         member.getEmail()
                 )
         );
+
+        commentService.deleteComment(article.getId(), firstReply.id(), other.getEmail());
+
+        assertThat(commentRepository.existsById(firstReply.id())).isFalse();
+        assertThat(commentRepository.existsById(lastReply.id())).isTrue();
+        assertThat(commentRepository.existsById(root.id())).isTrue();
+        assertThat(commentService.getCommentCount(article.getId())).isEqualTo(1);
+
+        commentService.deleteComment(article.getId(), lastReply.id(), member.getEmail());
+
+        assertThat(commentRepository.existsById(lastReply.id())).isFalse();
+        assertThat(commentRepository.existsById(root.id())).isFalse();
+        assertThat(commentService.getCommentCount(article.getId())).isZero();
+        assertThat(commentService.getComments(article.getId(), member.getEmail())).isEmpty();
     }
 
     @DisplayName("작성자만 댓글을 수정하고 작성자 또는 관리자가 삭제할 수 있다")

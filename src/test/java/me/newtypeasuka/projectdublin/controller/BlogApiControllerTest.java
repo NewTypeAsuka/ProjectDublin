@@ -119,7 +119,16 @@ class BlogApiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "<strong>Summernote</strong>")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 2")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"bi bi-eye\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-view-count\">2</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"bi bi-chat-dots\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-comment-count\">0</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("id=\"article-modified\""))))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("alert('xss')"))));
 
@@ -136,6 +145,15 @@ class BlogApiControllerTest {
                 .andExpect(jsonPath("$.title").value("Updated title"))
                 .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
                         "https://www.youtube.com/embed/video-id")));
+
+        mockMvc.perform(get("/articles/{id}", articleId).with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-modified\">수정됨</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Posted on"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"bi bi-heart-fill article-meta__like-icon\"")));
     }
 
     @DisplayName("S3 이미지를 게시글과 연결하고 게시글 삭제 후 S3에서도 제거한다")
@@ -199,15 +217,18 @@ class BlogApiControllerTest {
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 1")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-view-count\">1</span>")));
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 2")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-view-count\">2</span>")));
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("조회수 3")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-view-count\">3</span>")));
 
         assertThat(blogRepository.findById(article.getId()).orElseThrow().getViewCount())
                 .isEqualTo(3);

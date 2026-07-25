@@ -31,4 +31,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     );
 
     boolean existsByParentId(Long parentId);
+
+    long countByArticleIdAndDeletedAtIsNull(Long articleId);
 }

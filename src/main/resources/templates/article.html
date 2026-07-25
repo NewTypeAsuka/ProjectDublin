@@ -135,6 +135,23 @@
             width: 100%;
             height: auto;
         }
+        .article-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .article-meta__separator {
+            color: #adb5bd;
+        }
+        .article-meta__metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .article-meta__like-icon {
+            color: #e03131;
+        }
         .article-like {
             display: flex;
             align-items: center;
@@ -354,12 +371,35 @@
                                 <div class="text-uppercase text-muted small mb-2">Article Detail</div>
                                 <h2 class="h4 mb-0">게시글</h2>
                             </div> -->
-                            <div class="text-muted small">
-                                <span th:text="|Posted on ${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')} by ${article.author}|"></span>
-                                <span aria-hidden="true"> · </span>
-                                <span th:text="|조회수 ${article.viewCount}|"></span>
-                                <span aria-hidden="true"> · </span>
-                                <span>좋아요 <span id="article-like-count" th:text="${article.likeCount}"></span></span>
+                            <div class="text-muted small article-meta">
+                                <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                <span th:text="|by ${article.author}|"></span>
+                                <span class="article-meta__separator" aria-hidden="true">·</span>
+                                <span class="article-meta__metric" title="조회수">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                    <span class="sr-only">조회수</span>
+                                    <span id="article-view-count" th:text="${article.viewCount}"></span>
+                                </span>
+                                <span class="article-meta__separator" aria-hidden="true">·</span>
+                                <span class="article-meta__metric" title="좋아요">
+                                    <i class="bi bi-heart-fill article-meta__like-icon"
+                                       aria-hidden="true"></i>
+                                    <span class="sr-only">좋아요</span>
+                                    <span id="article-like-count" th:text="${article.likeCount}"></span>
+                                </span>
+                                <span class="article-meta__separator" aria-hidden="true">·</span>
+                                <span class="article-meta__metric" title="댓글">
+                                    <i class="bi bi-chat-dots" aria-hidden="true"></i>
+                                    <span class="sr-only">댓글</span>
+                                    <span id="article-comment-count"
+                                          th:text="${article.commentCount}"></span>
+                                </span>
+                                <th:block th:if="${article.updatedAt != null
+                                        and article.createdAt != null
+                                        and article.updatedAt.isAfter(article.createdAt)}">
+                                    <span class="article-meta__separator" aria-hidden="true">·</span>
+                                    <span id="article-modified">수정됨</span>
+                                </th:block>
                             </div>
                         </div>
 

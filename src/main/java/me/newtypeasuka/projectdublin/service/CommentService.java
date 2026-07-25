@@ -55,6 +55,10 @@ public class CommentService {
                 .toList();
     }
 
+    public long getCommentCount(long articleId) {
+        return commentRepository.countByArticleIdAndDeletedAtIsNull(articleId);
+    }
+
     // 게시글에 새로운 일반 댓글을 작성
     @Transactional
     public CommentResponse createComment(long articleId,
@@ -141,7 +145,19 @@ public class CommentService {
             return;
         }
 
+        Comment deletedParent = null;
+        // 소프트 삭제된 부모의 마지막 대댓글을 지우면 부모 댓글도 실제 삭제
+        if (comment.isReply() && comment.getParent().isDeleted()) {
+            deletedParent = findCommentForUpdate(articleId, comment.getParent().getId());
+        }
+
         commentRepository.delete(comment);
+        if (deletedParent != null) {
+            commentRepository.flush();
+            if (!commentRepository.existsByParentId(deletedParent.getId())) {
+                commentRepository.delete(deletedParent);
+            }
+        }
     }
 
     private CommentResponse toResponse(Comment comment,

@@ -6,6 +6,7 @@ import me.newtypeasuka.projectdublin.dto.ArticleListViewResponse;
 import me.newtypeasuka.projectdublin.dto.ArticleViewResponse;
 import me.newtypeasuka.projectdublin.service.ArticleLikeService;
 import me.newtypeasuka.projectdublin.service.BlogService;
+import me.newtypeasuka.projectdublin.service.CommentService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ public class BlogViewController {
 
     private final BlogService blogService;
     private final ArticleLikeService articleLikeService;
+    private final CommentService commentService;
 
     @GetMapping("/")
     public String root() {
@@ -49,7 +51,11 @@ public class BlogViewController {
     public String getArticle(@PathVariable Long id, Model model, Principal principal) {
         Article article = blogService.findByIdAndIncreaseViewCount(id);
         long likeCount = articleLikeService.getLikeCount(id);
-        model.addAttribute("article", new ArticleViewResponse(article, likeCount));
+        long commentCount = commentService.getCommentCount(id);
+        model.addAttribute(
+                "article",
+                new ArticleViewResponse(article, likeCount, commentCount)
+        );
         model.addAttribute("isAdmin", blogService.isAdmin(principal.getName()));
 
         return "article"; // article.html 뷰 이름 반환

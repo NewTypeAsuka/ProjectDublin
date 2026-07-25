@@ -5,6 +5,7 @@
     const commentSubmit = document.getElementById('comment-submit');
     const commentLength = document.getElementById('comment-length');
     const commentCount = document.getElementById('comment-count');
+    const articleCommentCount = document.getElementById('article-comment-count');
     const commentMessage = document.getElementById('comment-message');
     const commentLoading = document.getElementById('comment-loading');
     const commentList = document.getElementById('comment-list');
@@ -16,6 +17,7 @@
         || !commentSubmit
         || !commentLength
         || !commentCount
+        || !articleCommentCount
         || !commentMessage
         || !commentLoading
         || !commentList
@@ -87,6 +89,7 @@
         });
 
         commentCount.textContent = String(activeCommentCount);
+        articleCommentCount.textContent = String(activeCommentCount);
         commentList.classList.toggle('d-none', comments.length === 0);
         commentEmpty.classList.toggle('d-none', comments.length !== 0);
     }

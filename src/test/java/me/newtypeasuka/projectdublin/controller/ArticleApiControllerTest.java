@@ -3,12 +3,14 @@ package me.newtypeasuka.projectdublin.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.newtypeasuka.projectdublin.domain.Article;
+import me.newtypeasuka.projectdublin.domain.Comment;
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
 import me.newtypeasuka.projectdublin.domain.ArticleLike.ArticleLikeId;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleLikeRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
+import me.newtypeasuka.projectdublin.repository.CommentRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.ArticleImageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +69,9 @@ class ArticleApiControllerTest {
 
     @Autowired
     ArticleLikeRepository articleLikeRepository;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     User admin;
     User member;
@@ -176,12 +181,23 @@ class ArticleApiControllerTest {
     void renderLikeButton() throws Exception {
         articleLikeRepository.save(new ArticleLike(admin, article));
         articleLikeRepository.save(new ArticleLike(member, article));
+        Comment comment = commentRepository.save(
+                new Comment(article, admin, null, "일반 댓글")
+        );
+        commentRepository.save(new Comment(article, member, comment, "대댓글"));
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(member)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(
                         "id=\"article-like-count\">2</span>")))
                 .andExpect(content().string(containsString("id=\"like-btn\"")))
+                .andExpect(content().string(containsString("class=\"bi bi-eye\"")))
+                .andExpect(content().string(containsString(
+                        "class=\"bi bi-heart-fill article-meta__like-icon\"")))
+                .andExpect(content().string(containsString("class=\"bi bi-chat-dots\"")))
+                .andExpect(content().string(containsString(
+                        "id=\"article-comment-count\">2</span>")))
+                .andExpect(content().string(not(containsString("Posted on"))))
                 .andExpect(content().string(containsString(
                         "src=\"/js/articleLike.js\"")));
     }
