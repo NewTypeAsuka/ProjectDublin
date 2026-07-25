@@ -154,6 +154,15 @@ class BlogApiControllerTest {
                         org.hamcrest.Matchers.containsString("Posted on"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"bi bi-heart-fill article-meta__like-icon\"")));
+
+        mockMvc.perform(get("/articles").with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"article-card__modified\">수정됨</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"article-card__comment-count\">0</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("글 번호"))));
     }
 
     @DisplayName("S3 이미지를 게시글과 연결하고 게시글 삭제 후 S3에서도 제거한다")

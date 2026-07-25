@@ -15,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -57,6 +59,19 @@ public class CommentService {
 
     public long getCommentCount(long articleId) {
         return commentRepository.countByArticleIdAndDeletedAtIsNull(articleId);
+    }
+
+    // 게시글 목록의 댓글 수를 한 번에 조회해 N+1 쿼리를 방지
+    public Map<Long, Long> getCommentCounts(Collection<Long> articleIds) {
+        if (articleIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return commentRepository.countByArticleIds(articleIds).stream()
+                .collect(Collectors.toMap(
+                        commentCount -> commentCount.getArticleId(),
+                        commentCount -> commentCount.getCommentCount()
+                ));
     }
 
     // 게시글에 새로운 일반 댓글을 작성

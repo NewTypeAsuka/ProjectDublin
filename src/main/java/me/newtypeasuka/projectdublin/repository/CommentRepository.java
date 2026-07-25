@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,4 +34,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     boolean existsByParentId(Long parentId);
 
     long countByArticleIdAndDeletedAtIsNull(Long articleId);
+
+    @Query("SELECT comment.article.id AS articleId, COUNT(comment) AS commentCount "
+            + "FROM Comment comment "
+            + "WHERE comment.article.id IN :articleIds "
+            + "AND comment.deletedAt IS NULL "
+            + "GROUP BY comment.article.id")
+    List<CommentCount> countByArticleIds(@Param("articleIds") Collection<Long> articleIds);
+
+    interface CommentCount {
+
+        Long getArticleId();
+
+        long getCommentCount();
+    }
 }

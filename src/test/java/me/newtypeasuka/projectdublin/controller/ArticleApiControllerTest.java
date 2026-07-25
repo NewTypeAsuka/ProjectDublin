@@ -233,6 +233,10 @@ class ArticleApiControllerTest {
                 .build());
         articleLikeRepository.save(new ArticleLike(admin, article));
         articleLikeRepository.save(new ArticleLike(member, article));
+        Comment comment = commentRepository.save(
+                new Comment(article, admin, null, "목록의 일반 댓글")
+        );
+        commentRepository.save(new Comment(article, member, comment, "목록의 대댓글"));
 
         mockMvc.perform(put("/api/articles/{id}/pin", article.getId()).with(loginUser(admin)))
                 .andExpect(status().isOk());
@@ -241,7 +245,16 @@ class ArticleApiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("class=\"pinned-corner\"")))
                 .andExpect(content().string(containsString(
-                        "by Admin · 조회수 0 · 좋아요 2")))
+                        "class=\"bi bi-eye\"")))
+                .andExpect(content().string(containsString(
+                        "class=\"bi bi-heart-fill article-card__like-icon\"")))
+                .andExpect(content().string(containsString(
+                        "class=\"article-card__like-count\">2</span>")))
+                .andExpect(content().string(containsString(
+                        "class=\"bi bi-chat-dots\"")))
+                .andExpect(content().string(containsString(
+                        "class=\"article-card__comment-count\">2</span>")))
+                .andExpect(content().string(not(containsString("글 번호"))))
                 .andReturn();
 
         String html = result.getResponse().getContentAsString();

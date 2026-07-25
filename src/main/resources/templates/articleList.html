@@ -172,8 +172,24 @@
             gap: 1rem;
         }
         .article-card__meta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.35rem;
             flex-shrink: 0;
             text-align: right;
+        }
+        .article-card__separator {
+            color: #adb5bd;
+        }
+        .article-card__metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .article-card__like-icon {
+            color: #e03131;
         }
         .article-card-link:hover .article-card,
         .article-card-link:focus .article-card,
@@ -190,6 +206,7 @@
                 gap: 0.25rem;
             }
             .article-card__meta {
+                justify-content: flex-start;
                 padding-left: 1.1rem;
                 text-align: left;
             }
@@ -249,9 +266,40 @@
                         </span>
                         <div class="card-body p-4">
                             <div class="article-card__header text-muted small mb-2">
-                                <div class="article-card__number">글 번호 <span th:text="${item.id}"></span></div>
-                                <div class="article-card__meta"
-                                     th:text="|${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')} by ${item.author} · 조회수 ${item.viewCount} · 좋아요 ${item.likeCount}|"></div>
+                                <div class="article-card__number" th:text="${item.id}"></div>
+                                <div class="article-card__meta">
+                                    <span th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                    <span th:text="|by ${item.author}|"></span>
+                                    <span class="article-card__separator" aria-hidden="true">·</span>
+                                    <span class="article-card__metric" title="조회수">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                        <span class="sr-only">조회수</span>
+                                        <span class="article-card__view-count"
+                                              th:text="${item.viewCount}"></span>
+                                    </span>
+                                    <span class="article-card__separator" aria-hidden="true">·</span>
+                                    <span class="article-card__metric" title="좋아요">
+                                        <i class="bi bi-heart-fill article-card__like-icon"
+                                           aria-hidden="true"></i>
+                                        <span class="sr-only">좋아요</span>
+                                        <span class="article-card__like-count"
+                                              th:text="${item.likeCount}"></span>
+                                    </span>
+                                    <span class="article-card__separator" aria-hidden="true">·</span>
+                                    <span class="article-card__metric" title="댓글">
+                                        <i class="bi bi-chat-dots" aria-hidden="true"></i>
+                                        <span class="sr-only">댓글</span>
+                                        <span class="article-card__comment-count"
+                                              th:text="${item.commentCount}"></span>
+                                    </span>
+                                    <th:block th:if="${item.updatedAt != null
+                                            and item.createdAt != null
+                                            and item.updatedAt.isAfter(item.createdAt)}">
+                                        <span class="article-card__separator"
+                                              aria-hidden="true">·</span>
+                                        <span class="article-card__modified">수정됨</span>
+                                    </th:block>
+                                </div>
                             </div>
                             <div>
                                 <h3 class="h5 mb-2 text-break" th:text="${item.title}"></h3>

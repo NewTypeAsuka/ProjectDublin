@@ -33,13 +33,14 @@ public class BlogViewController {
     @GetMapping("/articles")
     public String getArticles(Model model) {
         List<Article> articleEntities = blogService.findAll();
-        Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(
-                articleEntities.stream().map(Article::getId).toList()
-        );
+        List<Long> articleIds = articleEntities.stream().map(Article::getId).toList();
+        Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(articleIds);
+        Map<Long, Long> commentCounts = commentService.getCommentCounts(articleIds);
         List<ArticleListViewResponse> articles = articleEntities.stream()
                 .map(article -> new ArticleListViewResponse(
                         article,
-                        likeCounts.getOrDefault(article.getId(), 0L)
+                        likeCounts.getOrDefault(article.getId(), 0L),
+                        commentCounts.getOrDefault(article.getId(), 0L)
                 ))
                 .toList();
         model.addAttribute("articles", articles); // 블로그 글 리스트 저장
