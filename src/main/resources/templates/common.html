@@ -34,7 +34,7 @@
             letter-spacing: 0.04em;
         }
 
-        /* 그라데이션 배경 */
+        /* 헤더 그라데이션 배경 */
         .site-header {
             background: linear-gradient(135deg,
                 rgba(230, 243, 255, 1),
@@ -70,5 +70,11 @@
             </a>
         </div>
     </header>
+
+    <footer th:fragment="siteFooter" class="mt-auto bg-white border-top"> <!-- 공통 푸터 -->
+        <div class="container py-3 text-center text-secondary small">
+            &copy; 2026 NewTypeAsuka. All rights reserved.
+        </div>
+    </footer>
 </body>
 </html>
