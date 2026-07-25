@@ -18,7 +18,7 @@ if (googleLoginLink && googleLoginLoading) {
 const loginMessage = document.getElementById('login-message');
 const loginMessages = [
     '구글 계정을 사용하여<br>로그인 해주세요',
-    'NewTypeBlog는<br>구글 계정 정보를 필요로 합니다'
+    'NewTypeBlog 사용에는<br>구글 계정이 필요합니다'
 ];
 let loginMessageIndex = 0;
 

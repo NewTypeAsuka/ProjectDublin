@@ -6,11 +6,11 @@
         <link rel="shortcut icon" href="/favicon.ico?v=1" type="image/x-icon"> <!-- 사이트 공통 favicon -->
     </th:block>
     <style th:fragment="styles">
-        /* NewTypeBlog 헤더 스타일 */
+        /* NewTypeBlog 공통 헤더 스타일 */
         .intro-header__title-link,
         .intro-header__title-link:visited,
         .intro-header__title-link:active {
-            color: #334155;
+            color: rgba(51, 65, 85, 1);
             text-decoration: none;
         }
         .intro-header__title-link {
@@ -21,7 +21,7 @@
         }
         .intro-header__title-link:hover,
         .intro-header__title-link:focus {
-            color: #0369a1;
+            color: rgba(3, 105, 161, 1);
             text-decoration: none;
         }
         .intro-header__title-link:focus-visible {
@@ -37,10 +37,10 @@
         /* 그라데이션 배경 */
         .site-header {
             background: linear-gradient(135deg,
-                #f4f9fc,
-                #e3f0f6,
-                #cfe5f1,
-                #edf6fa
+                rgba(230, 243, 255, 1),
+                rgba(200, 231, 255, 1),
+                rgba(170, 214, 255, 1),
+                rgba(205, 236, 255, 1)
             );
             background-size: 240% 240%;
             animation: headerGradientAnimation 30s ease-in-out infinite;
