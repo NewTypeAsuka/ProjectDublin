@@ -7,8 +7,6 @@
     const commentCount = document.getElementById('comment-count');
     const articleCommentCount = document.getElementById('article-comment-count');
     const commentMessage = document.getElementById('comment-message');
-    const commentMessageText = document.getElementById('comment-message-text');
-    const commentMessageClose = document.getElementById('comment-message-close');
     const commentLoading = document.getElementById('comment-loading');
     const commentList = document.getElementById('comment-list');
     const commentEmpty = document.getElementById('comment-empty');
@@ -21,8 +19,6 @@
         || !commentCount
         || !articleCommentCount
         || !commentMessage
-        || !commentMessageText
-        || !commentMessageClose
         || !commentLoading
         || !commentList
         || !commentEmpty) {
@@ -35,7 +31,6 @@
     commentContent.addEventListener('input', function () {
         updateLengthCounter(commentContent, commentLength);
     });
-    commentMessageClose.addEventListener('click', hideMessage);
 
     commentForm.addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -323,15 +318,9 @@
     }
 
     function showMessage(message, error) {
-        commentMessageText.textContent = message;
+        commentMessage.textContent = message;
         commentMessage.classList.remove('d-none', 'alert-danger', 'alert-success');
         commentMessage.classList.add(error ? 'alert-danger' : 'alert-success');
-    }
-
-    function hideMessage() {
-        commentMessage.classList.add('d-none');
-        commentMessage.classList.remove('alert-danger', 'alert-success');
-        commentMessageText.textContent = '';
     }
 
     async function request(url, options = {}) {

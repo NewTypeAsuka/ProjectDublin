@@ -1,7 +1,4 @@
 const deleteButton = document.getElementById('delete-btn'); // 글 삭제 버튼
-const deleteDialog = document.getElementById('article-delete-dialog');
-const deleteCancelButton = document.getElementById('article-delete-cancel');
-const deleteConfirmButton = document.getElementById('article-delete-confirm');
 const modifyButton = document.getElementById('modify-btn'); // 글 수정 버튼
 const createButton = document.getElementById('create-btn'); // 글 등록 버튼
 const titleInput = document.getElementById('title');
@@ -17,77 +14,19 @@ if (titleInput && titleLength) {
 
 // 삭제 버튼 클릭
 if (deleteButton) {
-    const deleteArticle = () => {
+    deleteButton.addEventListener('click', () => {
+        if (!window.confirm('정말 삭제하시겠습니까?')) {
+            return;
+        }
+
         const id = document.getElementById('article-id').value;
         httpRequest('DELETE', `/api/articles/${id}`, null, () => {
             alert('삭제가 완료되었습니다');
             location.replace('/articles');
         }, () => {
-            if (deleteCancelButton && deleteConfirmButton) {
-                deleteCancelButton.disabled = false;
-                deleteConfirmButton.disabled = false;
-            }
             alert('삭제에 실패했습니다');
         });
-    };
-
-    if (deleteDialog && deleteCancelButton && deleteConfirmButton) {
-        let previousFocus = null;
-
-        const closeDeleteDialog = () => {
-            deleteDialog.classList.add('d-none');
-            deleteDialog.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('article-delete-dialog-open');
-            previousFocus?.focus();
-        };
-
-        const openDeleteDialog = () => {
-            previousFocus = document.activeElement;
-            deleteDialog.classList.remove('d-none');
-            deleteDialog.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('article-delete-dialog-open');
-            deleteCancelButton.focus();
-        };
-
-        deleteButton.addEventListener('click', openDeleteDialog);
-        deleteCancelButton.addEventListener('click', closeDeleteDialog);
-        deleteConfirmButton.addEventListener('click', () => {
-            deleteCancelButton.disabled = true;
-            deleteConfirmButton.disabled = true;
-            deleteArticle();
-        });
-        deleteDialog.addEventListener('click', event => {
-            if (event.target === deleteDialog) {
-                closeDeleteDialog();
-            }
-        });
-        document.addEventListener('keydown', event => {
-            if (deleteDialog.classList.contains('d-none')) {
-                return;
-            }
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                closeDeleteDialog();
-                return;
-            }
-            if (event.key !== 'Tab') {
-                return;
-            }
-            if (event.shiftKey && document.activeElement === deleteCancelButton) {
-                event.preventDefault();
-                deleteConfirmButton.focus();
-            } else if (!event.shiftKey && document.activeElement === deleteConfirmButton) {
-                event.preventDefault();
-                deleteCancelButton.focus();
-            }
-        });
-    } else {
-        deleteButton.addEventListener('click', () => {
-            if (window.confirm('정말 삭제하시겠습니까?')) {
-                deleteArticle();
-            }
-        });
-    }
+    });
 }
 
 // 수정 버튼 클릭

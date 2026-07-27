@@ -141,31 +141,6 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
-        .article-delete-dialog {
-            position: fixed;
-            inset: 0;
-            z-index: 1060;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            background-color: rgba(15, 23, 42, 0.55);
-        }
-        .article-delete-dialog__content {
-            width: min(100%, 24rem);
-            padding: 1.5rem;
-            border-radius: 0.8rem;
-            background-color: #ffffff;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
-        }
-        .article-delete-dialog__actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-        body.article-delete-dialog-open {
-            overflow: hidden;
-        }
         .article-comments__textarea {
             min-height: 7rem;
             resize: vertical;
@@ -355,29 +330,6 @@
                     </div>
                 </section>
 
-                <div id="article-delete-dialog"
-                     class="article-delete-dialog d-none"
-                     role="dialog"
-                     aria-modal="true"
-                     aria-hidden="true"
-                     aria-labelledby="article-delete-title"
-                     aria-describedby="article-delete-description">
-                    <div class="article-delete-dialog__content" role="document">
-                        <h2 id="article-delete-title" class="h5 mb-2">정말 삭제하시겠습니까?</h2>
-                        <p id="article-delete-description" class="mb-4 text-secondary">
-                            삭제한 글은 복구할 수 없습니다.
-                        </p>
-                        <div class="article-delete-dialog__actions">
-                            <button type="button"
-                                    id="article-delete-cancel"
-                                    class="btn btn-outline-secondary btn-sm">취소</button>
-                            <button type="button"
-                                    id="article-delete-confirm"
-                                    class="btn btn-danger btn-sm">삭제</button>
-                        </div>
-                    </div>
-                </div>
-
                 <section class="card border-0 shadow-sm mt-4 article-comments"
                          id="article-comments"
                          aria-labelledby="comment-heading">
@@ -406,17 +358,9 @@
                         </form>
 
                         <div id="comment-message"
-                             class="alert alert-dismissible d-none mt-3 mb-0"
+                             class="alert d-none mt-3 mb-0"
                              role="status"
-                             aria-live="polite">
-                            <span id="comment-message-text"></span>
-                            <button type="button"
-                                    id="comment-message-close"
-                                    class="close"
-                                    aria-label="알림 닫기">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
+                             aria-live="polite"></div>
                         <div id="comment-loading"
                              class="py-4 text-center text-muted">댓글을 불러오는 중입니다...</div>
                         <div id="comment-list" class="comment-list d-none"></div>

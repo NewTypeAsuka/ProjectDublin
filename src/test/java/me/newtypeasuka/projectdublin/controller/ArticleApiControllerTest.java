@@ -334,10 +334,6 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(containsString("bi-pin-angle-fill")))
                 .andExpect(content().string(containsString(
                         "id=\"pin-label\">해제</span>")))
-                .andExpect(content().string(containsString(
-                        "id=\"article-delete-dialog\"")))
-                .andExpect(content().string(containsString(
-                        "id=\"comment-message-close\"")))
                 .andExpect(content().string(containsString("id=\"pinned-corner\"")));
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(member)))
