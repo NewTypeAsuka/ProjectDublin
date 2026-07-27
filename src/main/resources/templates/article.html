@@ -89,7 +89,9 @@
         .article-pin__button {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.45rem;
+            min-width: 6.5rem;
             padding: 0.55rem 0.9rem;
             border: 1px solid #dee2e6;
             border-radius: 999px;
@@ -114,6 +116,10 @@
             opacity: 0.65;
             transform: none;
         }
+        .article-pin__icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
         .article-detail-card {
             position: relative;
             overflow: hidden;
@@ -127,6 +133,38 @@
             height: 0;
             border-top: 2.75rem solid #ffc107;
             border-right: 2.75rem solid transparent;
+        }
+        .article-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .article-delete-dialog {
+            position: fixed;
+            inset: 0;
+            z-index: 1060;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: rgba(15, 23, 42, 0.55);
+        }
+        .article-delete-dialog__content {
+            width: min(100%, 24rem);
+            padding: 1.5rem;
+            border-radius: 0.8rem;
+            background-color: #ffffff;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+        }
+        .article-delete-dialog__actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        body.article-delete-dialog-open {
+            overflow: hidden;
         }
         .article-comments__textarea {
             min-height: 7rem;
@@ -219,7 +257,9 @@
     <main class="container flex-fill py-4 py-md-5">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9">
-                <div class="card border-0 shadow-sm article-detail-card">
+                <section class="card border-0 shadow-sm article-detail-card"
+                         id="article-detail"
+                         aria-labelledby="article-title">
                     <span id="pinned-corner" class="pinned-corner"
                           th:classappend="${article.pinned} ? '' : ' d-none'">
                         <span class="sr-only">고정 게시글</span>
@@ -270,7 +310,9 @@
 
                         <article>
                             <header class="border-bottom pb-3 mb-4">
-                                <h1 class="h3 mb-0 text-break" th:text="${article.title}"></h1>
+                                <h1 id="article-title"
+                                    class="h3 mb-0 text-break"
+                                    th:text="${article.title}"></h1>
                             </header>
                             <section class="mb-4">
                                 <div class="mb-0 text-break article-content" th:utext="${article.content}"></div>
@@ -281,7 +323,9 @@
                                         aria-label="좋아요"
                                         aria-pressed="false"
                                         disabled>
-                                    <span id="like-icon" class="article-like__icon" aria-hidden="true">♡</span>
+                                    <i id="like-icon"
+                                       class="bi bi-heart article-like__icon"
+                                       aria-hidden="true"></i>
                                     <span>좋아요</span>
                                     <span id="like-count" class="article-like__count">0</span>
                                 </button>
@@ -289,21 +333,48 @@
                                         th:if="${isAdmin}"
                                         class="article-pin__button"
                                         th:classappend="${article.pinned} ? ' is-pinned'"
-                                        th:attr="data-pinned=${article.pinned},aria-pressed=${article.pinned}"
-                                        aria-label="글 고정">
-                                    <span aria-hidden="true">📌</span>
+                                        th:attr="data-pinned=${article.pinned},
+                                                 aria-pressed=${article.pinned},
+                                                 aria-label=${article.pinned} ? '글 고정 해제' : '글 고정'">
+                                    <i id="pin-icon"
+                                       class="bi article-pin__icon"
+                                       th:classappend="${article.pinned} ? ' bi-pin-angle-fill' : ' bi-pin-angle'"
+                                       aria-hidden="true"></i>
                                     <span id="pin-label"
-                                          th:text="${article.pinned} ? '고정 해제' : '글 고정'"></span>
+                                          th:text="${article.pinned} ? '해제' : '고정'"></span>
                                 </button>
                             </div>
-                            <div class="d-flex flex-wrap">
+                            <div class="article-actions">
                                 <button type="button" id="edit-btn"
                                         th:onclick="|location.href='@{/new-article?id={articleId}(articleId=${article.id})}'|"
-                                        class="btn btn-primary btn-sm mr-2 mb-2">수정</button>
+                                        class="btn btn-primary btn-sm">수정</button>
                                 <button type="button" id="delete-btn"
-                                        class="btn btn-outline-secondary btn-sm mb-2">삭제</button>
+                                        class="btn btn-outline-secondary btn-sm">삭제</button>
                             </div>
                         </article>
+                    </div>
+                </section>
+
+                <div id="article-delete-dialog"
+                     class="article-delete-dialog d-none"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-hidden="true"
+                     aria-labelledby="article-delete-title"
+                     aria-describedby="article-delete-description">
+                    <div class="article-delete-dialog__content" role="document">
+                        <h2 id="article-delete-title" class="h5 mb-2">정말 삭제하시겠습니까?</h2>
+                        <p id="article-delete-description" class="mb-4 text-secondary">
+                            삭제한 글은 복구할 수 없습니다.
+                        </p>
+                        <div class="article-delete-dialog__actions">
+                            <button type="button"
+                                    id="article-delete-cancel"
+                                    class="btn btn-outline-secondary btn-sm">취소</button>
+                            <button type="button"
+                                    id="article-delete-confirm"
+                                    class="btn btn-danger btn-sm">삭제</button>
+                        </div>
                     </div>
                 </div>
 
@@ -335,9 +406,17 @@
                         </form>
 
                         <div id="comment-message"
-                             class="alert d-none mt-3 mb-0"
+                             class="alert alert-dismissible d-none mt-3 mb-0"
                              role="status"
-                             aria-live="polite"></div>
+                             aria-live="polite">
+                            <span id="comment-message-text"></span>
+                            <button type="button"
+                                    id="comment-message-close"
+                                    class="close"
+                                    aria-label="알림 닫기">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
                         <div id="comment-loading"
                              class="py-4 text-center text-muted">댓글을 불러오는 중입니다...</div>
                         <div id="comment-list" class="comment-list d-none"></div>

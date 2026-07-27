@@ -51,7 +51,8 @@
 
     function render(state) {
         liked = state.liked;
-        likeIcon.textContent = liked ? '♥' : '♡';
+        likeIcon.classList.toggle('bi-heart', !liked);
+        likeIcon.classList.toggle('bi-heart-fill', liked);
         likeCount.textContent = state.likeCount;
         articleLikeCount.textContent = state.likeCount;
         likeButton.classList.toggle('is-liked', liked);

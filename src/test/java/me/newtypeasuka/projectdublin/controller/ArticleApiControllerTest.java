@@ -326,8 +326,18 @@ class ArticleApiControllerTest {
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(admin)))
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "<section class=\"card border-0 shadow-sm article-detail-card\"")))
                 .andExpect(content().string(containsString("id=\"pin-btn\"")))
                 .andExpect(content().string(containsString("data-pinned=\"true\"")))
+                .andExpect(content().string(containsString("id=\"pin-icon\"")))
+                .andExpect(content().string(containsString("bi-pin-angle-fill")))
+                .andExpect(content().string(containsString(
+                        "id=\"pin-label\">해제</span>")))
+                .andExpect(content().string(containsString(
+                        "id=\"article-delete-dialog\"")))
+                .andExpect(content().string(containsString(
+                        "id=\"comment-message-close\"")))
                 .andExpect(content().string(containsString("id=\"pinned-corner\"")));
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(member)))

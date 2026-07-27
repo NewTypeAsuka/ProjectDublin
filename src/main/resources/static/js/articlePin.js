@@ -1,10 +1,11 @@
 (function () {
     const pinButton = document.getElementById('pin-btn');
     const articleId = document.getElementById('article-id')?.value;
+    const pinIcon = document.getElementById('pin-icon');
     const pinLabel = document.getElementById('pin-label');
     const pinnedCorner = document.getElementById('pinned-corner');
 
-    if (!pinButton || !articleId || !pinLabel || !pinnedCorner) {
+    if (!pinButton || !articleId || !pinIcon || !pinLabel || !pinnedCorner) {
         return;
     }
 
@@ -53,7 +54,9 @@
         pinButton.classList.toggle('is-pinned', pinned);
         pinButton.setAttribute('aria-pressed', String(pinned));
         pinButton.setAttribute('aria-label', pinned ? '글 고정 해제' : '글 고정');
-        pinLabel.textContent = pinned ? '고정 해제' : '글 고정';
+        pinIcon.classList.toggle('bi-pin-angle', !pinned);
+        pinIcon.classList.toggle('bi-pin-angle-fill', pinned);
+        pinLabel.textContent = pinned ? '해제' : '고정';
         pinnedCorner.classList.toggle('d-none', !pinned);
     }
 })();

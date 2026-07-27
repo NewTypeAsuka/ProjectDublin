@@ -155,7 +155,11 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"bi bi-heart-fill article-meta__like-icon\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "<h1 class=\"h3 mb-0 text-break\">Updated title</h1>")));
+                        "class=\"bi bi-heart article-like__icon\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "<h1 id=\"article-title\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"h3 mb-0 text-break\">Updated title</h1>")));
 
         mockMvc.perform(get("/articles").with(loginUser()))
                 .andExpect(status().isOk())
