@@ -104,17 +104,16 @@
 
         const author = document.createElement('span');
         author.className = 'comment-item__author';
-        // 관리자 댓글 작성자의 이름 앞에 관리자 표시를 추가
+        author.appendChild(document.createTextNode(comment.commenterNickname));
+        // 관리자 댓글 작성자의 이름 뒤에 관리자 아이콘을 추가
         if (comment.commenterAdmin) {
-            const adminBadge = document.createElement('span');
-            adminBadge.className = 'author-admin-badge';
+            const adminBadge = document.createElement('i');
+            adminBadge.className = 'bi bi-patch-check-fill author-admin-badge';
             adminBadge.setAttribute('role', 'img');
             adminBadge.setAttribute('aria-label', '관리자');
             adminBadge.title = '관리자';
-            adminBadge.textContent = '✅ ';
             author.appendChild(adminBadge);
         }
-        author.appendChild(document.createTextNode(comment.commenterNickname));
 
         const date = document.createElement('time');
         date.className = 'comment-item__date';

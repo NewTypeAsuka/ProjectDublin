@@ -274,7 +274,10 @@ class ArticleApiControllerTest {
         assertThat(adminArticleLink).isNotNull();
         assertThat(memberArticleLink).isNotNull();
         assertThat(adminArticleLink.select(".author-admin-badge")).hasSize(1);
-        assertThat(adminArticleLink.select(".author-admin-badge").text()).isEqualTo("✅");
+        Element adminBadge = adminArticleLink.selectFirst(".author-admin-badge");
+        assertThat(adminBadge).isNotNull();
+        assertThat(adminBadge.classNames()).contains("bi", "bi-patch-check-fill");
+        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getNickname());
         assertThat(memberArticleLink.select(".author-admin-badge")).isEmpty();
     }
 
@@ -305,8 +308,11 @@ class ArticleApiControllerTest {
 
         assertThat(adminArticleDocument.select(".article-meta .author-admin-badge"))
                 .hasSize(1);
-        assertThat(adminArticleDocument.select(".article-meta .author-admin-badge").text())
-                .isEqualTo("✅");
+        Element adminBadge =
+                adminArticleDocument.selectFirst(".article-meta .author-admin-badge");
+        assertThat(adminBadge).isNotNull();
+        assertThat(adminBadge.classNames()).contains("bi", "bi-patch-check-fill");
+        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getNickname());
         assertThat(memberArticleDocument.select(".article-meta .author-admin-badge"))
                 .isEmpty();
     }
