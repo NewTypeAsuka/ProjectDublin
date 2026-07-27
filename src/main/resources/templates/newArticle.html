@@ -13,6 +13,12 @@
         .article-title__counter {
             font-variant-numeric: tabular-nums;
         }
+        .article-title__feedback {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
@@ -39,11 +45,15 @@
                                            placeholder="제목"
                                            id="title"
                                            data-max-length="40"
-                                           aria-describedby="title-length"
+                                           aria-describedby="title-length title-error"
                                            th:value="${article.title}">
-                                    <small id="title-length"
-                                           class="d-block mt-2 text-muted article-title__counter"
-                                           aria-live="polite">0 / 40</small>
+                                    <div class="article-title__feedback mt-2" aria-live="polite">
+                                        <small id="title-length"
+                                               class="text-muted article-title__counter">0 / 40</small>
+                                        <small id="title-error"
+                                               class="d-none text-danger"
+                                               aria-hidden="true">제목은 40자 이내로 작성해주세요</small>
+                                    </div>
                                 </div>
                                 <div class="form-group mb-4">
                                     <label for="content" class="small text-muted">내용</label>
@@ -53,9 +63,9 @@
                                            aria-live="polite"></small>
                                 </div>
                             </section>
-                            <div class="d-flex flex-wrap">
-                                <button th:if="${article.id} != null" type="button" id="modify-btn" class="btn btn-primary btn-sm mr-2 mb-2">수정</button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
-                                <button th:if="${article.id} == null" type="button" id="create-btn" class="btn btn-primary btn-sm mr-2 mb-2">등록</button>
+                            <div class="d-flex flex-wrap justify-content-end">
+                                <button th:if="${article.id} != null" type="button" id="modify-btn" class="btn btn-primary btn-sm mb-2">수정</button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
+                                <button th:if="${article.id} == null" type="button" id="create-btn" class="btn btn-primary btn-sm mb-2">등록</button>
                             </div>
                         </article>
                     </div>

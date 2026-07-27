@@ -1,14 +1,18 @@
-const deleteButton = document.getElementById('delete-btn');
+const deleteButton = document.getElementById('delete-btn'); // 글 삭제 버튼
+const modifyButton = document.getElementById('modify-btn'); // 글 수정 버튼
+const createButton = document.getElementById('create-btn'); // 글 등록 버튼
 const titleInput = document.getElementById('title');
 const titleLength = document.getElementById('title-length');
+const titleError = document.getElementById('title-error');
 const maxTitleLength = Number(titleInput?.dataset.maxLength) || 40;
 
-// 글 작성과 수정 화면에서 제목 글자 수를 실시간으로 표시
+// 글 작성과 수정 화면에서 제목 글자 수를 실시간으로 표시(40자 제한)
 if (titleInput && titleLength) {
     titleInput.addEventListener('input', updateTitleLengthCounter);
     updateTitleLengthCounter();
 }
 
+// 삭제 버튼 클릭
 if (deleteButton) {
     deleteButton.addEventListener('click', () => {
         const id = document.getElementById('article-id').value;
@@ -21,8 +25,7 @@ if (deleteButton) {
     });
 }
 
-const modifyButton = document.getElementById('modify-btn');
-
+// 수정 버튼 클릭
 if (modifyButton) {
     modifyButton.addEventListener('click', () => {
         const id = new URLSearchParams(location.search).get('id');
@@ -40,8 +43,7 @@ if (modifyButton) {
     });
 }
 
-const createButton = document.getElementById('create-btn');
-
+// 등록 버튼 클릭
 if (createButton && document.getElementById('content')) {
     createButton.addEventListener('click', () => {
         const requestBody = createArticleRequestBody();
@@ -79,7 +81,7 @@ function createArticleRequestBody() {
         return null;
     }
     if (countCharacters(title) > maxTitleLength) {
-        alert(`제목은 ${maxTitleLength}자 이하로 작성해주세요`);
+        alert(`제목은 ${maxTitleLength}자 이내로 작성해주세요`);
         return null;
     }
 
@@ -88,9 +90,17 @@ function createArticleRequestBody() {
 
 function updateTitleLengthCounter() {
     const length = countCharacters(titleInput.value);
+    const isOverLimit = length > maxTitleLength;
+
     titleLength.textContent = `${length} / ${maxTitleLength}`;
-    titleLength.classList.toggle('text-danger', length > maxTitleLength);
-    titleLength.classList.toggle('text-muted', length <= maxTitleLength);
+    titleLength.classList.toggle('text-danger', isOverLimit);
+    titleLength.classList.toggle('text-muted', !isOverLimit);
+    titleInput.setAttribute('aria-invalid', String(isOverLimit));
+
+    if (titleError) {
+        titleError.classList.toggle('d-none', !isOverLimit);
+        titleError.setAttribute('aria-hidden', String(!isOverLimit));
+    }
 }
 
 function countCharacters(value) {
