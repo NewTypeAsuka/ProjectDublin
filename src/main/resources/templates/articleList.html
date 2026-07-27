@@ -89,6 +89,15 @@
         .article-card__like-icon {
             color: #e03131;
         }
+        .article-card__title {
+            display: -webkit-box;
+            max-height: 2.8em;
+            overflow: hidden;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
         .article-card-link:hover .article-card,
         .article-card-link:focus .article-card,
         .article-card-link:focus-visible .article-card {
@@ -153,7 +162,8 @@
                                 </div>
                             </div>
                             <div>
-                                <h3 class="h5 mb-2 text-break" th:text="${item.title}"></h3>
+                                <h3 class="h5 mb-2 article-card__title"
+                                    th:text="${item.title}"></h3>
                                 <p class="mb-0 text-secondary text-break" th:text="${item.content}"></p>
                             </div>
                             <div class="article-card__metrics text-muted small mt-3">

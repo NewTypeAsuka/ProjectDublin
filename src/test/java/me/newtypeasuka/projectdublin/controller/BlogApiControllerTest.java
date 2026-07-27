@@ -153,7 +153,9 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("Posted on"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "class=\"bi bi-heart-fill article-meta__like-icon\"")));
+                        "class=\"bi bi-heart-fill article-meta__like-icon\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "<h1 class=\"h3 mb-0 text-break\">Updated title</h1>")));
 
         mockMvc.perform(get("/articles").with(loginUser()))
                 .andExpect(status().isOk())
@@ -161,8 +163,53 @@ class BlogApiControllerTest {
                         "class=\"article-card__modified\">수정됨</span>")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-card__comment-count\">0</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"h5 mb-2 article-card__title\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("글 번호"))));
+    }
+
+    @DisplayName("게시글 제목은 40자까지 허용하고 작성 화면에 글자 수 표시를 제공한다")
+    @Test
+    void limitArticleTitleToFortyCharacters() throws Exception {
+        String validTitle = "가".repeat(40);
+        AddArticleRequest validRequest = new AddArticleRequest(
+                validTitle,
+                "<p>Content</p>"
+        );
+
+        String createResponse = mockMvc.perform(post("/api/articles")
+                        .with(loginUser())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value(validTitle))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long articleId = objectMapper.readTree(createResponse).get("id").asLong();
+
+        UpdateArticleRequest invalidRequest = new UpdateArticleRequest(
+                "가".repeat(41),
+                "<p>Updated content</p>"
+        );
+        mockMvc.perform(put("/api/articles/{id}", articleId)
+                        .with(loginUser())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+
+        assertThat(blogRepository.findById(articleId).orElseThrow().getTitle())
+                .isEqualTo(validTitle);
+
+        mockMvc.perform(get("/new-article").with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "data-max-length=\"40\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"title-length\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "0 / 40")));
     }
 
     @DisplayName("S3 이미지를 게시글과 연결하고 게시글 삭제 후 S3에서도 제거한다")

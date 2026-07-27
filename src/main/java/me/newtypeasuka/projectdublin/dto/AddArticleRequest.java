@@ -1,7 +1,6 @@
 package me.newtypeasuka.projectdublin.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,15 +13,16 @@ import me.newtypeasuka.projectdublin.domain.User;
 public class AddArticleRequest {
 
     @NotBlank
-    @Size(max = 255)
     private String title;
 
     @NotBlank
     private String content;
 
-    public Article toEntity(User author, String sanitizedContent) { // 생성자를 사용해 객체 생성
+    public Article toEntity(User author,
+                            String sanitizedTitle,
+                            String sanitizedContent) { // 생성자를 사용해 객체 생성
         return Article.builder()
-                .title(title)
+                .title(sanitizedTitle)
                 .content(sanitizedContent)
                 .author(author)
                 .build();

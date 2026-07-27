@@ -1,4 +1,13 @@
 const deleteButton = document.getElementById('delete-btn');
+const titleInput = document.getElementById('title');
+const titleLength = document.getElementById('title-length');
+const maxTitleLength = Number(titleInput?.dataset.maxLength) || 40;
+
+// 글 작성과 수정 화면에서 제목 글자 수를 실시간으로 표시
+if (titleInput && titleLength) {
+    titleInput.addEventListener('input', updateTitleLengthCounter);
+    updateTitleLengthCounter();
+}
 
 if (deleteButton) {
     deleteButton.addEventListener('click', () => {
@@ -55,7 +64,7 @@ function createArticleRequestBody() {
         return null;
     }
 
-    const title = document.getElementById('title').value.trim();
+    const title = titleInput.value.trim();
     const content = window.articleEditor
         ? window.articleEditor.getHtml()
         : document.getElementById('content').value;
@@ -69,8 +78,23 @@ function createArticleRequestBody() {
         alert('제목과 내용을 입력해주세요');
         return null;
     }
+    if (countCharacters(title) > maxTitleLength) {
+        alert(`제목은 ${maxTitleLength}자 이하로 작성해주세요`);
+        return null;
+    }
 
     return JSON.stringify({ title, content });
+}
+
+function updateTitleLengthCounter() {
+    const length = countCharacters(titleInput.value);
+    titleLength.textContent = `${length} / ${maxTitleLength}`;
+    titleLength.classList.toggle('text-danger', length > maxTitleLength);
+    titleLength.classList.toggle('text-muted', length <= maxTitleLength);
+}
+
+function countCharacters(value) {
+    return Array.from(value).length;
 }
 
 function httpRequest(method, url, body, success, fail) {

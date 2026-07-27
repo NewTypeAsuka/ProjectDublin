@@ -28,8 +28,11 @@ public class BlogService {
     @Transactional
     public Article save(AddArticleRequest request, String userName) {
         User author = findUserByEmail(userName);
+        String sanitizedTitle = sanitizeTitle(request.getTitle());
         String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
-        Article article = blogRepository.save(request.toEntity(author, sanitizedContent));
+        Article article = blogRepository.save(
+                request.toEntity(author, sanitizedTitle, sanitizedContent)
+        );
         articleImageService.synchronize(article);
         return article;
     }
@@ -73,8 +76,9 @@ public class BlogService {
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 
         authorizeArticleAuthor(article, findCurrentUser());
+        String sanitizedTitle = sanitizeTitle(request.getTitle());
         String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
-        article.update(request.getTitle(), sanitizedContent);
+        article.update(sanitizedTitle, sanitizedContent);
         articleImageService.synchronize(article);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
@@ -112,6 +116,23 @@ public class BlogService {
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("user not found: " + email));
+    }
+
+    // 게시글 제목을 정리하고 최대 40자 제한을 백엔드에서도 검사
+    private String sanitizeTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제목을 입력해주세요");
+        }
+
+        String sanitizedTitle = title.strip();
+        int length = sanitizedTitle.codePointCount(0, sanitizedTitle.length());
+        if (length > Article.MAX_TITLE_LENGTH) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "제목은 40자 이하로 작성해주세요"
+            );
+        }
+        return sanitizedTitle;
     }
 
 }
