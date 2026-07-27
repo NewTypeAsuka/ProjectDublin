@@ -21,14 +21,43 @@
             width: 100%;
             height: auto;
         }
+        .article-detail__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .article-detail__pin-marker {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            color: #ffc107;
+            font-size: 1rem;
+            line-height: 1;
+        }
         .article-meta {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             flex-wrap: wrap;
             gap: 0.35rem;
+            min-width: 0;
+            margin-left: auto;
+            text-align: right;
+        }
+        .article-meta__byline {
+            white-space: nowrap;
         }
         .article-meta__separator {
             color: #adb5bd;
+        }
+        .article-detail__metrics {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            text-align: right;
         }
         .article-meta__metric {
             display: inline-flex;
@@ -119,20 +148,6 @@
         .article-pin__icon {
             font-size: 1.5rem;
             line-height: 1;
-        }
-        .article-detail-card {
-            position: relative;
-            overflow: hidden;
-        }
-        .pinned-corner {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            width: 0;
-            height: 0;
-            border-top: 2.75rem solid #ffc107;
-            border-right: 2.75rem solid transparent;
         }
         .article-actions {
             display: flex;
@@ -232,47 +247,25 @@
     <main class="container flex-fill py-4 py-md-5">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9">
-                <section class="card border-0 shadow-sm article-detail-card"
-                         id="article-detail"
-                         aria-labelledby="article-title">
-                    <span id="pinned-corner" class="pinned-corner"
-                          th:classappend="${article.pinned} ? '' : ' d-none'">
-                        <span class="sr-only">고정 게시글</span>
-                    </span>
+                <section class="card border-0 shadow-sm article-detail-card" id="article-detail" aria-labelledby="article-title"> <!-- 글 영역 -->
                     <div class="card-body p-4 p-md-5">
                         <input type="hidden" id="article-id" th:value="${article.id}">
-                        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4">
-                            <!-- <div class="mb-3 mb-lg-0">
-                                <div class="text-uppercase text-muted small mb-2">Article Detail</div>
-                                <h2 class="h4 mb-0">게시글</h2>
-                            </div> -->
+                        <div class="article-detail__header mb-4">
+                            <span id="article-pinned-marker"
+                                  class="article-detail__pin-marker"
+                                  th:classappend="${article.pinned} ? '' : ' d-none'">
+                                <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
+                                <span class="sr-only">고정 게시글</span>
+                            </span>
                             <div class="text-muted small article-meta">
-                                <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                                <span>by <span th:text="${article.author}"></span><i
-                                        th:if="${article.authorAdmin}"
-                                        class="bi bi-patch-check-fill author-admin-badge"
-                                        role="img"
-                                        aria-label="관리자"
-                                        title="관리자"></i></span>
-                                <span class="article-meta__separator" aria-hidden="true">·</span>
-                                <span class="article-meta__metric" title="조회수">
-                                    <i class="bi bi-eye" aria-hidden="true"></i>
-                                    <span class="sr-only">조회수</span>
-                                    <span id="article-view-count" th:text="${article.viewCount}"></span>
-                                </span>
-                                <span class="article-meta__separator" aria-hidden="true">·</span>
-                                <span class="article-meta__metric" title="좋아요">
-                                    <i class="bi bi-heart-fill article-meta__like-icon"
-                                       aria-hidden="true"></i>
-                                    <span class="sr-only">좋아요</span>
-                                    <span id="article-like-count" th:text="${article.likeCount}"></span>
-                                </span>
-                                <span class="article-meta__separator" aria-hidden="true">·</span>
-                                <span class="article-meta__metric" title="댓글">
-                                    <i class="bi bi-chat-dots" aria-hidden="true"></i>
-                                    <span class="sr-only">댓글</span>
-                                    <span id="article-comment-count"
-                                          th:text="${article.commentCount}"></span>
+                                <span class="article-meta__byline">
+                                    <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                    <span>by <span th:text="${article.author}"></span><i
+                                            th:if="${article.authorAdmin}"
+                                            class="bi bi-patch-check-fill author-admin-badge"
+                                            role="img"
+                                            aria-label="관리자"
+                                            title="관리자"></i></span>
                                 </span>
                                 <th:block th:if="${article.updatedAt != null
                                         and article.createdAt != null
@@ -291,6 +284,27 @@
                             </header>
                             <section class="mb-4">
                                 <div class="mb-0 text-break article-content" th:utext="${article.content}"></div>
+                                <div class="article-detail__metrics text-muted small mt-4">
+                                    <span class="article-meta__metric" title="조회수">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                        <span class="sr-only">조회수</span>
+                                        <span id="article-view-count" th:text="${article.viewCount}"></span>
+                                    </span>
+                                    <span class="article-meta__separator" aria-hidden="true">·</span>
+                                    <span class="article-meta__metric" title="좋아요">
+                                        <i class="bi bi-heart-fill article-meta__like-icon"
+                                           aria-hidden="true"></i>
+                                        <span class="sr-only">좋아요</span>
+                                        <span id="article-like-count" th:text="${article.likeCount}"></span>
+                                    </span>
+                                    <span class="article-meta__separator" aria-hidden="true">·</span>
+                                    <span class="article-meta__metric" title="댓글">
+                                        <i class="bi bi-chat-dots" aria-hidden="true"></i>
+                                        <span class="sr-only">댓글</span>
+                                        <span id="article-comment-count"
+                                              th:text="${article.commentCount}"></span>
+                                    </span>
+                                </div>
                             </section>
                             <div class="article-like border-top pt-4 mb-4">
                                 <button type="button" id="like-btn"
@@ -330,9 +344,7 @@
                     </div>
                 </section>
 
-                <section class="card border-0 shadow-sm mt-4 article-comments"
-                         id="article-comments"
-                         aria-labelledby="comment-heading">
+                <section class="card border-0 shadow-sm mt-4 article-comments" id="article-comments" aria-labelledby="comment-heading"> <!-- 댓글 섹션 -->
                     <div class="card-body p-4 p-md-5">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h2 class="h5 mb-0" id="comment-heading">
@@ -390,7 +402,7 @@
             window.addEventListener('resize', syncStickyNavState);
         }
     </script>
-    <script src="/js/articleLike.js"></script>
+    <script src="/js/articleLike.js?v=2"></script>
     <script src="/js/articlePin.js"></script>
     <script src="/js/articleComment.js"></script>
     <script src="/js/article.js"></script>

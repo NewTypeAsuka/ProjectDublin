@@ -202,7 +202,7 @@ class ArticleApiControllerTest {
                         "id=\"article-comment-count\">2</span>")))
                 .andExpect(content().string(not(containsString("Posted on"))))
                 .andExpect(content().string(containsString(
-                        "src=\"/js/articleLike.js\"")));
+                        "src=\"/js/articleLike.js?v=2\"")));
     }
 
     @DisplayName("관리자만 게시글을 고정하고 해제할 수 있다")
@@ -334,7 +334,8 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(containsString("bi-pin-angle-fill")))
                 .andExpect(content().string(containsString(
                         "id=\"pin-label\">해제</span>")))
-                .andExpect(content().string(containsString("id=\"pinned-corner\"")));
+                .andExpect(content().string(containsString(
+                        "id=\"article-pinned-marker\"")));
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(member)))
                 .andExpect(status().isOk())

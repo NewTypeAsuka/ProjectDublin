@@ -3,9 +3,9 @@
     const articleId = document.getElementById('article-id')?.value;
     const pinIcon = document.getElementById('pin-icon');
     const pinLabel = document.getElementById('pin-label');
-    const pinnedCorner = document.getElementById('pinned-corner');
+    const pinnedMarker = document.getElementById('article-pinned-marker');
 
-    if (!pinButton || !articleId || !pinIcon || !pinLabel || !pinnedCorner) {
+    if (!pinButton || !articleId || !pinIcon || !pinLabel || !pinnedMarker) {
         return;
     }
 
@@ -57,6 +57,6 @@
         pinIcon.classList.toggle('bi-pin-angle', !pinned);
         pinIcon.classList.toggle('bi-pin-angle-fill', pinned);
         pinLabel.textContent = pinned ? '해제' : '고정';
-        pinnedCorner.classList.toggle('d-none', !pinned);
+        pinnedMarker.classList.toggle('d-none', !pinned);
     }
 })();
