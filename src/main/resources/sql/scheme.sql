@@ -112,4 +112,3 @@ select * from article_images;
 select * from comments;
 
 update users set role = 1 where email = 'sangzoon0102@gmail.com' and nickname = '상준';
-update users set nickname = '상준✅' where id = 1;
