@@ -131,7 +131,7 @@ public class CommentService {
                     "삭제된 댓글은 수정할 수 없습니다"
             );
         }
-        if (!isOwner(comment, currentUser)) {
+        if (!isOwner(comment, currentUser) && !currentUser.isAdmin()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -192,7 +192,7 @@ public class CommentService {
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 deleted,
-                !deleted && owner,
+                !deleted && (owner || currentUser.isAdmin()),
                 !deleted && (owner || currentUser.isAdmin()),
                 List.copyOf(replies)
         );

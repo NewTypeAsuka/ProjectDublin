@@ -333,7 +333,7 @@
                                           th:text="${article.pinned} ? '해제' : '고정'"></span>
                                 </button>
                             </div>
-                            <div class="article-actions">
+                            <div class="article-actions" th:if="${canManageArticle}">
                                 <button type="button" id="edit-btn"
                                         th:onclick="|location.href='@{/new-article?id={articleId}(articleId=${article.id})}'|"
                                         class="btn btn-primary btn-sm">수정</button>

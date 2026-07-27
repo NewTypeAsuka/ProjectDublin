@@ -9,7 +9,6 @@ import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -60,28 +59,35 @@ public class BlogService {
 
     // 블로그 글 삭제
     @Transactional
-    public void delete(long id) {
+    public void delete(long id, String email) {
         Article article = blogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 
-        authorizeArticleAuthor(article, findCurrentUser());
+        authorizeArticleManager(article, findUserByEmail(email));
         articleImageService.removeAllForArticle(article.getId());
         blogRepository.delete(article);
     }
 
     // 블로그 글 수정
     @Transactional // 트랜잭션 처리를 위해 @Transactional 어노테이션 사용
-    public Article update(long id, UpdateArticleRequest request) {
+    public Article update(long id, UpdateArticleRequest request, String email) {
         Article article = blogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 
-        authorizeArticleAuthor(article, findCurrentUser());
+        authorizeArticleManager(article, findUserByEmail(email));
         String sanitizedTitle = sanitizeTitle(request.getTitle());
         String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
         article.update(sanitizedTitle, sanitizedContent);
         articleImageService.synchronize(article);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
+    }
+
+    // 작성자 또는 관리자인 경우에만 게시글 수정 화면을 반환
+    public Article findByIdForManagement(Long id, String email) {
+        Article article = findById(id);
+        authorizeArticleManager(article, findUserByEmail(email));
+        return article;
     }
 
     @Transactional
@@ -101,16 +107,20 @@ public class BlogService {
         return findUserByEmail(email).isAdmin();
     }
 
-    // 게시물을 작성한 유저인지 확인
-    private void authorizeArticleAuthor(Article article, User currentUser) {
-        if (!article.getAuthor().getId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("not authorized: " + currentUser.getEmail());
+    public boolean canManageArticle(Article article, String email) {
+        return isArticleManager(article, findUserByEmail(email));
+    }
+
+    // 게시글 작성자 또는 관리자인지 백엔드에서 확인
+    private void authorizeArticleManager(Article article, User currentUser) {
+        if (!isArticleManager(article, currentUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
     }
 
-    private User findCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return findUserByEmail(email);
+    private boolean isArticleManager(Article article, User currentUser) {
+        return currentUser.isAdmin()
+                || article.getAuthor().getId().equals(currentUser.getId());
     }
 
     private User findUserByEmail(String email) {

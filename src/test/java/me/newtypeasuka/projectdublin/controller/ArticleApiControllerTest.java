@@ -318,6 +318,67 @@ class ArticleApiControllerTest {
                 .isEmpty();
     }
 
+    @DisplayName("게시글 작성자와 관리자는 수정·삭제할 수 있고 다른 사용자는 접근할 수 없다")
+    @Test
+    void authorizeArticleManagement() throws Exception {
+        Article memberArticle = blogRepository.save(Article.builder()
+                .author(member)
+                .title("Member article")
+                .content("<p>Member content</p>")
+                .build());
+
+        mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(member)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"edit-btn\""))))
+                .andExpect(content().string(not(containsString("id=\"delete-btn\""))));
+
+        mockMvc.perform(get("/articles/{id}", memberArticle.getId()).with(loginUser(member)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"edit-btn\"")))
+                .andExpect(content().string(containsString("id=\"delete-btn\"")));
+
+        mockMvc.perform(get("/articles/{id}", memberArticle.getId()).with(loginUser(admin)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"edit-btn\"")))
+                .andExpect(content().string(containsString("id=\"delete-btn\"")));
+
+        mockMvc.perform(get("/new-article")
+                        .param("id", article.getId().toString())
+                        .with(loginUser(member)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/new-article")
+                        .param("id", memberArticle.getId().toString())
+                        .with(loginUser(admin)))
+                .andExpect(status().isOk());
+
+        String updateBody = objectMapper.writeValueAsString(Map.of(
+                "title", "Managed by admin",
+                "content", "<p>Updated by admin</p>"
+        ));
+        mockMvc.perform(put("/api/articles/{id}", article.getId())
+                        .with(loginUser(member))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(put("/api/articles/{id}", memberArticle.getId())
+                        .with(loginUser(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Managed by admin"));
+
+        mockMvc.perform(delete("/api/articles/{id}", article.getId())
+                        .with(loginUser(member)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/api/articles/{id}", memberArticle.getId())
+                        .with(loginUser(admin)))
+                .andExpect(status().isOk());
+        assertThat(blogRepository.findById(memberArticle.getId())).isEmpty();
+    }
+
     @DisplayName("상세 화면의 고정 버튼은 관리자에게만 표시된다")
     @Test
     void showPinButtonOnlyToAdmin() throws Exception {
@@ -342,7 +403,7 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(not(containsString("id=\"pin-btn\""))));
     }
 
-    @DisplayName("댓글 API에서 댓글과 대댓글을 작성, 수정, 조회하고 관리자가 삭제한다")
+    @DisplayName("댓글 API에서 관리자가 다른 사용자의 댓글을 수정·삭제할 수 있다")
     @Test
     void manageComments() throws Exception {
         String commentsEndpoint = "/api/articles/" + article.getId() + "/comments";
@@ -377,11 +438,18 @@ class ArticleApiControllerTest {
         long replyId = responseId(createdReply);
 
         mockMvc.perform(put(commentsEndpoint + "/{commentId}", commentId)
-                        .with(loginUser(member))
+                        .with(loginUser(admin))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(commentBody("수정된 회원 댓글")))
+                        .content(commentBody("관리자가 수정한 회원 댓글")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("수정된 회원 댓글"));
+                .andExpect(jsonPath("$.content").value("관리자가 수정한 회원 댓글"));
+
+        mockMvc.perform(get(commentsEndpoint).with(loginUser(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].editable").value(true))
+                .andExpect(jsonPath("$[0].deletable").value(true))
+                .andExpect(jsonPath("$[0].replies[0].editable").value(true))
+                .andExpect(jsonPath("$[0].replies[0].deletable").value(true));
 
         mockMvc.perform(get(commentsEndpoint).with(loginUser(member)))
                 .andExpect(status().isOk())
@@ -389,6 +457,8 @@ class ArticleApiControllerTest {
                 .andExpect(jsonPath("$[0].replies[0].id").value(replyId))
                 .andExpect(jsonPath("$[0].commenterAdmin").value(false))
                 .andExpect(jsonPath("$[0].replies[0].commenterAdmin").value(true))
+                .andExpect(jsonPath("$[0].editable").value(true))
+                .andExpect(jsonPath("$[0].replies[0].editable").value(false))
                 .andExpect(jsonPath("$[0].replies[0].content").value("관리자 대댓글"));
 
         mockMvc.perform(delete(commentsEndpoint + "/{commentId}", commentId)

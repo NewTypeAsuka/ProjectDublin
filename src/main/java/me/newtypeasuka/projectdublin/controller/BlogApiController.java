@@ -52,8 +52,9 @@ public class BlogApiController {
 
     // 블로그 글 삭제 API
     @DeleteMapping("/api/articles/{id}")
-    public ResponseEntity<Void> deleteArticle(@PathVariable long id) { // @PathVariable 어노테이션으로 URL 경로에서 id 값을 가져옴
-        blogService.delete(id);
+    public ResponseEntity<Void> deleteArticle(@PathVariable long id,
+                                              Principal principal) { // @PathVariable 어노테이션으로 URL 경로에서 id 값을 가져옴
+        blogService.delete(id, principal.getName());
 
         return ResponseEntity.ok()
                 .build();
@@ -62,8 +63,9 @@ public class BlogApiController {
     // 블로그 글 수정 API
     @PutMapping("/api/articles/{id}")
     public ResponseEntity<ArticleResponse> updateArticle(@PathVariable long id,
-                                                         @Valid @RequestBody UpdateArticleRequest request) {
-        Article updatedArticle = blogService.update(id, request);
+                                                         @Valid @RequestBody UpdateArticleRequest request,
+                                                         Principal principal) {
+        Article updatedArticle = blogService.update(id, request, principal.getName());
 
         return ResponseEntity.ok()
                 .body(new ArticleResponse(updatedArticle));

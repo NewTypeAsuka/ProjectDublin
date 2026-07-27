@@ -76,7 +76,11 @@ class CommentServiceTest {
         assertThat(comments.get(0).content()).isEqualTo("첫 번째 댓글 !*$ 😀");
         assertThat(comments.get(0).createdAt()).isNotNull();
         assertThat(comments.get(0).editable()).isTrue();
+        assertThat(comments.get(0).deletable()).isTrue();
+        assertThat(comments.get(0).replies().get(0).editable()).isFalse();
+        assertThat(comments.get(0).replies().get(0).deletable()).isFalse();
         assertThat(comments.get(1).editable()).isFalse();
+        assertThat(comments.get(1).deletable()).isFalse();
     }
 
     @DisplayName("대댓글에는 추가 답글을 작성할 수 없다")
@@ -157,7 +161,7 @@ class CommentServiceTest {
         assertThat(commentService.getComments(article.getId(), member.getEmail())).isEmpty();
     }
 
-    @DisplayName("작성자만 댓글을 수정하고 작성자 또는 관리자가 삭제할 수 있다")
+    @DisplayName("작성자 또는 관리자는 댓글을 수정·삭제하고 다른 사용자는 접근할 수 없다")
     @Test
     void authorizeUpdateAndDelete() {
         CommentResponse memberComment = createComment(article, member, "회원 댓글");
@@ -187,6 +191,19 @@ class CommentServiceTest {
                 member.getEmail()
         );
         assertThat(updated.content()).isEqualTo("작성자가 수정한 댓글");
+
+        List<CommentResponse> commentsForAdmin =
+                commentService.getComments(article.getId(), admin.getEmail());
+        assertThat(commentsForAdmin.get(0).editable()).isTrue();
+        assertThat(commentsForAdmin.get(0).deletable()).isTrue();
+
+        CommentResponse adminUpdated = commentService.updateComment(
+                article.getId(),
+                memberComment.id(),
+                request("관리자가 수정한 댓글"),
+                admin.getEmail()
+        );
+        assertThat(adminUpdated.content()).isEqualTo("관리자가 수정한 댓글");
 
         commentService.deleteComment(article.getId(), memberComment.id(), admin.getEmail());
         assertThat(commentRepository.existsById(memberComment.id())).isFalse();

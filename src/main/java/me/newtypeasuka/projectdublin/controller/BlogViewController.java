@@ -57,17 +57,24 @@ public class BlogViewController {
                 "article",
                 new ArticleViewResponse(article, likeCount, commentCount)
         );
-        model.addAttribute("isAdmin", blogService.isAdmin(principal.getName()));
+        String email = principal.getName();
+        model.addAttribute("isAdmin", blogService.isAdmin(email));
+        model.addAttribute(
+                "canManageArticle",
+                blogService.canManageArticle(article, email)
+        );
 
         return "article"; // article.html 뷰 이름 반환
     }
 
     @GetMapping("/new-article")
-    public String newArticle(@RequestParam(required = false) Long id, Model model) {
+    public String newArticle(@RequestParam(required = false) Long id,
+                             Model model,
+                             Principal principal) {
         if (id == null) { // id가 없으면 새 글 작성 페이지로 이동
             model.addAttribute("article", new ArticleViewResponse());
         } else {
-            Article article = blogService.findById(id);
+            Article article = blogService.findByIdForManagement(id, principal.getName());
             model.addAttribute("article", new ArticleViewResponse(article));
         }
 
