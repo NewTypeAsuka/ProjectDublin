@@ -60,6 +60,133 @@
                 transition: none;
             }
         }
+
+        /* nav 요소 관련 스타일 */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            transition: background-color 0.22s ease, box-shadow 0.22s ease;
+        }
+        .site-nav.is-stuck {
+            background-color: rgba(108, 117, 125, 0.96) !important;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .site-nav .nav-link {
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+        .site-nav .nav-link:hover,
+        .site-nav .nav-link:focus {
+            transform: translateY(-1px);
+        }
+        .site-nav__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .site-nav__menu {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            gap: 0.15rem;
+        }
+        .site-nav-dropdown {
+            position: relative;
+            margin: 0;
+        }
+        .site-nav-dropdown > summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-width: 2.5rem;
+            height: 2.5rem;
+            padding: 0 0.8rem;
+            border-radius: 0.35rem;
+            color: rgba(255, 255, 255, 0.75);
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            transition: color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+        }
+        .site-nav-dropdown > summary::-webkit-details-marker {
+            display: none;
+        }
+        .site-nav-dropdown > summary:hover,
+        .site-nav-dropdown > summary:focus {
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+            outline: none;
+        }
+        .site-nav-dropdown[open] > summary {
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+        .site-nav-dropdown__icon {
+            display: inline-block;
+            width: 0.6rem;
+            height: 0.6rem;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg) translateY(-1px);
+        }
+        .site-nav-dropdown__menu {
+            position: absolute;
+            top: calc(100% + 0.45rem);
+            left: 0;
+            min-width: 13rem;
+            padding: 0.5rem;
+            border-radius: 0.8rem;
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+            z-index: 1040;
+        }
+        .site-nav-dropdown__item {
+            display: block;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.55rem;
+            font-size: 0.92rem;
+            line-height: 1.35;
+            color: rgba(95, 107, 122, 1);
+            background-color: rgba(248, 249, 250, 1);
+            text-decoration: none;
+        }
+        .site-nav-dropdown__item:hover,
+        .site-nav-dropdown__item:focus {
+            color: rgba(31, 41, 55, 1);
+            background-color: rgba(238, 242, 247, 1);
+            text-decoration: none;
+            outline: none;
+        }
+        .site-nav__actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .site-nav__actions .btn {
+            margin: 0;
+            white-space: nowrap;
+        }
+        @media (min-width: 992px) {
+            .site-nav__inner {
+                max-width: 800px;
+            }
+        }
+        @media (min-width: 1200px) {
+            .site-nav__inner {
+                max-width: 855px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -71,10 +198,32 @@
         </div>
     </header>
 
+    <nav th:fragment="siteNavbar(showCreateButton)" class="navbar navbar-dark bg-secondary py-2 site-nav" id="site-nav"> <!-- 공통 내비게이션 -->
+        <div class="container site-nav__inner">
+            <div class="navbar-nav flex-row site-nav__menu">
+                <details class="site-nav-dropdown">
+                    <summary aria-label="메뉴 열기">
+                        <span>메뉴</span>
+                        <span class="site-nav-dropdown__icon" aria-hidden="true"></span>
+                    </summary>
+                    <div class="site-nav-dropdown__menu">
+                        <a class="site-nav-dropdown__item" href="/">홈</a>
+                        <!-- 추후 다른 기능으로 이동하는 링크 항목 추가 -->
+                    </div>
+                </details>
+            </div>
+            <div class="site-nav__actions">
+                <button th:if="${showCreateButton}" type="button" id="create-btn" th:onclick="|location.href='@{/new-article}'|" 
+                        class="btn btn-primary btn-sm">글쓰기</button> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
+                <button type="button" class="btn btn-outline-light btn-sm" onclick="location.href='/logout'">로그아웃</button>
+            </div>
+        </div>
+    </nav>
+
     <footer th:fragment="siteFooter" class="mt-auto bg-white border-top"> <!-- 공통 푸터 -->
         <div class="container py-3 text-center text-secondary small">
             <a href="https://github.com/NewTypeAsuka/ProjectDublin" class="intro-header__title-link">
-                <img th:src="@{/img/githubIcon.png}" src="/img/githubIcon.png" alt="깃허브" width="15" height="15" style="margin-right: 5px;">
+                <img th:src="@{/img/githubIcon.png}" src="/img/githubIcon.png" alt="github" width="15" height="15" style="margin-right: 5px;">
                 2026 NewTypeAsuka. All rights reserved.
             </a>
         </div>
