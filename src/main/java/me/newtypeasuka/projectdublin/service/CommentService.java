@@ -187,6 +187,7 @@ public class CommentService {
                 comment.getDepth(),
                 comment.getCommenter().getId(),
                 comment.getCommenter().getNickname(),
+                comment.getCommenter().isAdmin(),
                 deleted ? Comment.DELETED_CONTENT : comment.getContent(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),

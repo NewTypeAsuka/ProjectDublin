@@ -16,6 +16,8 @@ public class ArticleViewResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String author;
+    // 게시글 작성자가 관리자인지 화면에 전달
+    private boolean authorAdmin;
     private long viewCount;
     private long likeCount;
     private long commentCount;
@@ -36,6 +38,7 @@ public class ArticleViewResponse {
         this.createdAt = article.getCreatedAt();
         this.updatedAt = article.getUpdatedAt();
         this.author = article.getAuthor().getNickname();
+        this.authorAdmin = article.getAuthor().isAdmin();
         this.viewCount = article.getViewCount();
         this.likeCount = likeCount;
         this.commentCount = commentCount;

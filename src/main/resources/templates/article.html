@@ -228,7 +228,11 @@
                             </div> -->
                             <div class="text-muted small article-meta">
                                 <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                                <span th:text="|by ${article.author}|"></span>
+                                <span>by <span th:if="${article.authorAdmin}"
+                                              class="author-admin-badge"
+                                              role="img"
+                                              aria-label="관리자"
+                                              title="관리자">✅ </span><span th:text="${article.author}"></span></span>
                                 <span class="article-meta__separator" aria-hidden="true">·</span>
                                 <span class="article-meta__metric" title="조회수">
                                     <i class="bi bi-eye" aria-hidden="true"></i>

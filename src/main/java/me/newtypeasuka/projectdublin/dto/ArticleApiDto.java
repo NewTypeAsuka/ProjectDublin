@@ -30,6 +30,8 @@ public final class ArticleApiDto {
             int depth,
             Long commenterId,
             String commenterNickname,
+            // 댓글 작성자가 관리자인지 화면에 전달
+            boolean commenterAdmin,
             String content,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,

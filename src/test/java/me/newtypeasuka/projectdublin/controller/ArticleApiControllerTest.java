@@ -13,6 +13,9 @@ import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.CommentRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.ArticleImageService;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -260,6 +263,52 @@ class ArticleApiControllerTest {
         String html = result.getResponse().getContentAsString();
         assertThat(html.indexOf(article.getTitle()))
                 .isLessThan(html.indexOf(newerArticle.getTitle()));
+
+        Document document = Jsoup.parse(html);
+        Element adminArticleLink = document.selectFirst(
+                "a[href='/articles/" + article.getId() + "']"
+        );
+        Element memberArticleLink = document.selectFirst(
+                "a[href='/articles/" + newerArticle.getId() + "']"
+        );
+        assertThat(adminArticleLink).isNotNull();
+        assertThat(memberArticleLink).isNotNull();
+        assertThat(adminArticleLink.select(".author-admin-badge")).hasSize(1);
+        assertThat(adminArticleLink.select(".author-admin-badge").text()).isEqualTo("✅");
+        assertThat(memberArticleLink.select(".author-admin-badge")).isEmpty();
+    }
+
+    @DisplayName("게시글 상세 화면에서 관리자 작성자에게만 관리자 표시를 붙인다")
+    @Test
+    void showAdminBadgeOnlyForAdminArticleAuthor() throws Exception {
+        Article memberArticle = blogRepository.save(Article.builder()
+                .author(member)
+                .title("Member article")
+                .content("<p>Member content</p>")
+                .build());
+
+        MvcResult adminArticleResult = mockMvc.perform(
+                        get("/articles/{id}", article.getId()).with(loginUser(member))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+        MvcResult memberArticleResult = mockMvc.perform(
+                        get("/articles/{id}", memberArticle.getId()).with(loginUser(member))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document adminArticleDocument =
+                Jsoup.parse(adminArticleResult.getResponse().getContentAsString());
+        Document memberArticleDocument =
+                Jsoup.parse(memberArticleResult.getResponse().getContentAsString());
+
+        assertThat(adminArticleDocument.select(".article-meta .author-admin-badge"))
+                .hasSize(1);
+        assertThat(adminArticleDocument.select(".article-meta .author-admin-badge").text())
+                .isEqualTo("✅");
+        assertThat(memberArticleDocument.select(".article-meta .author-admin-badge"))
+                .isEmpty();
     }
 
     @DisplayName("상세 화면의 고정 버튼은 관리자에게만 표시된다")
@@ -292,6 +341,7 @@ class ArticleApiControllerTest {
                 .andExpect(jsonPath("$.depth").value(1))
                 .andExpect(jsonPath("$.commenterId").value(member.getId()))
                 .andExpect(jsonPath("$.commenterNickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.commenterAdmin").value(false))
                 .andExpect(jsonPath("$.content").value("회원 댓글 !*$ 😀"))
                 .andExpect(jsonPath("$.editable").value(true))
                 .andExpect(jsonPath("$.deletable").value(true))
@@ -308,6 +358,7 @@ class ArticleApiControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.parentId").value(commentId))
                 .andExpect(jsonPath("$.depth").value(2))
+                .andExpect(jsonPath("$.commenterAdmin").value(true))
                 .andReturn();
         long replyId = responseId(createdReply);
 
@@ -322,6 +373,8 @@ class ArticleApiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(commentId))
                 .andExpect(jsonPath("$[0].replies[0].id").value(replyId))
+                .andExpect(jsonPath("$[0].commenterAdmin").value(false))
+                .andExpect(jsonPath("$[0].replies[0].commenterAdmin").value(true))
                 .andExpect(jsonPath("$[0].replies[0].content").value("관리자 대댓글"));
 
         mockMvc.perform(delete(commentsEndpoint + "/{commentId}", commentId)

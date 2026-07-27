@@ -59,7 +59,7 @@ class CommentServiceTest {
         CommentResponse first = createComment(article, member, "첫 번째 댓글 !*$ 😀");
         CommentResponse firstReply = createReply(article, first, other, "첫 번째 답글");
         CommentResponse secondReply = createReply(article, first, member, "두 번째 답글");
-        CommentResponse second = createComment(article, other, "두 번째 댓글");
+        CommentResponse second = createComment(article, admin, "두 번째 댓글");
 
         List<CommentResponse> comments =
                 commentService.getComments(article.getId(), member.getEmail());
@@ -70,6 +70,9 @@ class CommentServiceTest {
                 .containsExactly(firstReply.id(), secondReply.id());
         assertThat(comments.get(0).commenterId()).isEqualTo(member.getId());
         assertThat(comments.get(0).commenterNickname()).isEqualTo(member.getNickname());
+        assertThat(comments.get(0).commenterAdmin()).isFalse();
+        assertThat(comments.get(0).replies()).allMatch(reply -> !reply.commenterAdmin());
+        assertThat(comments.get(1).commenterAdmin()).isTrue();
         assertThat(comments.get(0).content()).isEqualTo("첫 번째 댓글 !*$ 😀");
         assertThat(comments.get(0).createdAt()).isNotNull();
         assertThat(comments.get(0).editable()).isTrue();
