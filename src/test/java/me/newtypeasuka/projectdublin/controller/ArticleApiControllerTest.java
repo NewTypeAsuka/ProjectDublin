@@ -246,7 +246,8 @@ class ArticleApiControllerTest {
 
         MvcResult result = mockMvc.perform(get("/articles").with(loginUser(member)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("class=\"pinned-corner\"")))
+                .andExpect(content().string(containsString(
+                        "class=\"bi bi-pin-angle-fill article-card__pin\"")))
                 .andExpect(content().string(containsString(
                         "class=\"bi bi-eye\"")))
                 .andExpect(content().string(containsString(

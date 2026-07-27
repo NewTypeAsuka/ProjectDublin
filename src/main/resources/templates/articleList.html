@@ -36,18 +36,16 @@
             overflow: hidden;
             transition: transform 0.18s ease, box-shadow 0.18s ease;
         }
-        .pinned-corner {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            width: 0;
-            height: 0;
-            border-top: 2.25rem solid #ffc107;
-            border-right: 2.25rem solid transparent;
+        .article-card__number {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-shrink: 0;
         }
-        .article-card.is-pinned .article-card__number {
-            padding-left: 1.1rem;
+        .article-card__pin {
+            color: #ffc107;
+            font-size: 1rem;
+            line-height: 1;
         }
         .article-card__header {
             display: flex;
@@ -55,17 +53,28 @@
             justify-content: space-between;
             gap: 1rem;
         }
-        .article-card__meta {
+        .article-card__byline {
             display: flex;
             align-items: center;
             justify-content: flex-end;
             flex-wrap: wrap;
             gap: 0.35rem;
-            flex-shrink: 0;
+            min-width: 0;
             text-align: right;
+        }
+        .article-card__byline-main {
+            white-space: nowrap;
         }
         .article-card__separator {
             color: #adb5bd;
+        }
+        .article-card__metrics {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            text-align: right;
         }
         .article-card__metric {
             display: inline-flex;
@@ -91,13 +100,10 @@
         }
         @media (max-width: 575.98px) {
             .article-card__header {
-                flex-direction: column;
-                gap: 0.25rem;
+                gap: 0.75rem;
             }
-            .article-card__meta {
-                justify-content: flex-start;
-                padding-left: 1.1rem;
-                text-align: left;
+            .article-card__byline {
+                justify-content: flex-end;
             }
         }
     </style>
@@ -117,43 +123,25 @@
                 </div>
 
                 <a th:each="item : ${articles}" th:href="@{/articles/{id}(id=${item.id})}" class="article-card-link"> <!-- article 개수만큼 반복 -->
-                    <article class="card border-0 shadow-sm article-card"
-                             th:classappend="${item.pinned} ? ' is-pinned'">
-                        <span th:if="${item.pinned}" class="pinned-corner">
-                            <span class="sr-only">고정 게시글</span>
-                        </span>
+                    <article class="card border-0 shadow-sm article-card">
                         <div class="card-body p-4">
-                            <div class="article-card__header text-muted small mb-2">
-                                <div class="article-card__number" th:text="${item.id}"></div>
-                                <div class="article-card__meta">
-                                    <span th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                                    <span>by <span th:text="${item.author}"></span><i
-                                            th:if="${item.authorAdmin}"
-                                            class="bi bi-patch-check-fill author-admin-badge"
-                                            role="img"
-                                            aria-label="관리자"
-                                            title="관리자"></i></span>
-                                    <span class="article-card__separator" aria-hidden="true">·</span>
-                                    <span class="article-card__metric" title="조회수">
-                                        <i class="bi bi-eye" aria-hidden="true"></i>
-                                        <span class="sr-only">조회수</span>
-                                        <span class="article-card__view-count"
-                                              th:text="${item.viewCount}"></span>
-                                    </span>
-                                    <span class="article-card__separator" aria-hidden="true">·</span>
-                                    <span class="article-card__metric" title="좋아요">
-                                        <i class="bi bi-heart-fill article-card__like-icon"
-                                           aria-hidden="true"></i>
-                                        <span class="sr-only">좋아요</span>
-                                        <span class="article-card__like-count"
-                                              th:text="${item.likeCount}"></span>
-                                    </span>
-                                    <span class="article-card__separator" aria-hidden="true">·</span>
-                                    <span class="article-card__metric" title="댓글">
-                                        <i class="bi bi-chat-dots" aria-hidden="true"></i>
-                                        <span class="sr-only">댓글</span>
-                                        <span class="article-card__comment-count"
-                                              th:text="${item.commentCount}"></span>
+                            <div class="article-card__header text-muted small mb-3">
+                                <div class="article-card__number">
+                                    <i th:if="${item.pinned}"
+                                       class="bi bi-pin-angle-fill article-card__pin"
+                                       aria-hidden="true"></i>
+                                    <span th:if="${item.pinned}" class="sr-only">고정 게시글</span>
+                                    <span th:text="${item.id}"></span>
+                                </div>
+                                <div class="article-card__byline">
+                                    <span class="article-card__byline-main">
+                                        <span th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                        <span>by <span th:text="${item.author}"></span><i
+                                                th:if="${item.authorAdmin}"
+                                                class="bi bi-patch-check-fill author-admin-badge"
+                                                role="img"
+                                                aria-label="관리자"
+                                                title="관리자"></i></span>
                                     </span>
                                     <th:block th:if="${item.updatedAt != null
                                             and item.createdAt != null
@@ -167,6 +155,29 @@
                             <div>
                                 <h3 class="h5 mb-2 text-break" th:text="${item.title}"></h3>
                                 <p class="mb-0 text-secondary text-break" th:text="${item.content}"></p>
+                            </div>
+                            <div class="article-card__metrics text-muted small mt-3">
+                                <span class="article-card__metric" title="조회수">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                    <span class="sr-only">조회수</span>
+                                    <span class="article-card__view-count"
+                                          th:text="${item.viewCount}"></span>
+                                </span>
+                                <span class="article-card__separator" aria-hidden="true">·</span>
+                                <span class="article-card__metric" title="좋아요">
+                                    <i class="bi bi-heart-fill article-card__like-icon"
+                                       aria-hidden="true"></i>
+                                    <span class="sr-only">좋아요</span>
+                                    <span class="article-card__like-count"
+                                          th:text="${item.likeCount}"></span>
+                                </span>
+                                <span class="article-card__separator" aria-hidden="true">·</span>
+                                <span class="article-card__metric" title="댓글">
+                                    <i class="bi bi-chat-dots" aria-hidden="true"></i>
+                                    <span class="sr-only">댓글</span>
+                                    <span class="article-card__comment-count"
+                                          th:text="${item.commentCount}"></span>
+                                </span>
                             </div>
                         </div>
                     </article>
