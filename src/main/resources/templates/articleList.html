@@ -230,18 +230,18 @@
                 </div>
 
                 <p th:if="${#lists.isEmpty(articles)}"
-                    class="text-center text-muted py-5 mb-0">작성된 게시글이 없습니다.</p>
+                    class="text-center text-muted py-5 mb-0">작성된 게시글이 없습니다</p>
 
-                <!-- 게시글 추가 로딩 상태 -->
+                <!-- 게시글 로딩 섹션 -->
                 <div class="article-feed__controls text-center py-3"
-                    th:hidden="${!hasNextArticles}">
+                    th:hidden="${!hasNextArticles}">  <!-- 게시글 추가 로딩 상태 -->
                     <div id="article-feed-loading"
                         class="text-muted small"
                         role="status"
                         hidden>
                         <span class="spinner-border spinner-border-sm mr-2"
                             aria-hidden="true"></span>
-                        게시글을 불러오는 중입니다.
+                        게시글을 불러오는 중입니다
                     </div>
                     <p id="article-feed-message"
                         class="text-muted small mb-2"
@@ -251,7 +251,7 @@
                     <button id="article-feed-load-button"
                         type="button"
                         class="btn btn-outline-secondary btn-sm"
-                        hidden>게시글 더 보기</button>
+                        hidden>게시글 더보기</button>
                 </div>
                 <div id="article-feed-sentinel"
                     class="article-feed__sentinel"

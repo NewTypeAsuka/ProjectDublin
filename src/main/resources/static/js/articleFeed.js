@@ -1,3 +1,6 @@
+// 게시글 무한 스크롤
+// 사용처: articleList.html
+
 // 게시글 목록 무한 스크롤
 document.addEventListener('DOMContentLoaded', () => {
     const feed = document.getElementById('article-feed');
@@ -167,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             observer.disconnect();
         }
         if (feed.children.length > 0) {
-            setMessage('모든 게시글을 불러왔습니다.');
+            setMessage('모든 게시글을 불러왔습니다');
         }
     }
 
@@ -202,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const page = await response.json();
             if (!page || !Array.isArray(page.articles)) {
-                throw new Error('게시글 응답 형식이 올바르지 않습니다.');
+                throw new Error('게시글 응답 형식이 올바르지 않습니다');
             }
 
             const fragment = document.createDocumentFragment();
@@ -222,11 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!hasNext) {
                 finishFeed();
             } else if (!nextCursor) {
-                throw new Error('다음 게시글 커서가 없습니다.');
+                throw new Error('다음 게시글 커서가 없습니다');
             }
         } catch (error) {
             console.error(error);
-            setMessage('게시글을 불러오지 못했습니다. 다시 시도해주세요.');
+            setMessage('게시글을 불러오지 못했습니다. 다시 시도해주세요');
             loadButton.textContent = '다시 시도';
             loadButton.hidden = false;
         } finally {
@@ -238,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (observer) {
                     observer.observe(sentinel);
                 } else {
-                    loadButton.textContent = '게시글 더 보기';
+                    loadButton.textContent = '게시글 더보기';
                     loadButton.hidden = false;
                 }
             }
