@@ -16,6 +16,8 @@ spring:
     properties:
       hibernate:
         format_sql: true # 쿼리를 보기좋게 포맷팅
+        jdbc:
+          time_zone: Asia/Seoul # DB와 통신할 때 KST 시간대 강제 적용
     defer-datasource-initialization: true # 테이블 생성 후에 data.sql 실행
 #  datasource:
 #    url: jdbc:h2:mem:testdb # h2 데이터베이스 url(jdbc:h2:mem:xxx 형식)
