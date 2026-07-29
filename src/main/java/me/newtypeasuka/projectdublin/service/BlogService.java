@@ -8,15 +8,26 @@ import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @RequiredArgsConstructor // lombok의 RequiredArgsConstructor 어노테이션으로 final이 붙거나 @NotNull 어노테이션이 붙은 생성자 자동 생성
 @Service // 스프링의 Service 어노테이션으로 빈 등록
 public class BlogService {
+
+    public static final int DEFAULT_FEED_SIZE = 10;
+    private static final int MAX_FEED_SIZE = 50;
+    private static final String CURSOR_SEPARATOR = "|";
 
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
@@ -39,6 +50,32 @@ public class BlogService {
     // 블로그 글 모두 조회
     public List<Article> findAll() {
         return blogRepository.findAllPinnedFirst();
+    }
+
+    // 최초 게시글 목록은 고정 글 전체와 일반 글 10개만 조회
+    @Transactional
+    public ArticleFeed findInitialFeed() {
+        List<Article> pinnedArticles =
+                blogRepository.findAllByPinnedTrueOrderByCreatedAtDescIdDesc();
+        List<Article> normalCandidates =
+                blogRepository.findAllByPinnedFalseOrderByCreatedAtDescIdDesc(
+                        PageRequest.of(0, DEFAULT_FEED_SIZE + 1)
+                );
+
+        return createArticleFeed(pinnedArticles, normalCandidates, DEFAULT_FEED_SIZE);
+    }
+
+    // 마지막으로 조회한 일반 글 이후의 게시글을 커서 기준으로 조회
+    public ArticleFeed findArticleFeed(String cursor, int size) {
+        int validatedSize = validateFeedSize(size);
+        ArticleCursor articleCursor = decodeCursor(cursor);
+        List<Article> normalCandidates = blogRepository.findUnpinnedAfterCursor(
+                articleCursor.createdAt(),
+                articleCursor.id(),
+                PageRequest.of(0, validatedSize + 1)
+        );
+
+        return createArticleFeed(List.of(), normalCandidates, validatedSize);
     }
 
     // 블로그 글 단건 조회
@@ -128,6 +165,80 @@ public class BlogService {
                 .orElseThrow(() -> new IllegalArgumentException("user not found: " + email));
     }
 
+    private ArticleFeed createArticleFeed(List<Article> pinnedArticles,
+                                          List<Article> normalCandidates,
+                                          int size) {
+        boolean hasNext = normalCandidates.size() > size;
+        List<Article> normalArticles = List.copyOf(
+                normalCandidates.subList(0, Math.min(size, normalCandidates.size()))
+        );
+        List<Article> articles = new ArrayList<>(
+                pinnedArticles.size() + normalArticles.size()
+        );
+        articles.addAll(pinnedArticles);
+        articles.addAll(normalArticles);
+
+        String nextCursor = hasNext && !normalArticles.isEmpty()
+                ? encodeCursor(normalArticles.get(normalArticles.size() - 1))
+                : null;
+        return new ArticleFeed(List.copyOf(articles), nextCursor, hasNext);
+    }
+
+    private int validateFeedSize(int size) {
+        if (size < 1 || size > MAX_FEED_SIZE) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "게시글은 한 번에 1개 이상 50개 이하로 조회할 수 있습니다"
+            );
+        }
+        return size;
+    }
+
+    private String encodeCursor(Article article) {
+        String value = article.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                + CURSOR_SEPARATOR
+                + article.getId();
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private ArticleCursor decodeCursor(String cursor) {
+        if (cursor == null || cursor.isBlank()) {
+            throw invalidCursor();
+        }
+
+        try {
+            String decoded = new String(
+                    Base64.getUrlDecoder().decode(cursor),
+                    StandardCharsets.UTF_8
+            );
+            int separatorIndex = decoded.lastIndexOf(CURSOR_SEPARATOR);
+            if (separatorIndex <= 0 || separatorIndex == decoded.length() - 1) {
+                throw invalidCursor();
+            }
+
+            LocalDateTime createdAt = LocalDateTime.parse(
+                    decoded.substring(0, separatorIndex),
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            );
+            long id = Long.parseLong(decoded.substring(separatorIndex + 1));
+            if (id <= 0) {
+                throw invalidCursor();
+            }
+            return new ArticleCursor(createdAt, id);
+        } catch (IllegalArgumentException | DateTimeParseException exception) {
+            throw invalidCursor();
+        }
+    }
+
+    private ResponseStatusException invalidCursor() {
+        return new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "유효하지 않은 게시글 커서입니다"
+        );
+    }
+
     // 게시글 제목을 정리하고 최대 40자 제한을 백엔드에서도 검사
     private String sanitizeTitle(String title) {
         if (title == null || title.isBlank()) {
@@ -143,6 +254,16 @@ public class BlogService {
             );
         }
         return sanitizedTitle;
+    }
+
+    public record ArticleFeed(
+            List<Article> articles,
+            String nextCursor,
+            boolean hasNext
+    ) {
+    }
+
+    private record ArticleCursor(LocalDateTime createdAt, long id) {
     }
 
 }

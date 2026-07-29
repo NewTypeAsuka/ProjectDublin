@@ -32,7 +32,8 @@ public class BlogViewController {
 
     @GetMapping("/articles")
     public String getArticles(Model model) {
-        List<Article> articleEntities = blogService.findAll();
+        BlogService.ArticleFeed articleFeed = blogService.findInitialFeed();
+        List<Article> articleEntities = articleFeed.articles();
         List<Long> articleIds = articleEntities.stream().map(Article::getId).toList();
         Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(articleIds);
         Map<Long, Long> commentCounts = commentService.getCommentCounts(articleIds);
@@ -44,6 +45,8 @@ public class BlogViewController {
                 ))
                 .toList();
         model.addAttribute("articles", articles); // 블로그 글 리스트 저장
+        model.addAttribute("nextCursor", articleFeed.nextCursor());
+        model.addAttribute("hasNextArticles", articleFeed.hasNext());
 
         return "articleList"; // articleList.html 뷰 이름 반환
     }

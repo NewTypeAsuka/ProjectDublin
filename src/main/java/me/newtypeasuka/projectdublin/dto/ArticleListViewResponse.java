@@ -5,6 +5,7 @@ import me.newtypeasuka.projectdublin.domain.Article;
 import org.jsoup.Jsoup;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class ArticleListViewResponse {
@@ -47,5 +48,12 @@ public class ArticleListViewResponse {
     private String createPreview(String html) {
         String text = Jsoup.parseBodyFragment(html).text();
         return text.length() <= 200 ? text : text.substring(0, 200) + "...";
+    }
+
+    public record FeedResponse(
+            List<ArticleListViewResponse> articles,
+            String nextCursor,
+            boolean hasNext
+    ) {
     }
 }

@@ -4,21 +4,27 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
+import me.newtypeasuka.projectdublin.dto.ArticleListViewResponse;
 import me.newtypeasuka.projectdublin.dto.ArticleResponse;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
+import me.newtypeasuka.projectdublin.service.ArticleLikeService;
 import me.newtypeasuka.projectdublin.service.BlogService;
+import me.newtypeasuka.projectdublin.service.CommentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController // 스프링의 RestController 어노테이션으로 REST API 컨트롤러 빈 등록(json 형태로 반환)
 public class BlogApiController {
 
     private final BlogService blogService;
+    private final ArticleLikeService articleLikeService;
+    private final CommentService commentService;
 
     // 블로그 글 작성 API
     @PostMapping("/api/articles")
@@ -39,6 +45,32 @@ public class BlogApiController {
 
         return ResponseEntity.ok()
                 .body(articles);
+    }
+
+    // 무한 스크롤에서 커서 이후의 일반 게시글을 10개씩 조회
+    @GetMapping("/api/articles/feed")
+    public ResponseEntity<ArticleListViewResponse.FeedResponse> findArticleFeed(
+            @RequestParam String cursor,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        BlogService.ArticleFeed articleFeed = blogService.findArticleFeed(cursor, size);
+        List<Article> articleEntities = articleFeed.articles();
+        List<Long> articleIds = articleEntities.stream().map(Article::getId).toList();
+        Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(articleIds);
+        Map<Long, Long> commentCounts = commentService.getCommentCounts(articleIds);
+        List<ArticleListViewResponse> articles = articleEntities.stream()
+                .map(article -> new ArticleListViewResponse(
+                        article,
+                        likeCounts.getOrDefault(article.getId(), 0L),
+                        commentCounts.getOrDefault(article.getId(), 0L)
+                ))
+                .toList();
+
+        return ResponseEntity.ok(new ArticleListViewResponse.FeedResponse(
+                articles,
+                articleFeed.nextCursor(),
+                articleFeed.hasNext()
+        ));
     }
 
     // 블로그 글 단건 조회 API

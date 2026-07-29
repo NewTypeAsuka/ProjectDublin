@@ -117,6 +117,15 @@
             -webkit-line-clamp: 2;
         }
 
+        /* 게시글 추가 로딩 상태 */
+        .article-feed__controls {
+            min-height: 3.5rem;
+        }
+        .article-feed__sentinel {
+            width: 100%;
+            height: 1px;
+        }
+
         /* 모바일 게시글 카드 작성 정보 */
         @media (max-width: 575.98px) {
             .article-card__header {
@@ -145,75 +154,108 @@
                 </div>
 
                 <!-- 게시글 카드 섹션 -->
-                <a th:each="item : ${articles}"
-                    th:href="@{/articles/{id}(id=${item.id})}"
-                    class="article-card-link"> <!-- 게시글 카드 링크와 호버 효과 -->
-                    <article class="card border-0 shadow-sm article-card">
-                        <div class="card-body p-4">
+                <div id="article-feed"
+                    th:attr="data-next-cursor=${nextCursor},
+                        data-has-next=${hasNextArticles}">
+                    <a th:each="item : ${articles}"
+                        th:href="@{/articles/{id}(id=${item.id})}"
+                        class="article-card-link"> <!-- 게시글 카드 링크와 호버 효과 -->
+                        <article class="card border-0 shadow-sm article-card">
+                            <div class="card-body p-4">
 
-                            <!-- 게시글 카드 1단 -->
-                            <div class="article-card__header text-muted small mb-3"> <!-- 게시글 작성 일시와 작성자 정보 -->
-                                <div class="article-card__number"> <!-- 게시글 식별자와 고정 표시 -->
-                                    <i th:if="${item.pinned}"
-                                        class="bi bi-pin-angle-fill article-card__pin"
-                                        aria-hidden="true"></i>
-                                    <span th:if="${item.pinned}" class="sr-only">고정 게시글</span>
-                                    <span th:text="${item.id}"></span>
+                                <!-- 게시글 카드 1단 -->
+                                <div class="article-card__header text-muted small mb-3"> <!-- 게시글 작성 일시와 작성자 정보 -->
+                                    <div class="article-card__number"> <!-- 게시글 식별자와 고정 표시 -->
+                                        <i th:if="${item.pinned}"
+                                            class="bi bi-pin-angle-fill article-card__pin"
+                                            aria-hidden="true"></i>
+                                        <span th:if="${item.pinned}" class="sr-only">고정 게시글</span>
+                                        <span th:text="${item.id}"></span>
+                                    </div>
+                                    <div class="article-card__byline">
+                                        <span class="article-card__byline-main">
+                                            <span th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                            <span>by <span th:text="${item.author}"></span><i
+                                                    th:if="${item.authorAdmin}"
+                                                    class="bi bi-patch-check-fill author-admin-badge"
+                                                    role="img"
+                                                    aria-label="관리자"
+                                                    title="관리자"></i></span>
+                                        </span>
+                                        <th:block th:if="${item.updatedAt != null
+                                                and item.createdAt != null
+                                                and item.updatedAt.isAfter(item.createdAt)}">
+                                            <span class="article-card__separator"
+                                                    aria-hidden="true">·</span>
+                                            <span class="article-card__modified">수정됨</span>
+                                        </th:block>
+                                    </div>
                                 </div>
-                                <div class="article-card__byline">
-                                    <span class="article-card__byline-main">
-                                        <span th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                                        <span>by <span th:text="${item.author}"></span><i
-                                                th:if="${item.authorAdmin}"
-                                                class="bi bi-patch-check-fill author-admin-badge"
-                                                role="img"
-                                                aria-label="관리자"
-                                                title="관리자"></i></span>
-                                    </span>
-                                    <th:block th:if="${item.updatedAt != null
-                                            and item.createdAt != null
-                                            and item.updatedAt.isAfter(item.createdAt)}">
-                                        <span class="article-card__separator"
-                                                aria-hidden="true">·</span>
-                                        <span class="article-card__modified">수정됨</span>
-                                    </th:block>
+
+                                <!-- 게시글 카드 2단 -->
+                                <div>
+                                    <h3 class="h5 mb-2 article-card__title"
+                                        th:text="${item.title}"></h3> <!-- 게시글 제목 두 줄 말줄임 -->
+                                    <p class="mb-0 text-secondary text-break"
+                                        th:text="${item.content}"></p>
                                 </div>
-                            </div>
 
-                            <!-- 게시글 카드 2단 -->
-                            <div>
-                                <h3 class="h5 mb-2 article-card__title"
-                                    th:text="${item.title}"></h3> <!-- 게시글 제목 두 줄 말줄임 -->
-                                <p class="mb-0 text-secondary text-break" th:text="${item.content}"></p>
-                            </div>
-
-                            <!-- 게시글 카드 3단 -->
-                            <div class="article-card__metrics text-muted small mt-3"> <!-- 게시글 조회수·좋아요·댓글 지표 -->
-                                <span class="article-card__metric" title="조회수">
-                                    <i class="bi bi-eye" aria-hidden="true"></i>
-                                    <span class="sr-only">조회수</span>
-                                    <span class="article-card__view-count"
+                                <!-- 게시글 카드 3단 -->
+                                <div class="article-card__metrics text-muted small mt-3"> <!-- 게시글 조회수·좋아요·댓글 지표 -->
+                                    <span class="article-card__metric" title="조회수">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                        <span class="sr-only">조회수</span>
+                                        <span class="article-card__view-count"
                                             th:text="${item.viewCount}"></span>
-                                </span>
-                                <span class="article-card__separator" aria-hidden="true">·</span>
-                                <span class="article-card__metric" title="좋아요">
-                                    <i class="bi bi-heart-fill article-card__like-icon"
-                                        aria-hidden="true"></i>
-                                    <span class="sr-only">좋아요</span>
-                                    <span class="article-card__like-count"
+                                    </span>
+                                    <span class="article-card__separator" aria-hidden="true">·</span>
+                                    <span class="article-card__metric" title="좋아요">
+                                        <i class="bi bi-heart-fill article-card__like-icon"
+                                            aria-hidden="true"></i>
+                                        <span class="sr-only">좋아요</span>
+                                        <span class="article-card__like-count"
                                             th:text="${item.likeCount}"></span>
-                                </span>
-                                <span class="article-card__separator" aria-hidden="true">·</span>
-                                <span class="article-card__metric" title="댓글">
-                                    <i class="bi bi-chat-dots" aria-hidden="true"></i>
-                                    <span class="sr-only">댓글</span>
-                                    <span class="article-card__comment-count"
+                                    </span>
+                                    <span class="article-card__separator" aria-hidden="true">·</span>
+                                    <span class="article-card__metric" title="댓글">
+                                        <i class="bi bi-chat-dots" aria-hidden="true"></i>
+                                        <span class="sr-only">댓글</span>
+                                        <span class="article-card__comment-count"
                                             th:text="${item.commentCount}"></span>
-                                </span>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
-                </a>
+                        </article>
+                    </a>
+                </div>
+
+                <p th:if="${#lists.isEmpty(articles)}"
+                    class="text-center text-muted py-5 mb-0">작성된 게시글이 없습니다.</p>
+
+                <!-- 게시글 추가 로딩 상태 -->
+                <div class="article-feed__controls text-center py-3"
+                    th:hidden="${!hasNextArticles}">
+                    <div id="article-feed-loading"
+                        class="text-muted small"
+                        role="status"
+                        hidden>
+                        <span class="spinner-border spinner-border-sm mr-2"
+                            aria-hidden="true"></span>
+                        게시글을 불러오는 중입니다.
+                    </div>
+                    <p id="article-feed-message"
+                        class="text-muted small mb-2"
+                        role="status"
+                        aria-live="polite"
+                        hidden></p>
+                    <button id="article-feed-load-button"
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        hidden>게시글 더 보기</button>
+                </div>
+                <div id="article-feed-sentinel"
+                    class="article-feed__sentinel"
+                    aria-hidden="true"></div>
             </div>
         </div>
     </main>
@@ -222,5 +264,6 @@
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <script src="/js/siteNavigation.js"></script> <!-- 공통 내비게이션 고정 -->
+    <script src="/js/articleFeed.js"></script> <!-- 게시글 무한 스크롤 -->
 </body>
 </html>

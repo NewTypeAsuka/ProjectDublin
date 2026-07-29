@@ -1,9 +1,11 @@
 package me.newtypeasuka.projectdublin.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
+import me.newtypeasuka.projectdublin.dto.ArticleListViewResponse;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
@@ -27,6 +29,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -302,6 +306,132 @@ class BlogApiControllerTest {
 
         assertThat(blogRepository.findById(article.getId()).orElseThrow().getViewCount())
                 .isEqualTo(3);
+    }
+
+    @DisplayName("최초 목록은 고정 글과 일반 글 10개를 보여주고 이후 일반 글을 커서로 조회한다")
+    @Test
+    void loadArticleFeedByCursor() throws Exception {
+        List<Article> normalArticles = new ArrayList<>();
+        for (int number = 1; number <= 23; number++) {
+            normalArticles.add(blogRepository.save(Article.builder()
+                    .author(user)
+                    .title("Normal " + number)
+                    .content("<p>Content " + number + "</p>")
+                    .build()));
+        }
+        for (int number = 1; number <= 2; number++) {
+            Article pinnedArticle = blogRepository.save(Article.builder()
+                    .author(user)
+                    .title("Pinned " + number)
+                    .content("<p>Pinned content</p>")
+                    .build());
+            pinnedArticle.updatePinned(true);
+            blogRepository.save(pinnedArticle);
+        }
+
+        var initialResult = mockMvc.perform(get("/articles").with(loginUser()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists(
+                        "articles",
+                        "nextCursor",
+                        "hasNextArticles"
+                ))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"article-feed\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "data-has-next=\"true\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "src=\"/js/articleFeed.js\"")))
+                .andReturn();
+
+        @SuppressWarnings("unchecked")
+        List<ArticleListViewResponse> initialArticles =
+                (List<ArticleListViewResponse>) initialResult
+                        .getModelAndView()
+                        .getModel()
+                        .get("articles");
+        assertThat(initialArticles).hasSize(12);
+        assertThat(initialArticles.subList(0, 2))
+                .allMatch(ArticleListViewResponse::isPinned);
+        assertThat(initialArticles.subList(2, 12))
+                .noneMatch(ArticleListViewResponse::isPinned);
+        assertThat(initialArticles.subList(2, 12))
+                .extracting(ArticleListViewResponse::getId)
+                .containsExactly(
+                        normalArticles.get(22).getId(),
+                        normalArticles.get(21).getId(),
+                        normalArticles.get(20).getId(),
+                        normalArticles.get(19).getId(),
+                        normalArticles.get(18).getId(),
+                        normalArticles.get(17).getId(),
+                        normalArticles.get(16).getId(),
+                        normalArticles.get(15).getId(),
+                        normalArticles.get(14).getId(),
+                        normalArticles.get(13).getId()
+                );
+
+        String firstCursor = (String) initialResult
+                .getModelAndView()
+                .getModel()
+                .get("nextCursor");
+        assertThat(firstCursor).isNotBlank();
+        assertThat(initialResult.getModelAndView().getModel().get("hasNextArticles"))
+                .isEqualTo(true);
+
+        String secondResponse = mockMvc.perform(get("/api/articles/feed")
+                        .with(loginUser())
+                        .param("cursor", firstCursor)
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.articles.length()").value(10))
+                .andExpect(jsonPath("$.articles[0].id")
+                        .value(normalArticles.get(12).getId()))
+                .andExpect(jsonPath("$.articles[9].id")
+                        .value(normalArticles.get(3).getId()))
+                .andExpect(jsonPath("$.articles[0].pinned").value(false))
+                .andExpect(jsonPath("$.articles[0].likeCount").value(0))
+                .andExpect(jsonPath("$.articles[0].commentCount").value(0))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode secondPage = objectMapper.readTree(secondResponse);
+        String secondCursor = secondPage.get("nextCursor").asText();
+        assertThat(secondCursor).isNotBlank().isNotEqualTo(firstCursor);
+
+        String finalResponse = mockMvc.perform(get("/api/articles/feed")
+                        .with(loginUser())
+                        .param("cursor", secondCursor)
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.articles.length()").value(3))
+                .andExpect(jsonPath("$.articles[0].id")
+                        .value(normalArticles.get(2).getId()))
+                .andExpect(jsonPath("$.articles[2].id")
+                        .value(normalArticles.get(0).getId()))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode finalPage = objectMapper.readTree(finalResponse);
+        assertThat(finalPage.get("nextCursor").isNull()).isTrue();
+    }
+
+    @DisplayName("게시글 피드는 잘못된 커서와 과도한 조회 크기를 거부한다")
+    @Test
+    void rejectInvalidArticleFeedRequest() throws Exception {
+        mockMvc.perform(get("/api/articles/feed")
+                        .with(loginUser())
+                        .param("cursor", "invalid-cursor"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/articles/feed")
+                        .with(loginUser())
+                        .param("cursor", "invalid-cursor")
+                        .param("size", "51"))
+                .andExpect(status().isBadRequest());
     }
 
     private RequestPostProcessor loginUser() {
