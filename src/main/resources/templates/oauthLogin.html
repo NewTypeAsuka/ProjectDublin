@@ -63,7 +63,10 @@
             position: absolute;
             inset: 8% 10%;
             border-radius: 999px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(59, 130, 246, 0.18) 35%, rgba(59, 130, 246, 0) 72%);
+            background: radial-gradient(circle,
+                rgba(59, 130, 246, 0.35) 0%, 
+                rgba(59, 130, 246, 0.18) 35%, 
+                rgba(59, 130, 246, 0) 72%);
             filter: blur(12px);
             opacity: 0;
             transform: scale(0.92);
@@ -115,9 +118,14 @@
                     <div class="login-brand">NewTypeBlog</div>
                     <div class="card-body p-4 p-sm-5 text-center">
                         <h2 class="text-dark">LOGIN</h2>
-                        <p id="login-message" class="login-message text-secondary mt-2 mb-5">구글 계정을 사용하여<br>로그인 해주세요</p> <!-- 로그인 안내 문구 전환 -->
+                        <p id="login-message" class="login-message text-secondary mt-2 mb-5"> <!-- 로그인 안내 문구 전환 -->
+                            구글 계정을 사용하여<br>로그인 해주세요
+                        </p>
                         <div class="mb-2">
-                            <a th:href="@{/oauth2/authorization/google}" href="/oauth2/authorization/google" id="google-login-link" class="google-login-link d-inline-block"> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
+                            <a th:href="@{/oauth2/authorization/google}" 
+                                href="/oauth2/authorization/google" 
+                                id="google-login-link" 
+                                class="google-login-link d-inline-block"> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
                                 <span class="sr-only">구글 로그인</span>
                                 <img th:src="@{/img/googleLogin.png}" src="/img/googleLogin.png" class="img-fluid" alt="Google 로그인">
                             </a>

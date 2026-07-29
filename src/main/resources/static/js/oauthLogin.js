@@ -1,3 +1,6 @@
+// Google 로그인 스크립트
+// 사용처: oauthLogin.html
+
 // Google 로그인 버튼 클릭 시 로딩 상태를 표시하는 스크립트
 const googleLoginLink = document.getElementById('google-login-link');
 const googleLoginLoading = document.getElementById('google-login-loading');

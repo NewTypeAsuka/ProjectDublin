@@ -7,7 +7,7 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
-        /* 게시글 목록 상단 제목 */
+        /* 게시글 목록 상단 제목(포스트) */
         .article-list-toolbar {
             display: flex;
             align-items: center;
@@ -129,35 +129,34 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
+    <!-- 공통 헤더 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
+    <!-- 공통 네비게이션 -->
     <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
 
     <main class="container flex-fill py-4 py-md-5">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9">
-                <!-- 게시글 목록 상단 제목 -->
-                <div class="article-list-toolbar mb-4">
+                <div class="article-list-toolbar mb-4"> <!-- 게시글 목록 상단 제목(포스트) -->
                     <div class="article-list-toolbar__heading">
                         <h2 class="h4 mb-1">포스트</h2>
                     </div>
                 </div>
 
-                <!-- 게시글 카드 링크와 호버 효과 -->
-                <!-- 게시글 수만큼 카드 반복 -->
+                <!-- 게시글 카드 섹션 -->
                 <a th:each="item : ${articles}"
-                   th:href="@{/articles/{id}(id=${item.id})}"
-                   class="article-card-link">
+                    th:href="@{/articles/{id}(id=${item.id})}"
+                    class="article-card-link"> <!-- 게시글 카드 링크와 호버 효과 -->
                     <article class="card border-0 shadow-sm article-card">
                         <div class="card-body p-4">
-                            <!-- 게시글 식별자와 고정 표시 -->
-                            <!-- 게시글 작성 일시와 작성자 정보 -->
-                            <!-- 모바일 게시글 카드 작성 정보 -->
-                            <div class="article-card__header text-muted small mb-3">
-                                <div class="article-card__number">
+
+                            <!-- 게시글 카드 1단 -->
+                            <div class="article-card__header text-muted small mb-3"> <!-- 게시글 작성 일시와 작성자 정보 -->
+                                <div class="article-card__number"> <!-- 게시글 식별자와 고정 표시 -->
                                     <i th:if="${item.pinned}"
-                                       class="bi bi-pin-angle-fill article-card__pin"
-                                       aria-hidden="true"></i>
+                                        class="bi bi-pin-angle-fill article-card__pin"
+                                        aria-hidden="true"></i>
                                     <span th:if="${item.pinned}" class="sr-only">고정 게시글</span>
                                     <span th:text="${item.id}"></span>
                                 </div>
@@ -175,41 +174,41 @@
                                             and item.createdAt != null
                                             and item.updatedAt.isAfter(item.createdAt)}">
                                         <span class="article-card__separator"
-                                              aria-hidden="true">·</span>
+                                                aria-hidden="true">·</span>
                                         <span class="article-card__modified">수정됨</span>
                                     </th:block>
                                 </div>
                             </div>
 
-                            <!-- 게시글 제목 두 줄 말줄임 -->
+                            <!-- 게시글 카드 2단 -->
                             <div>
                                 <h3 class="h5 mb-2 article-card__title"
-                                    th:text="${item.title}"></h3>
+                                    th:text="${item.title}"></h3> <!-- 게시글 제목 두 줄 말줄임 -->
                                 <p class="mb-0 text-secondary text-break" th:text="${item.content}"></p>
                             </div>
 
-                            <!-- 게시글 조회수·좋아요·댓글 지표 -->
-                            <div class="article-card__metrics text-muted small mt-3">
+                            <!-- 게시글 카드 3단 -->
+                            <div class="article-card__metrics text-muted small mt-3"> <!-- 게시글 조회수·좋아요·댓글 지표 -->
                                 <span class="article-card__metric" title="조회수">
                                     <i class="bi bi-eye" aria-hidden="true"></i>
                                     <span class="sr-only">조회수</span>
                                     <span class="article-card__view-count"
-                                          th:text="${item.viewCount}"></span>
+                                            th:text="${item.viewCount}"></span>
                                 </span>
                                 <span class="article-card__separator" aria-hidden="true">·</span>
                                 <span class="article-card__metric" title="좋아요">
                                     <i class="bi bi-heart-fill article-card__like-icon"
-                                       aria-hidden="true"></i>
+                                        aria-hidden="true"></i>
                                     <span class="sr-only">좋아요</span>
                                     <span class="article-card__like-count"
-                                          th:text="${item.likeCount}"></span>
+                                            th:text="${item.likeCount}"></span>
                                 </span>
                                 <span class="article-card__separator" aria-hidden="true">·</span>
                                 <span class="article-card__metric" title="댓글">
                                     <i class="bi bi-chat-dots" aria-hidden="true"></i>
                                     <span class="sr-only">댓글</span>
                                     <span class="article-card__comment-count"
-                                          th:text="${item.commentCount}"></span>
+                                            th:text="${item.commentCount}"></span>
                                 </span>
                             </div>
                         </div>
@@ -219,6 +218,7 @@
         </div>
     </main>
 
+    <!-- 공통 푸터 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <script src="/js/siteNavigation.js"></script> <!-- 공통 내비게이션 고정 -->
