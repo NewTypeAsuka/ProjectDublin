@@ -219,7 +219,11 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "제목은 40자 이내로 작성해주세요")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "class=\"d-flex flex-wrap justify-content-end\"")));
+                        "class=\"d-flex flex-wrap justify-content-end\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "src=\"/js/siteNavigation.js\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "src=\"/js/articleForm.js\"")));
     }
 
     @DisplayName("S3 이미지를 게시글과 연결하고 게시글 삭제 후 S3에서도 제거한다")

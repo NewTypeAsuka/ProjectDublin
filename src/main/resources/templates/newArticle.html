@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
     <title>✨NewTypeBlog::글쓰기✨</title>
-    <th:block th:replace="~{common :: headLinks}"></th:block> <!-- 사이트 공통 favicon -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
+    <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
+        /* 게시글 제목 글자 수와 제한 안내 */
         .article-title__counter {
             font-variant-numeric: tabular-nums;
         }
@@ -29,6 +28,7 @@
     <main class="container flex-fill py-4 py-md-5">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9">
+                <!-- 게시글 작성·수정 카드 -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4 p-md-5">
                         <article>
@@ -38,6 +38,7 @@
                                 <h2 class="h4 mb-0" th:text="${article.id} != null ? '글 수정' : '새 글 작성'">새 글 작성</h2>
                             </header> -->
                             <section>
+                                <!-- 게시글 제목 글자 수와 40자 제한 안내 -->
                                 <div class="form-group mb-4">
                                     <label for="title" class="small text-muted">제목</label>
                                     <input type="text"
@@ -55,6 +56,8 @@
                                                aria-hidden="true">제목은 40자 이내로 작성해주세요</small>
                                     </div>
                                 </div>
+
+                                <!-- Summernote 본문과 이미지 업로드 상태 -->
                                 <div class="form-group mb-4">
                                     <label for="content" class="small text-muted">내용</label>
                                     <textarea class="form-control" rows="12" placeholder="내용" id="content" th:text="${article.content}"></textarea>
@@ -63,6 +66,8 @@
                                            aria-live="polite"></small>
                                 </div>
                             </section>
+
+                            <!-- 게시글 등록·수정 버튼 -->
                             <div class="d-flex flex-wrap justify-content-end">
                                 <button th:if="${article.id} != null" type="button" id="modify-btn" class="btn btn-primary btn-sm mb-2">수정</button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
                                 <button th:if="${article.id} == null" type="button" id="create-btn" class="btn btn-primary btn-sm mb-2">등록</button>
@@ -76,27 +81,14 @@
 
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
-    <!-- summernote 사용을 위한 스크립트 -->
+    <!-- Summernote 사용을 위한 외부 스크립트 -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/lang/summernote-ko-KR.min.js"></script>
-    <script>
-        const siteHeader = document.querySelector('.site-header');
-        const siteNav = document.getElementById('site-nav');
 
-        if (siteHeader && siteNav) {
-            const syncStickyNavState = function () {
-                siteNav.classList.toggle('is-stuck', siteHeader.getBoundingClientRect().bottom <= 0);
-            };
-
-            syncStickyNavState();
-            window.addEventListener('scroll', syncStickyNavState, { passive: true });
-            window.addEventListener('resize', syncStickyNavState);
-        }
-
-    </script>
-    <script src="/js/summernote.js"></script>
-    <script src="/js/article.js"></script>
+    <script src="/js/siteNavigation.js"></script>  <!-- 공통 내비게이션 고정 -->
+    <script src="/js/summernote.js"></script> <!-- Summernote 본문과 이미지 업로드 -->
+    <script src="/js/articleForm.js"></script> <!-- 게시글 작성·수정과 제목 글자 수 제한 -->
 </body>
 </html>

@@ -1,3 +1,4 @@
+// 댓글·대댓글의 조회, 작성, 수정, 삭제와 화면 렌더링을 관리하는 스크립트
 (function () {
     const articleId = document.getElementById('article-id')?.value;
     const commentForm = document.getElementById('comment-form');
@@ -28,6 +29,7 @@
     const maxContentLength = Number(commentContent.dataset.maxLength) || 1000;
     const commentsUrl = `/api/articles/${articleId}/comments`;
 
+    // 새 댓글 작성과 글자 수 표시
     commentContent.addEventListener('input', function () {
         updateLengthCounter(commentContent, commentLength);
     });
@@ -59,6 +61,7 @@
     updateLengthCounter(commentContent, commentLength);
     loadComments();
 
+    // 댓글 목록 조회
     async function loadComments() {
         commentLoading.classList.remove('d-none');
         commentList.classList.add('d-none');
@@ -76,6 +79,7 @@
         }
     }
 
+    // 댓글·대댓글 목록 렌더링
     function renderComments(comments) {
         commentList.replaceChildren();
 
@@ -105,6 +109,7 @@
         const author = document.createElement('span');
         author.className = 'comment-item__author';
         author.appendChild(document.createTextNode(comment.commenterNickname));
+
         // 관리자 댓글 작성자의 이름 뒤에 관리자 아이콘을 추가
         if (comment.commenterAdmin) {
             const adminBadge = document.createElement('i');
@@ -201,6 +206,7 @@
         return button;
     }
 
+    // 답글 작성과 댓글 수정에 공통으로 사용하는 인라인 폼
     function openInlineForm(container, initialContent, submitLabel, submitHandler) {
         closeInlineForms();
 
@@ -277,6 +283,7 @@
         document.querySelectorAll('.comment-inline-form').forEach(form => form.remove());
     }
 
+    // 댓글 내용과 1000자 제한 검증
     function validateContent(value) {
         const content = value.trim();
         const length = countCharacters(content);
@@ -323,6 +330,7 @@
         commentMessage.classList.add(error ? 'alert-danger' : 'alert-success');
     }
 
+    // 댓글 API 요청과 오류 메시지 처리
     async function request(url, options = {}) {
         const requestOptions = {
             method: options.method || 'GET',

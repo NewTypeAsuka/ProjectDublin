@@ -1,3 +1,4 @@
+// Summernote 본문 편집기 초기화와 게시글 이미지 업로드를 관리하는 스크립트
 (function ($) {
     // 글 작성 화면의 본문 textarea를 찾는다.
     const $content = $('#content');
@@ -35,7 +36,7 @@
     // 새 글이면 빈 문자열을, 수정이면 기존 HTML을 에디터에 표시한다.
     $content.summernote('code', initialHtml || '');
 
-    // article.js가 글을 저장할 때 현재 Summernote HTML을 가져갈 수 있게 공개한다.
+    // articleForm.js가 글을 저장할 때 현재 Summernote HTML을 가져갈 수 있게 공개한다.
     window.articleEditor = {
         getHtml: function () {
             return $content.summernote('code');

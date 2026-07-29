@@ -258,6 +258,8 @@ class ArticleApiControllerTest {
                         "class=\"bi bi-chat-dots\"")))
                 .andExpect(content().string(containsString(
                         "class=\"article-card__comment-count\">2</span>")))
+                .andExpect(content().string(containsString(
+                        "src=\"/js/siteNavigation.js\"")))
                 .andExpect(content().string(not(containsString("글 번호"))))
                 .andReturn();
 
@@ -335,6 +337,8 @@ class ArticleApiControllerTest {
         mockMvc.perform(get("/articles/{id}", memberArticle.getId()).with(loginUser(member)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("id=\"edit-btn\"")))
+                .andExpect(content().string(containsString(
+                        "href=\"/new-article?id=" + memberArticle.getId() + "\"")))
                 .andExpect(content().string(containsString("id=\"delete-btn\"")));
 
         mockMvc.perform(get("/articles/{id}", memberArticle.getId()).with(loginUser(admin)))
@@ -503,7 +507,9 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(containsString("id=\"article-comments\"")))
                 .andExpect(content().string(containsString("id=\"comment-form\"")))
                 .andExpect(content().string(containsString(
-                        "src=\"/js/articleComment.js\"")));
+                        "src=\"/js/articleComment.js\"")))
+                .andExpect(content().string(containsString(
+                        "src=\"/js/articleDelete.js\"")));
     }
 
     private long responseId(MvcResult result) throws Exception {

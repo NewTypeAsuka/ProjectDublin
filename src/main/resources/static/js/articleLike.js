@@ -1,3 +1,4 @@
+// 게시글 좋아요 상태의 조회, 등록, 취소와 화면 표시를 관리하는 스크립트
 (function () {
     const likeButton = document.getElementById('like-btn');
     const articleId = document.getElementById('article-id')?.value;

@@ -1,6 +1,6 @@
-const deleteButton = document.getElementById('delete-btn'); // 글 삭제 버튼
-const modifyButton = document.getElementById('modify-btn'); // 글 수정 버튼
-const createButton = document.getElementById('create-btn'); // 글 등록 버튼
+// 게시글 작성·수정과 제목 40자 제한을 관리하는 스크립트
+const modifyButton = document.getElementById('modify-btn');
+const createButton = document.getElementById('create-btn');
 const titleInput = document.getElementById('title');
 const titleLength = document.getElementById('title-length');
 const titleError = document.getElementById('title-error');
@@ -12,24 +12,7 @@ if (titleInput && titleLength) {
     updateTitleLengthCounter();
 }
 
-// 삭제 버튼 클릭
-if (deleteButton) {
-    deleteButton.addEventListener('click', () => {
-        if (!window.confirm('정말 삭제하시겠습니까?')) {
-            return;
-        }
-
-        const id = document.getElementById('article-id').value;
-        httpRequest('DELETE', `/api/articles/${id}`, null, () => {
-            alert('삭제가 완료되었습니다');
-            location.replace('/articles');
-        }, () => {
-            alert('삭제에 실패했습니다');
-        });
-    });
-}
-
-// 수정 버튼 클릭
+// 게시글 수정
 if (modifyButton) {
     modifyButton.addEventListener('click', () => {
         const id = new URLSearchParams(location.search).get('id');
@@ -47,7 +30,7 @@ if (modifyButton) {
     });
 }
 
-// 등록 버튼 클릭
+// 게시글 등록
 if (createButton && document.getElementById('content')) {
     createButton.addEventListener('click', () => {
         const requestBody = createArticleRequestBody();
@@ -64,6 +47,7 @@ if (createButton && document.getElementById('content')) {
     });
 }
 
+// 게시글 저장 요청 본문 생성
 function createArticleRequestBody() {
     if (window.articleEditor && window.articleEditor.isUploading()) {
         alert('이미지 업로드가 완료된 후 저장해주세요');
@@ -92,6 +76,7 @@ function createArticleRequestBody() {
     return JSON.stringify({ title, content });
 }
 
+// 제목 글자 수와 제한 초과 안내 갱신
 function updateTitleLengthCounter() {
     const length = countCharacters(titleInput.value);
     const isOverLimit = length > maxTitleLength;
@@ -111,6 +96,7 @@ function countCharacters(value) {
     return Array.from(value).length;
 }
 
+// 게시글 작성·수정 API 요청
 function httpRequest(method, url, body, success, fail) {
     const options = {
         method,
