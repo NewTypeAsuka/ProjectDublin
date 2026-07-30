@@ -52,7 +52,8 @@ public class WebOAuthSecurityConfig {
                         .requestMatchers( // 로그인 없이 접근 가능한 경로 설정
                                 new AntPathRequestMatcher("/login"),
                                 new AntPathRequestMatcher("/oauth2/**"),
-                                new AntPathRequestMatcher("/login/oauth2/**")
+                                new AntPathRequestMatcher("/login/oauth2/**"),
+                                new AntPathRequestMatcher("/health") // 헬스 체크용 엔드포인트는 인증 없이 접근 가능하도록 설정
                         ).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated() // 로그인하지 않으면 접근 불가(401 반환)
                         .anyRequest().authenticated())
