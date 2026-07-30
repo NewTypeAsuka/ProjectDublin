@@ -26,16 +26,16 @@ public class BlogViewController {
     private final ArticleLikeService articleLikeService;
     private final CommentService commentService;
 
-//    @GetMapping("/")
-//    public String root() {
-//        return "redirect:/articles";
-//    }
-
     @GetMapping("/")
-    @ResponseBody // 뷰(html)를 찾지 않고 문자열 텍스트 자체를 200 OK로 반환하게 만듦
     public String root() {
-        return "Health Check OK";
+        return "redirect:/articles";
     }
+
+//    @GetMapping("/")
+//    @ResponseBody // 뷰(html)를 찾지 않고 문자열 텍스트 자체를 200 OK로 반환하게 만듦
+//    public String root() {
+//        return "Health Check OK";
+//    }
 
     @GetMapping("/articles")
     public String getArticles(Model model) {
