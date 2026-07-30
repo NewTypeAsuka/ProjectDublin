@@ -31,11 +31,12 @@ public class BlogViewController {
         return "redirect:/articles";
     }
 
-//    @GetMapping("/")
-//    @ResponseBody // 뷰(html)를 찾지 않고 문자열 텍스트 자체를 200 OK로 반환하게 만듦
-//    public String root() {
-//        return "Health Check OK";
-//    }
+    // 헬스 체크용
+    @GetMapping("/health")
+    @ResponseBody
+    public String healthCheck() {
+        return "OK";
+    }
 
     @GetMapping("/articles")
     public String getArticles(Model model) {
