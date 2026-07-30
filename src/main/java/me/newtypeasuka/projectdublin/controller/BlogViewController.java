@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 import java.util.List;
@@ -25,9 +26,15 @@ public class BlogViewController {
     private final ArticleLikeService articleLikeService;
     private final CommentService commentService;
 
+//    @GetMapping("/")
+//    public String root() {
+//        return "redirect:/articles";
+//    }
+
     @GetMapping("/")
+    @ResponseBody // 뷰(html)를 찾지 않고 문자열 텍스트 자체를 200 OK로 반환하게 만듦
     public String root() {
-        return "redirect:/articles";
+        return "Health Check OK";
     }
 
     @GetMapping("/articles")
