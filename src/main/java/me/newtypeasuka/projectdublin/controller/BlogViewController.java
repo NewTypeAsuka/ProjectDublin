@@ -7,12 +7,10 @@ import me.newtypeasuka.projectdublin.dto.ArticleViewResponse;
 import me.newtypeasuka.projectdublin.service.ArticleLikeService;
 import me.newtypeasuka.projectdublin.service.BlogService;
 import me.newtypeasuka.projectdublin.service.CommentService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -32,10 +30,17 @@ public class BlogViewController {
     }
 
     // 헬스 체크용
-    @GetMapping("/health")
-    @ResponseBody
-    public String healthCheck() {
-        return "OK";
+//    @GetMapping("/health")
+//    @ResponseBody
+//    public String healthCheck() {
+//        return "OK";
+//    }
+    @RestController
+    public class HealthController {
+        @GetMapping("/health")
+        public ResponseEntity<String> health() {
+            return ResponseEntity.ok("OK");
+        }
     }
 
     @GetMapping("/articles")
