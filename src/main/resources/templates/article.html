@@ -117,10 +117,12 @@
         .article-detail__pin-marker {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.35rem;
             flex-shrink: 0;
+            width: 2rem;
             min-height: 2rem;
-            padding: 0.35rem 0.65rem;
+            padding: 0;
             border-radius: 999px;
             color: rgba(27, 100, 218, 1);
             background-color: rgba(235, 244, 255, 1);
@@ -419,14 +421,22 @@
 
         /* 모바일 대댓글 들여쓰기 */
         @media (max-width: 575.98px) {
+            .article-back-link {
+                margin-bottom: 0.6rem;
+                padding: 0.3rem 0.45rem;
+                font-size: 0.8rem;
+            }
             .article-detail__header {
-                flex-direction: column;
-                gap: 0.75rem;
+                display: grid;
+                grid-template-columns: max-content minmax(0, 1fr);
+                align-items: flex-start;
+                gap: 0.5rem;
             }
             .article-meta {
-                justify-content: flex-start;
+                grid-column: 2;
+                justify-content: flex-end;
                 margin-left: 0;
-                text-align: left;
+                text-align: right;
             }
             .article-meta__byline {
                 white-space: normal;
@@ -468,7 +478,6 @@
                                   th:classappend="${article.pinned} ? '' : ' d-none'">
                                 <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
                                 <span class="sr-only">고정 게시글</span>
-                                <span aria-hidden="true">고정 포스트</span>
                             </span>
                             <div class="text-muted small article-meta">
                                 <span class="article-meta__byline">

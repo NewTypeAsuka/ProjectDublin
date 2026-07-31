@@ -87,11 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pin.setAttribute('aria-hidden', 'true');
             articleNumber.append(pin);
             articleNumber.append(createElement('span', 'sr-only', '고정 게시글'));
-            articleNumber.append(createElement(
-                'span',
-                'article-card__pinned-label',
-                '고정'
-            ));
         }
         articleNumber.append(createElement('span', '', `#${article.id}`));
 

@@ -155,7 +155,7 @@
 
         if (comment.editable) {
             actions.appendChild(createActionButton('수정', function () {
-                openInlineForm(item, comment.content, '수정 완료', async value => {
+                openInlineForm(item, comment.content, '수정', async value => {
                     await request(`${commentsUrl}/${comment.id}`, {
                         method: 'PUT',
                         body: JSON.stringify({ content: value })
