@@ -15,7 +15,11 @@
             box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
         }
         .article-content img {
+            display: block;
             height: auto;
+        }
+        .article-content img + img {
+            margin-top: 0.75rem;
         }
         .article-content iframe {
             aspect-ratio: 16 / 9;
@@ -120,14 +124,19 @@
             justify-content: center;
             gap: 0.35rem;
             flex-shrink: 0;
-            width: 2rem;
-            min-height: 2rem;
-            padding: 0;
+            min-height: 1.85rem;
+            padding: 0.25rem 0.6rem;
             border-radius: 999px;
-            color: rgba(27, 100, 218, 1);
-            background-color: rgba(235, 244, 255, 1);
-            font-size: 0.75rem;
+            color: rgba(107, 118, 132, 1);
+            background-color: rgba(242, 244, 246, 1);
+            font-size: 0.72rem;
             font-weight: 700;
+            line-height: 1;
+            letter-spacing: 0.02em;
+        }
+        .article-detail__pin-marker > i {
+            color: rgba(49, 130, 246, 1);
+            font-size: 0.85rem;
             line-height: 1;
         }
         .article-detail__pin-marker.is-hidden {
@@ -438,7 +447,7 @@
             }
             .article-detail__header {
                 display: grid;
-                grid-template-columns: 2rem minmax(0, 1fr);
+                grid-template-columns: max-content minmax(0, 1fr);
                 align-items: center;
                 gap: 0.5rem;
             }
@@ -457,18 +466,29 @@
                 text-align: right;
             }
             .article-actions,
-            .comment-item__actions,
             .comment-inline-form__actions {
-                gap: 0.35rem;
+                gap: 0.25rem;
             }
             .article-actions .btn,
             .article-comments__submit,
-            .comment-item__actions .btn,
             .comment-inline-form__button {
-                width: 4rem;
-                min-width: 4rem;
+                width: 3.5rem;
+                min-width: 3.5rem;
                 min-height: 2.25rem;
-                padding: 0.35rem 0.4rem;
+                padding: 0.35rem 0.25rem;
+                font-size: 0.8rem;
+                line-height: 1.2;
+            }
+            .comment-item__actions {
+                flex-wrap: nowrap;
+                gap: 0;
+            }
+            .comment-item__actions .btn {
+                width: 3rem;
+                min-width: 3rem;
+                min-height: 2.25rem;
+                padding: 0.3rem 0.15rem;
+                gap: 0.2rem;
                 font-size: 0.8rem;
                 line-height: 1.2;
             }
