@@ -52,6 +52,49 @@
 - Apple이나 Toss처럼 넉넉한 여백, 명확한 정보 위계, 절제된 색상과 움직임을 활용한 세련되고 모던한 UI/UX를 지향한다.
 - 버튼과 입력 영역의 상태 피드백, 키보드 포커스, 모션 감소 설정을 제공하여 직관성과 접근성을 함께 유지한다.
 
+## 대규모 프론트 리팩토링
+
+### 현재 상태와 후속 작업 방향
+
+- 2026년 7월 Windows 환경에서 전체 프론트엔드의 1차 디자인 시안을 구현했다.
+- 현재 결과물은 최종 디자인이 아니다. 사용자는 전체적인 리팩토링 방향은 긍정적으로 평가했지만 세부 디자인에는 수정할 부분이 많다고 판단했으므로, 이후 요청받는 구체적인 피드백에 따라 점진적으로 다듬는다.
+- 기존 화면을 무조건 전면 교체하거나 1차 시안으로 되돌리지 말고, 사용자가 지적하는 화면과 요소를 먼저 확인한 뒤 관련 컴포넌트와 동적 렌더링 코드를 함께 수정한다.
+- 브라우저 기반 시각 회귀 테스트는 수행하지 않았다. 데스크톱과 모바일의 실제 화면 밀도, 줄바꿈, 터치 영역, Summernote 툴바와 로그인 화면은 로컬 브라우저에서 직접 확인하며 조정한다.
+
+### Tailwind CSS 도입 방식
+
+- `common.html`의 `headLinks`에서 Bootstrap 4.6.1, Bootstrap Icons 1.13.1과 Tailwind CSS v4 Browser CDN을 함께 불러온다.
+- Tailwind는 theme 및 utilities 레이어만 가져오고 Preflight는 제외했다. 모든 Tailwind 유틸리티는 `tw:` 접두사를 사용하며 `important` 옵션으로 명시적인 유틸리티만 Bootstrap보다 우선하도록 구성했다.
+- 공통 Tailwind 테마에는 canvas, surface, ink, muted, brand 등의 rgba 색상 토큰과 시스템 글꼴, 카드 radius 및 shadow 토큰이 정의되어 있다.
+- Tailwind Browser CDN은 디자인 검토용 개발 구성이다. 사용자가 디자인을 최종 채택하면 운영 배포 전에 정적 CSS 빌드 방식으로 전환하고 사용 중인 `tw:` 클래스가 빌드 결과에 포함되는지 확인한다.
+- 별도의 Node 또는 Tailwind 빌드 파이프라인은 아직 추가하지 않았다. 기존 프로젝트 규칙에 따라 컴포넌트 고유 CSS는 각 Thymeleaf 템플릿의 `<style>` 안에 작성되어 있다.
+- Bootstrap, Bootstrap Icons 및 Summernote 의존성을 제거하거나 Tailwind Preflight와 같은 전역 reset을 활성화하지 않는다.
+
+### 1차 시안에서 변경한 화면
+
+- `common.html`: 공통 디자인 토큰, 시스템 타이포그래피, 배경, skip link, 브랜드 헤더, glass 형태의 고정 내비게이션, 글쓰기·로그아웃 버튼과 푸터를 현대화했다.
+- `articleList.html`: 포스트 소개 영역, 카드 radius와 hover/focus 상태, 고정 글 표시, 메타데이터 및 지표 pill, 빈 목록 CTA와 더보기 상태를 변경했다.
+- `articleFeed.js`: 무한 스크롤로 추가되는 게시글 카드가 최초 서버 렌더링 카드와 동일한 구조와 클래스 및 고정 글 표시를 사용하도록 수정했다. 목록 디자인을 변경할 때 두 구현을 항상 함께 변경한다.
+- `article.html`: 읽기 폭과 본문 타이포그래피, 이미지·동영상·인용문·코드 표현, 고정·좋아요·관리 액션, 댓글 작성과 대댓글 계층을 현대화했다.
+- `articleLike.js`, `articlePin.js`, `articleDelete.js`, `articleComment.js`: 처리 중 상태와 오류를 브라우저 `alert` 대신 화면 내부 메시지와 비활성화 상태로 표시하도록 개선했다. 삭제 확인용 `window.confirm`은 유지한다.
+- `newArticle.html`: 제목과 본문 중심의 집중형 편집 화면, Summernote 스타일, 모바일 대응 sticky 저장 영역, 취소 및 발행·수정 액션을 구성했다.
+- `articleForm.js`: 작성과 수정을 하나의 form submit 흐름으로 통합하고 검증, 저장 중 상태, 성공·실패 메시지를 화면 내부에 표시하도록 변경했다.
+- `oauthLogin.html`, `oauthLogin.js`: Google 아이콘을 사용하는 반응형 브랜드 로그인 화면과 이동 중 상태, 모션 감소 대응을 적용했다.
+- 게시글과 댓글 작성자가 관리자일 때 이름 뒤에 `<i class="bi bi-patch-check-fill"></i>`를 표시한다. 공통 클래스는 `author-admin-badge`이며 Twitter 계열의 하늘색을 사용한다.
+
+### 유지해야 하는 화면 계약
+
+- JavaScript와 테스트가 참조하는 ID를 디자인 변경만으로 임의 변경하지 않는다. 주요 ID는 `site-nav`, `article-feed`, `article-id`, `like-btn`, `pin-btn`, `delete-btn`, `comment-form`, `comment-list`, `article-form`, `title`, `content`, `create-btn`, `modify-btn`, `google-login-link` 및 `google-login-loading`이다.
+- `.site-header`, `.comment-replies`, `.comment-inline-form`, `d-none`, `text-danger`, `text-muted`, `alert-danger`, `alert-success` 등의 클래스는 JavaScript 상태 처리에서 사용된다.
+- 관리자 아이콘은 작성자 이름 바로 뒤에 있어야 한다. 게시글 템플릿과 `articleFeed.js`, 댓글을 생성하는 `articleComment.js` 모두 동일한 `bi bi-patch-check-fill author-admin-badge` 구조와 접근성 라벨을 유지한다.
+- 일부 Controller 테스트는 렌더링된 HTML의 class 문자열과 아이콘 class를 그대로 검사한다. 구조나 클래스를 변경할 때 `BlogApiControllerTest`와 `ArticleApiControllerTest`의 관련 assertion도 확인하되, 기능 hook을 단순히 테스트 통과 목적으로 제거하지 않는다.
+- 게시글 목록의 최초 서버 렌더링과 무한 스크롤 렌더링, 댓글의 서버 응답과 JavaScript 렌더링 간에 디자인 및 관리자 표시가 달라지지 않도록 한다.
+
+### 직전 검증 결과
+
+- 1차 시안 적용 후 관련 Controller 테스트, 전체 `./gradlew test`, `./gradlew bootJar`, `git diff --check`가 통과했다.
+- 당시 Windows 환경에 Node.js가 없어 별도의 `node --check`는 실행하지 못했으며 JavaScript는 수동 검토했다. macOS에서 후속 작업을 시작할 때 Node.js를 사용할 수 있다면 변경된 JavaScript의 문법 검사도 함께 수행한다.
+
 ## 코드 구조
 
 - 도메인 엔티티는 `src/main/java/me/newtypeasuka/projectdublin/domain`에 작성한다.
