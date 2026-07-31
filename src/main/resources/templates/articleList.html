@@ -10,20 +10,59 @@
         /* 게시글 목록 상단 제목(포스트) */
         .article-list-toolbar {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: space-between;
-            gap: 0.75rem;
-            flex-wrap: nowrap;
+            gap: 1.5rem;
+            flex-wrap: wrap;
         }
         .article-list-toolbar__heading {
+            max-width: 38rem;
             min-width: 0;
             margin-bottom: 0;
+        }
+        .article-list-toolbar__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0.75rem;
+            color: rgba(27, 100, 218, 1);
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+        .article-list-toolbar__title {
+            margin-bottom: 0.7rem;
+            color: rgba(25, 31, 40, 1);
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            font-weight: 780;
+            letter-spacing: -0.055em;
+            line-height: 1.08;
+        }
+        .article-list-toolbar__description {
+            margin-bottom: 0;
+            color: rgba(107, 118, 132, 1);
+            font-size: 1rem;
+            line-height: 1.75;
+        }
+        .article-list-toolbar__symbol {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border: 1px solid rgba(49, 130, 246, 0.12);
+            border-radius: 1.35rem;
+            color: rgba(49, 130, 246, 1);
+            background-color: rgba(235, 244, 255, 1);
+            box-shadow: 0 14px 34px rgba(49, 130, 246, 0.12);
+            font-size: 1.45rem;
         }
 
         /* 게시글 카드 링크와 호버 효과 */
         .article-card-link {
             display: block;
-            margin-bottom: 1rem;
+            margin-bottom: 1.15rem;
             color: inherit;
             text-decoration: none;
         }
@@ -35,16 +74,27 @@
         .article-card {
             position: relative;
             overflow: hidden;
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            border: 1px solid rgba(15, 23, 42, 0.07) !important;
+            border-radius: 1.6rem;
+            background-color: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 14px 40px rgba(15, 23, 42, 0.055) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease,
+                border-color 0.2s ease;
         }
         .article-card-link:hover .article-card,
         .article-card-link:focus .article-card,
         .article-card-link:focus-visible .article-card {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12) !important;
+            border-color: rgba(49, 130, 246, 0.22) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1) !important;
         }
         .article-card-link:focus-visible {
-            outline: none;
+            border-radius: 1.6rem;
+            outline: 3px solid rgba(49, 130, 246, 0.28);
+            outline-offset: 4px;
+        }
+        .article-card__body {
+            padding: clamp(1.35rem, 4vw, 2rem) !important;
         }
 
         /* 게시글 식별자와 고정 표시 */
@@ -53,19 +103,30 @@
             align-items: center;
             gap: 0.35rem;
             flex-shrink: 0;
+            min-height: 1.85rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            color: rgba(107, 118, 132, 1);
+            background-color: rgba(242, 244, 246, 1);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
         }
         .article-card__pin {
-            color: rgba(255, 193, 7, 1);
-            font-size: 1rem;
+            color: rgba(49, 130, 246, 1);
+            font-size: 0.85rem;
             line-height: 1;
+        }
+        .article-card__pinned-label {
+            color: rgba(27, 100, 218, 1);
         }
 
         /* 게시글 작성 일시와 작성자 정보 */
         .article-card__header {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
-            gap: 1rem;
+            gap: 0.9rem;
         }
         .article-card__byline {
             display: flex;
@@ -75,12 +136,13 @@
             gap: 0.35rem;
             min-width: 0;
             text-align: right;
+            line-height: 1.55;
         }
         .article-card__byline-main {
             white-space: nowrap;
         }
         .article-card__separator {
-            color: rgba(173, 181, 189, 1);
+            color: rgba(190, 198, 207, 1);
         }
         .author-admin-badge {
             margin-left: 0.2rem;
@@ -92,15 +154,19 @@
         .article-card__metrics {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: flex-start;
             flex-wrap: wrap;
-            gap: 0.35rem;
-            text-align: right;
+            gap: 0.5rem;
+            text-align: left;
         }
         .article-card__metric {
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
+            min-height: 2rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            background-color: rgba(247, 249, 252, 1);
         }
         .article-card__like-icon {
             color: rgba(224, 49, 49, 1);
@@ -110,47 +176,119 @@
         .article-card__title {
             display: -webkit-box;
             max-height: 2.8em;
+            margin-bottom: 0.7rem !important;
             overflow: hidden;
+            color: rgba(25, 31, 40, 1);
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: 740;
             line-height: 1.4;
+            letter-spacing: -0.035em;
             overflow-wrap: anywhere;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
         }
+        .article-card__preview {
+            display: -webkit-box;
+            overflow: hidden;
+            color: rgba(91, 103, 117, 1) !important;
+            line-height: 1.75;
+            overflow-wrap: anywhere;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+        }
 
         /* 게시글 추가 로딩 상태 */
         .article-feed__controls {
-            min-height: 3.5rem;
+            min-height: 4.5rem;
+            color: rgba(107, 118, 132, 1);
         }
         .article-feed__sentinel {
             width: 100%;
             height: 1px;
         }
+        .article-feed__load-button {
+            min-height: 2.75rem;
+            padding: 0.55rem 1rem;
+            border-color: rgba(15, 23, 42, 0.1);
+            border-radius: 999px;
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .article-feed__load-button:hover,
+        .article-feed__load-button:focus {
+            border-color: rgba(49, 130, 246, 0.2);
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(235, 244, 255, 1);
+        }
+        .article-empty-state {
+            padding: 4rem 1.5rem;
+            border: 1px dashed rgba(15, 23, 42, 0.12);
+            border-radius: 1.6rem;
+            background-color: rgba(255, 255, 255, 0.72);
+            text-align: center;
+        }
+        .article-empty-state__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            margin-bottom: 1rem;
+            border-radius: 1.35rem;
+            color: rgba(49, 130, 246, 1);
+            background-color: rgba(235, 244, 255, 1);
+            font-size: 1.4rem;
+        }
 
         /* 모바일 게시글 카드 작성 정보 */
         @media (max-width: 575.98px) {
             .article-card__header {
-                gap: 0.75rem;
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.65rem;
             }
             .article-card__byline {
-                justify-content: flex-end;
+                justify-content: flex-start;
+                text-align: left;
+            }
+            .article-card__byline-main {
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+            .article-card__metrics {
+                gap: 0.35rem;
+            }
+            .article-list-toolbar__symbol {
+                display: none;
             }
         }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
     <!-- 공통 헤더 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <!-- 공통 네비게이션 -->
     <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
 
-    <main class="container flex-fill py-4 py-md-5">
+    <main id="main-content"
+          class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 col-xl-9">
-                <div class="article-list-toolbar mb-4"> <!-- 게시글 목록 상단 제목(포스트) -->
+            <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
+                <div class="article-list-toolbar mb-4 tw:mb-10"> <!-- 게시글 목록 상단 제목(포스트) -->
                     <div class="article-list-toolbar__heading">
-                        <h2 class="h4 mb-1">포스트</h2>
+                        <span class="article-list-toolbar__eyebrow">
+                            <i class="bi bi-journal-richtext" aria-hidden="true"></i>
+                            Journal
+                        </span>
+                        <h2 class="article-list-toolbar__title">최근 포스트</h2>
+                        <p class="article-list-toolbar__description">
+                            새로운 생각과 경험을 한 편씩 천천히 만나보세요.
+                        </p>
                     </div>
+                    <span class="article-list-toolbar__symbol" aria-hidden="true">
+                        <i class="bi bi-stars"></i>
+                    </span>
                 </div>
 
                 <!-- 게시글 카드 섹션 -->
@@ -161,7 +299,7 @@
                         th:href="@{/articles/{id}(id=${item.id})}"
                         class="article-card-link"> <!-- 게시글 카드 링크와 호버 효과 -->
                         <article class="card border-0 shadow-sm article-card">
-                            <div class="card-body p-4">
+                            <div class="card-body p-4 article-card__body">
 
                                 <!-- 게시글 카드 1단 -->
                                 <div class="article-card__header text-muted small mb-3"> <!-- 게시글 작성 일시와 작성자 정보 -->
@@ -170,7 +308,9 @@
                                             class="bi bi-pin-angle-fill article-card__pin"
                                             aria-hidden="true"></i>
                                         <span th:if="${item.pinned}" class="sr-only">고정 게시글</span>
-                                        <span th:text="${item.id}"></span>
+                                        <span th:if="${item.pinned}"
+                                              class="article-card__pinned-label">고정</span>
+                                        <span th:text="|#${item.id}|"></span>
                                     </div>
                                     <div class="article-card__byline">
                                         <span class="article-card__byline-main">
@@ -196,7 +336,7 @@
                                 <div>
                                     <h3 class="h5 mb-2 article-card__title"
                                         th:text="${item.title}"></h3> <!-- 게시글 제목 두 줄 말줄임 -->
-                                    <p class="mb-0 text-secondary text-break"
+                                    <p class="mb-0 text-secondary text-break article-card__preview"
                                         th:text="${item.content}"></p>
                                 </div>
 
@@ -230,7 +370,21 @@
                 </div>
 
                 <p th:if="${#lists.isEmpty(articles)}"
-                    class="text-center text-muted py-5 mb-0">작성된 게시글이 없습니다</p>
+                   class="article-empty-state mb-0">
+                    <span class="article-empty-state__icon" aria-hidden="true">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </span>
+                    <strong class="tw:block tw:text-lg tw:text-ink">아직 작성된 포스트가 없습니다</strong>
+                    <span class="tw:mt-2 tw:block tw:text-sm tw:leading-6 tw:text-muted">
+                        첫 번째 생각을 기록해보세요.
+                    </span>
+                    <a th:href="@{/new-article}"
+                       class="btn btn-primary tw:mt-5 tw:rounded-full tw:border-brand tw:bg-brand
+                              tw:px-5 tw:py-2.5 tw:font-semibold tw:text-white
+                              tw:hover:border-brand-strong tw:hover:bg-brand-strong">
+                        첫 글 작성하기
+                    </a>
+                </p>
 
                 <!-- 게시글 로딩 섹션 -->
                 <div class="article-feed__controls text-center py-3"
@@ -250,7 +404,7 @@
                         hidden></p>
                     <button id="article-feed-load-button"
                         type="button"
-                        class="btn btn-outline-secondary btn-sm"
+                        class="btn btn-outline-secondary btn-sm article-feed__load-button"
                         hidden>게시글 더보기</button>
                 </div>
                 <div id="article-feed-sentinel"

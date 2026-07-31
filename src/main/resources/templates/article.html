@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>✨NewTypeBlog::포스트✨</title>
+    <title th:text="|${article.title} · NewTypeBlog|">NewTypeBlog · 포스트</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
@@ -11,6 +11,8 @@
         .article-content img,
         .article-content iframe {
             max-width: 100%;
+            border-radius: 1.1rem;
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
         }
         .article-content img {
             height: auto;
@@ -19,6 +21,90 @@
             aspect-ratio: 16 / 9;
             width: 100%;
             height: auto;
+        }
+        .article-content {
+            color: rgba(51, 61, 75, 1);
+            font-size: clamp(1rem, 2.5vw, 1.075rem);
+            line-height: 1.9;
+            letter-spacing: -0.012em;
+        }
+        .article-content > * + * {
+            margin-top: 1.25em;
+        }
+        .article-content h1,
+        .article-content h2,
+        .article-content h3,
+        .article-content h4 {
+            margin-top: 1.8em;
+            margin-bottom: 0.7em;
+            color: rgba(25, 31, 40, 1);
+            font-weight: 750;
+            line-height: 1.35;
+            letter-spacing: -0.035em;
+        }
+        .article-content blockquote {
+            margin: 1.75rem 0;
+            padding: 1rem 1.25rem;
+            border-left: 4px solid rgba(49, 130, 246, 0.5);
+            border-radius: 0 0.85rem 0.85rem 0;
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(235, 244, 255, 0.7);
+        }
+        .article-content pre {
+            overflow-x: auto;
+            padding: 1.1rem 1.25rem;
+            border-radius: 1rem;
+            color: rgba(226, 232, 240, 1);
+            background-color: rgba(25, 31, 40, 1);
+        }
+        .article-content a {
+            color: rgba(27, 100, 218, 1);
+            text-decoration: underline;
+            text-decoration-color: rgba(49, 130, 246, 0.35);
+            text-underline-offset: 0.2em;
+        }
+        .article-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 1.25rem;
+            padding: 0.55rem 0.8rem;
+            border-radius: 999px;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.88rem;
+            font-weight: 650;
+            text-decoration: none;
+            transition: color 0.18s ease, background-color 0.18s ease,
+                transform 0.18s ease;
+        }
+        .article-back-link:hover,
+        .article-back-link:focus {
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(235, 244, 255, 1);
+            text-decoration: none;
+            transform: translateX(-2px);
+        }
+        .article-back-link:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.28);
+            outline-offset: 3px;
+        }
+        .article-detail-card,
+        .article-comments {
+            border: 1px solid rgba(15, 23, 42, 0.07) !important;
+            border-radius: 1.75rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.075) !important;
+        }
+        .article-detail-card__body,
+        .article-comments__body {
+            padding: clamp(1.4rem, 5vw, 3rem) !important;
+        }
+        #article-title {
+            color: rgba(25, 31, 40, 1);
+            font-size: clamp(2rem, 6vw, 3.15rem);
+            font-weight: 780;
+            line-height: 1.16;
+            letter-spacing: -0.055em;
         }
 
         /* 게시글 상단 고정 표시와 작성 정보 */
@@ -31,9 +117,15 @@
         .article-detail__pin-marker {
             display: inline-flex;
             align-items: center;
+            gap: 0.35rem;
             flex-shrink: 0;
-            color: rgba(255, 193, 7, 1);
-            font-size: 1rem;
+            min-height: 2rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(235, 244, 255, 1);
+            font-size: 0.75rem;
+            font-weight: 700;
             line-height: 1;
         }
         .article-meta {
@@ -71,6 +163,10 @@
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
+            min-height: 2rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            background-color: rgba(247, 249, 252, 1);
         }
         .article-meta__like-icon {
             color: rgba(224, 49, 49, 1);
@@ -88,19 +184,30 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            padding: 0.55rem 0.9rem;
-            border: 1px solid rgba(222, 226, 230, 1);
+            min-height: 3.15rem;
+            padding: 0.65rem 1.15rem;
+            border: 1px solid rgba(15, 23, 42, 0.09);
             border-radius: 999px;
-            color: rgba(108, 117, 125, 1);
+            color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 1);
-            transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+            font-weight: 680;
+            transition: border-color 0.18s ease, color 0.18s ease,
+                background-color 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
         }
         .article-like__button:hover,
         .article-like__button:focus {
             border-color: rgba(224, 49, 49, 1);
             color: rgba(224, 49, 49, 1);
-            outline: none;
+            background-color: rgba(255, 245, 246, 1);
+            box-shadow: 0 12px 28px rgba(224, 49, 49, 0.11);
             transform: translateY(-1px);
+        }
+        .article-like__button:focus-visible,
+        .article-pin__button:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.28);
+            outline-offset: 3px;
         }
         .article-like__button:disabled {
             cursor: wait;
@@ -110,6 +217,7 @@
         .article-like__button.is-liked {
             border-color: rgba(224, 49, 49, 1);
             color: rgba(224, 49, 49, 1);
+            background-color: rgba(255, 245, 246, 1);
         }
         .article-like__icon {
             font-size: 1.5rem;
@@ -127,9 +235,10 @@
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
-            min-width: 6.5rem;
-            padding: 0.55rem 0.9rem;
-            border: 1px solid rgba(222, 226, 230, 1);
+            min-width: 7rem;
+            min-height: 3.15rem;
+            padding: 0.65rem 1.05rem;
+            border: 1px solid rgba(15, 23, 42, 0.09);
             border-radius: 999px;
             color: rgba(108, 117, 125, 1);
             background-color: rgba(255, 255, 255, 1);
@@ -153,7 +262,7 @@
             transform: none;
         }
         .article-pin__icon {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             line-height: 1;
         }
 
@@ -165,11 +274,52 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+        .article-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            min-height: 2.75rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 0.85rem;
+            font-weight: 650;
+        }
+        .article-actions__delete {
+            border-color: rgba(225, 45, 63, 0.18);
+            color: rgba(200, 38, 54, 1);
+            background-color: rgba(255, 247, 248, 1);
+        }
+        .article-action-message {
+            margin-top: 1rem;
+            border: 0;
+            border-radius: 0.9rem;
+            font-size: 0.9rem;
+        }
 
         /* 댓글 작성 영역 */
         .article-comments__textarea {
             min-height: 7rem;
+            padding: 1rem;
+            border-color: rgba(15, 23, 42, 0.08);
+            border-radius: 1rem;
+            color: rgba(25, 31, 40, 1);
+            background-color: rgba(247, 249, 252, 1);
             resize: vertical;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease,
+                background-color 0.18s ease;
+        }
+        .article-comments__textarea:focus {
+            border-color: rgba(49, 130, 246, 0.42);
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 4px rgba(49, 130, 246, 0.1);
+        }
+        .article-comments__submit {
+            min-height: 2.75rem;
+            padding: 0.55rem 1rem;
+            border-color: rgba(49, 130, 246, 1);
+            border-radius: 0.85rem;
+            background-color: rgba(49, 130, 246, 1);
+            font-weight: 680;
         }
         .article-comments__counter {
             font-variant-numeric: tabular-nums;
@@ -217,8 +367,12 @@
             gap: 0.35rem;
         }
         .comment-item__actions .btn {
-            padding: 0.15rem 0.45rem;
-            font-size: 0.78rem;
+            min-height: 2.5rem;
+            padding: 0.45rem 0.65rem;
+            border-radius: 0.7rem;
+            font-size: 0.82rem;
+            font-weight: 650;
+            text-decoration: none;
         }
 
         /* 대댓글과 인라인 작성·수정 폼 */
@@ -226,13 +380,13 @@
             margin-top: 1rem;
             margin-left: 2rem;
             padding-left: 1rem;
-            border-left: 3px solid rgba(233, 236, 239, 1);
+            border-left: 3px solid rgba(191, 219, 254, 1);
         }
         .comment-replies .comment-item {
             padding: 1rem;
             border: 0;
             border-radius: 0.65rem;
-            background-color: rgba(248, 249, 250, 1);
+            background-color: rgba(247, 249, 252, 1);
         }
         .comment-replies .comment-item + .comment-item {
             margin-top: 0.75rem;
@@ -241,7 +395,7 @@
             margin-top: 0.9rem;
             padding: 0.9rem;
             border-radius: 0.65rem;
-            background-color: rgba(248, 249, 250, 1);
+            background-color: rgba(247, 249, 252, 1);
         }
         .comment-inline-form textarea {
             min-height: 5.5rem;
@@ -250,6 +404,23 @@
 
         /* 모바일 대댓글 들여쓰기 */
         @media (max-width: 575.98px) {
+            .article-detail__header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .article-meta {
+                justify-content: flex-start;
+                margin-left: 0;
+                text-align: left;
+            }
+            .article-meta__byline {
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+            .article-detail__metrics {
+                justify-content: flex-start;
+                text-align: left;
+            }
             .comment-replies {
                 margin-left: 0.5rem;
                 padding-left: 0.75rem;
@@ -257,19 +428,24 @@
         }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
 
-    <main class="container flex-fill py-4 py-md-5">
+    <main id="main-content"
+          class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 col-xl-9">
+            <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
+                <a th:href="@{/articles}" class="article-back-link">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    모든 포스트
+                </a>
                 <!-- 게시글 상단 고정 표시와 작성 정보 -->
                 <section class="card border-0 shadow-sm article-detail-card"
                          id="article-detail"
                          aria-labelledby="article-title">
-                    <div class="card-body p-4 p-md-5">
+                    <div class="card-body p-4 p-md-5 article-detail-card__body">
                         <input type="hidden" id="article-id" th:value="${article.id}">
                         <div class="article-detail__header mb-4">
                             <span id="article-pinned-marker"
@@ -277,6 +453,7 @@
                                   th:classappend="${article.pinned} ? '' : ' d-none'">
                                 <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
                                 <span class="sr-only">고정 게시글</span>
+                                <span aria-hidden="true">고정 포스트</span>
                             </span>
                             <div class="text-muted small article-meta">
                                 <span class="article-meta__byline">
@@ -305,7 +482,8 @@
                                     th:text="${article.title}"></h1>
                             </header>
                             <section class="mb-4">
-                                <div class="mb-0 text-break article-content" th:utext="${article.content}"></div>
+                                <div class="mb-0 text-break article-content tw:max-w-none"
+                                     th:utext="${article.content}"></div>
 
                                 <!-- 게시글 조회수·좋아요·댓글 지표 -->
                                 <div class="article-detail__metrics text-muted small mt-4">
@@ -342,7 +520,9 @@
                                        class="bi bi-heart article-like__icon"
                                        aria-hidden="true"></i>
                                     <span>좋아요</span>
-                                    <span id="like-count" class="article-like__count">0</span>
+                                    <span id="like-count"
+                                          class="article-like__count"
+                                          th:text="${article.likeCount}">0</span>
                                 </button>
 
                                 <!-- 게시글 고정 버튼 -->
@@ -366,10 +546,20 @@
                             <div class="article-actions" th:if="${canManageArticle}">
                                 <a id="edit-btn"
                                    th:href="@{/new-article(id=${article.id})}"
-                                   class="btn btn-primary btn-sm">수정</a>
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                    수정
+                                </a>
                                 <button type="button" id="delete-btn"
-                                        class="btn btn-outline-secondary btn-sm">삭제</button>
+                                        class="btn btn-sm article-actions__delete">
+                                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                                    삭제
+                                </button>
                             </div>
+                            <div id="article-action-message"
+                                 class="alert d-none article-action-message"
+                                 role="status"
+                                 aria-live="polite"></div>
                         </article>
                     </div>
                 </section>
@@ -378,10 +568,12 @@
                 <section class="card border-0 shadow-sm mt-4 article-comments"
                          id="article-comments"
                          aria-labelledby="comment-heading">
-                    <div class="card-body p-4 p-md-5">
+                    <div class="card-body p-4 p-md-5 article-comments__body">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h2 class="h5 mb-0" id="comment-heading">
-                                댓글 <span id="comment-count" class="text-muted">0</span>
+                                댓글
+                                <span id="comment-count"
+                                      class="text-muted tw:ml-1">0</span>
                             </h2>
                         </div>
 
@@ -399,7 +591,9 @@
                                       class="small text-muted article-comments__counter">0 / 1000</span>
                                 <button type="submit"
                                         id="comment-submit"
-                                        class="btn btn-primary btn-sm">등록</button>
+                                        class="btn btn-primary btn-sm article-comments__submit">
+                                    댓글 등록
+                                </button>
                             </div>
                         </form>
 
@@ -409,12 +603,18 @@
                              role="status"
                              aria-live="polite"></div>
                         <div id="comment-loading"
-                             class="py-4 text-center text-muted">댓글을 불러오는 중입니다</div>
+                             class="py-4 text-center text-muted">
+                            <span class="spinner-border spinner-border-sm mr-2"
+                                  aria-hidden="true"></span>
+                            댓글을 불러오는 중입니다
+                        </div>
                         <!-- 대댓글과 인라인 작성·수정 폼 -->
                         <!-- 모바일 대댓글 들여쓰기 -->
                         <div id="comment-list" class="comment-list d-none"></div>
                         <p id="comment-empty"
                            class="d-none py-4 mb-0 text-center text-muted">
+                            <i class="bi bi-chat-square-text tw:mb-2 tw:block tw:text-2xl"
+                               aria-hidden="true"></i>
                             아직 작성된 댓글이 없습니다
                         </p>
                     </div>

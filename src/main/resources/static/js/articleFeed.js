@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = `/articles/${encodeURIComponent(article.id)}`;
 
         const card = createElement('article', 'card border-0 shadow-sm article-card');
-        const cardBody = createElement('div', 'card-body p-4');
+        const cardBody = createElement('div', 'card-body p-4 article-card__body');
         const header = createElement(
             'div',
             'article-card__header text-muted small mb-3'
@@ -80,8 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
             pin.setAttribute('aria-hidden', 'true');
             articleNumber.append(pin);
             articleNumber.append(createElement('span', 'sr-only', '고정 게시글'));
+            articleNumber.append(createElement(
+                'span',
+                'article-card__pinned-label',
+                '고정'
+            ));
         }
-        articleNumber.append(createElement('span', '', String(article.id)));
+        articleNumber.append(createElement('span', '', `#${article.id}`));
 
         const byline = createElement('div', 'article-card__byline');
         const bylineMain = createElement('span', 'article-card__byline-main');
@@ -121,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ));
         content.append(createElement(
             'p',
-            'mb-0 text-secondary text-break',
+            'mb-0 text-secondary text-break article-card__preview',
             article.content || ''
         ));
 

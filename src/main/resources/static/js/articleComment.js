@@ -38,10 +38,14 @@
         event.preventDefault();
         const content = validateContent(commentContent.value);
         if (!content) {
+            commentContent.focus();
             return;
         }
 
         commentSubmit.disabled = true;
+        const defaultSubmitContent = commentSubmit.innerHTML;
+        commentSubmit.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" aria-hidden="true"></span>등록 중';
+        commentSubmit.setAttribute('aria-busy', 'true');
         try {
             await request(commentsUrl, {
                 method: 'POST',
@@ -55,6 +59,8 @@
             showMessage(error.message, true);
         } finally {
             commentSubmit.disabled = false;
+            commentSubmit.innerHTML = defaultSubmitContent;
+            commentSubmit.setAttribute('aria-busy', 'false');
         }
     });
 
@@ -251,11 +257,15 @@
             event.preventDefault();
             const content = validateContent(textarea.value);
             if (!content) {
+                textarea.focus();
                 return;
             }
 
             submitButton.disabled = true;
             cancelButton.disabled = true;
+            const defaultSubmitLabel = submitButton.textContent;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" aria-hidden="true"></span>처리 중';
+            submitButton.setAttribute('aria-busy', 'true');
             try {
                 await submitHandler(content);
                 form.remove();
@@ -264,6 +274,8 @@
                 showMessage(error.message, true);
                 submitButton.disabled = false;
                 cancelButton.disabled = false;
+                submitButton.textContent = defaultSubmitLabel;
+                submitButton.setAttribute('aria-busy', 'false');
             }
         });
 
@@ -304,6 +316,7 @@
         counter.textContent = `${length} / ${maxContentLength}`;
         counter.classList.toggle('text-danger', length > maxContentLength);
         counter.classList.toggle('text-muted', length <= maxContentLength);
+        textarea.setAttribute('aria-invalid', String(length > maxContentLength));
     }
 
     function countCharacters(value) {
@@ -328,6 +341,7 @@
         commentMessage.textContent = message;
         commentMessage.classList.remove('d-none', 'alert-danger', 'alert-success');
         commentMessage.classList.add(error ? 'alert-danger' : 'alert-success');
+        commentMessage.setAttribute('role', error ? 'alert' : 'status');
     }
 
     // 댓글 API 요청과 오류 메시지 처리

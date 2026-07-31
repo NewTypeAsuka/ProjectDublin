@@ -5,6 +5,7 @@
     const pinIcon = document.getElementById('pin-icon');
     const pinLabel = document.getElementById('pin-label');
     const pinnedMarker = document.getElementById('article-pinned-marker');
+    const actionMessage = document.getElementById('article-action-message');
 
     if (!pinButton || !articleId || !pinIcon || !pinLabel || !pinnedMarker) {
         return;
@@ -42,7 +43,7 @@
                 }
             })
             .catch(() => {
-                alert('게시글 고정 상태를 변경하지 못했습니다');
+                showActionMessage('게시글 고정 상태를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
             })
             .finally(() => {
                 pinButton.disabled = false;
@@ -59,5 +60,25 @@
         pinIcon.classList.toggle('bi-pin-angle-fill', pinned);
         pinLabel.textContent = pinned ? '해제' : '고정';
         pinnedMarker.classList.toggle('d-none', !pinned);
+        hideActionMessage();
+    }
+
+    // 고정 상태 변경 오류를 게시글 안에서 바로 안내
+    function showActionMessage(message) {
+        if (!actionMessage) {
+            return;
+        }
+        actionMessage.textContent = message;
+        actionMessage.classList.remove('d-none', 'alert-success');
+        actionMessage.classList.add('alert-danger');
+        actionMessage.setAttribute('role', 'alert');
+    }
+
+    function hideActionMessage() {
+        if (!actionMessage) {
+            return;
+        }
+        actionMessage.classList.add('d-none');
+        actionMessage.classList.remove('alert-danger', 'alert-success');
     }
 })();

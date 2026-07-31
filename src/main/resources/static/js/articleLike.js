@@ -5,6 +5,7 @@
     const likeIcon = document.getElementById('like-icon');
     const likeCount = document.getElementById('like-count');
     const articleLikeCount = document.getElementById('article-like-count');
+    const actionMessage = document.getElementById('article-action-message');
 
     if (!likeButton || !articleId || !likeIcon || !likeCount || !articleLikeCount) {
         return;
@@ -42,7 +43,7 @@
             })
             .catch(() => {
                 if (showError) {
-                    alert('좋아요 처리에 실패했습니다');
+                    showActionMessage('좋아요를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
                 }
             })
             .finally(() => {
@@ -60,5 +61,25 @@
         likeButton.classList.toggle('is-liked', liked);
         likeButton.setAttribute('aria-pressed', String(liked));
         likeButton.setAttribute('aria-label', liked ? '좋아요 취소' : '좋아요');
+        hideActionMessage();
+    }
+
+    // 좋아요 오류를 팝업 대신 게시글 안에서 안내
+    function showActionMessage(message) {
+        if (!actionMessage) {
+            return;
+        }
+        actionMessage.textContent = message;
+        actionMessage.classList.remove('d-none', 'alert-success');
+        actionMessage.classList.add('alert-danger');
+        actionMessage.setAttribute('role', 'alert');
+    }
+
+    function hideActionMessage() {
+        if (!actionMessage) {
+            return;
+        }
+        actionMessage.classList.add('d-none');
+        actionMessage.classList.remove('alert-danger', 'alert-success');
     }
 })();

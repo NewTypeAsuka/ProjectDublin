@@ -3,98 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>✨NewTypeBlog::로그인✨</title>
+    <title>로그인 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <style>
         /* 배경색과 애니메이션 */
         .gradient-custom {
-            background: linear-gradient(135deg,
-                rgba(224, 242, 254, 1),
-                rgba(125, 211, 252, 1),
-                rgba(56, 189, 248, 1),
-                rgba(186, 230, 253, 1)
-            );
-            background-size: 240% 240%;
-            animation: gradientAnimation 30s ease-in-out infinite;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: rgba(25, 31, 40, 1);
+            background:
+                radial-gradient(circle at 12% 12%,
+                    rgba(49, 130, 246, 0.16) 0%,
+                    rgba(49, 130, 246, 0) 34%),
+                radial-gradient(circle at 88% 84%,
+                    rgba(92, 124, 250, 0.13) 0%,
+                    rgba(92, 124, 250, 0) 32%),
+                linear-gradient(145deg,
+                    rgba(247, 249, 252, 1),
+                    rgba(238, 245, 255, 1));
+            background-size: 120% 120%;
+            animation: gradientAnimation 24s ease-in-out infinite alternate;
         }
         @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 100% 30%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 0% 70%; }
-            100% { background-position: 0% 50%; }
+            from { background-position: 0% 0%; }
+            to { background-position: 100% 100%; }
+        }
+        .gradient-custom::before,
+        .gradient-custom::after {
+            content: '';
+            position: fixed;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.22);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            pointer-events: none;
+        }
+        .gradient-custom::before {
+            top: -8rem;
+            right: -7rem;
+            width: 22rem;
+            height: 22rem;
+        }
+        .gradient-custom::after {
+            bottom: -6rem;
+            left: -5rem;
+            width: 16rem;
+            height: 16rem;
         }
 
         /* 로그인 카드 상단에 블로그 이름을 표시하는 별도 영역 */
         .login-brand {
-            padding: 1.25rem 1.5rem;
-            background-color: rgba(240, 249, 255, 1);
-            border-bottom: 1px solid rgba(15, 23, 42, 0.1);
-            color: rgba(51, 65, 85, 1);
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            color: rgba(25, 31, 40, 1);
+            font-size: 1rem;
+            font-weight: 750;
+            letter-spacing: -0.025em;
+            text-decoration: none;
+        }
+        .login-brand:hover,
+        .login-brand:focus {
+            color: rgba(27, 100, 218, 1);
+            text-decoration: none;
+        }
+        .login-brand__mark {
+            display: inline-grid;
+            place-items: center;
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 0.75rem;
+            color: rgba(255, 255, 255, 1);
+            background: linear-gradient(145deg,
+                rgba(49, 130, 246, 1),
+                rgba(27, 100, 218, 1));
+            box-shadow: 0 8px 20px rgba(49, 130, 246, 0.24);
+        }
+        .login-shell {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .login-card {
+            display: grid;
+            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+            overflow: hidden;
+            max-width: 62rem;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.78);
+            border-radius: 2rem;
+            background-color: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 30px 90px rgba(15, 23, 42, 0.13);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+        }
+        .login-story {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 36rem;
+            padding: clamp(2rem, 5vw, 3.5rem);
+            color: rgba(255, 255, 255, 1);
+            background:
+                radial-gradient(circle at 82% 12%,
+                    rgba(255, 255, 255, 0.22) 0%,
+                    rgba(255, 255, 255, 0) 30%),
+                linear-gradient(155deg,
+                    rgba(49, 130, 246, 1),
+                    rgba(27, 100, 218, 1));
+        }
+        .login-story::after {
+            content: '';
+            position: absolute;
+            right: -4rem;
+            bottom: -5rem;
+            width: 17rem;
+            height: 17rem;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+        .login-story__eyebrow {
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.75rem;
+            font-weight: 750;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+        .login-story__title {
+            max-width: 21rem;
+            margin-bottom: 1rem;
+            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.14;
+            letter-spacing: -0.06em;
+        }
+        .login-story__description {
+            max-width: 22rem;
+            margin-bottom: 0;
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.75;
+        }
+        .login-story__note {
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: fit-content;
+            margin-top: 3rem;
+            padding: 0.65rem 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.82);
+            background-color: rgba(255, 255, 255, 0.1);
+            font-size: 0.82rem;
+        }
+        .login-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 36rem;
+            padding: clamp(2rem, 6vw, 4.5rem);
+        }
+        .login-panel__eyebrow {
+            margin: 2.5rem 0 0.65rem;
+            color: rgba(49, 130, 246, 1);
+            font-size: 0.76rem;
+            font-weight: 750;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+        .login-panel__title {
+            margin-bottom: 0;
+            color: rgba(25, 31, 40, 1);
+            font-size: clamp(1.85rem, 4vw, 2.65rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.055em;
         }
 
         /* 로그인 안내 문구 전환 */
         .login-message {
-            min-height: 3rem;
-            transition: opacity 0.8s ease, transform 0.8s ease; /* 0.8초의 부드러운 전환 효과 */
+            min-height: 3.3rem;
+            margin: 0.9rem 0 2rem;
+            color: rgba(107, 118, 132, 1);
+            line-height: 1.65;
+            transition: opacity 0.5s ease, transform 0.5s ease; /* 0.8초의 부드러운 전환 효과 */
         }
         .login-message.is-changing {
             opacity: 0;
             transform: translateY(4px);
         }
-        @media (prefers-reduced-motion: reduce) {
-            .login-message {
-                transition: none;
-            }
-        }
 
         /* 구글 이미지 버튼 hover 시 glow 효과 */
         .google-login-link {
             position: relative;
-            display: inline-block;
-            transition: transform 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            width: 100%;
+            min-height: 4.6rem;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(15, 23, 42, 0.09);
+            border-radius: 1.1rem;
+            color: rgba(25, 31, 40, 1);
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+            text-align: left;
+            text-decoration: none;
+            transition: border-color 0.22s ease, box-shadow 0.22s ease,
+                transform 0.22s ease;
         }
         .google-login-link::before {
             content: '';
             position: absolute;
-            inset: 8% 10%;
-            border-radius: 999px;
+            inset: -1px;
+            border-radius: 1.1rem;
             background: radial-gradient(circle,
-                rgba(59, 130, 246, 0.35) 0%, 
-                rgba(59, 130, 246, 0.18) 35%, 
-                rgba(59, 130, 246, 0) 72%);
-            filter: blur(12px);
+                rgba(49, 130, 246, 0.12) 0%,
+                rgba(49, 130, 246, 0) 72%);
             opacity: 0;
-            transform: scale(0.92);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            z-index: 0;
+            transition: opacity 0.22s ease;
             pointer-events: none;
         }
-        .google-login-link:hover {
-            transform: translateY(-1px);
+        .google-login-link:hover,
+        .google-login-link:focus {
+            border-color: rgba(49, 130, 246, 0.34);
+            color: rgba(25, 31, 40, 1);
+            box-shadow: 0 16px 36px rgba(49, 130, 246, 0.14);
+            text-decoration: none;
+            transform: translateY(-2px);
         }
         .google-login-link:hover::before {
             opacity: 1;
-            transform: scale(1);
         }
         .google-login-link img {
             position: relative;
             z-index: 1;
-            transition: filter 0.25s ease, transform 0.25s ease;
+            width: 2rem;
+            height: 2rem;
+            object-fit: contain;
         }
-        .google-login-link:hover img {
-            filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.28));
-            transform: scale(1.01);
+        .google-login-link__copy {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .google-login-link__title {
+            font-size: 0.95rem;
+            font-weight: 720;
+        }
+        .google-login-link__description {
+            margin-top: 0.15rem;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.76rem;
+            line-height: 1.35;
+        }
+        .google-login-link__arrow {
+            position: relative;
+            z-index: 1;
+            color: rgba(139, 149, 161, 1);
+            font-size: 1rem;
+            transition: transform 0.22s ease;
+        }
+        .google-login-link:hover .google-login-link__arrow {
+            transform: translateX(3px);
+        }
+        .google-login-link:focus-visible,
+        .login-brand:focus-visible,
+        .login-back-link:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.3);
+            outline-offset: 3px;
         }
 
         /* 로딩 상태를 나타내는 애니메이션 */
         .google-login-link.is-loading {
             pointer-events: none;
-            opacity: 0.7;
+            opacity: 0.62;
+            transform: none;
         }
         .google-login-loading {
             max-height: 0;
@@ -108,39 +307,151 @@
             opacity: 1;
             margin-top: 1rem;
         }
+        .google-login-loading__inner {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.9rem;
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(235, 244, 255, 0.75);
+            font-size: 0.85rem;
+        }
+        .google-login-loading .spinner-border {
+            width: 1.1rem;
+            height: 1.1rem;
+            border-width: 0.13rem;
+            color: rgba(49, 130, 246, 1) !important;
+        }
+        .login-security-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.55rem;
+            margin: 1.5rem 0 0;
+            color: rgba(139, 149, 161, 1);
+            font-size: 0.75rem;
+            line-height: 1.55;
+        }
+        .login-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            width: fit-content;
+            margin-top: 2.5rem;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.82rem;
+            font-weight: 650;
+            text-decoration: none;
+        }
+        .login-back-link:hover,
+        .login-back-link:focus {
+            color: rgba(27, 100, 218, 1);
+            text-decoration: none;
+        }
+        @media (max-width: 767.98px) {
+            .login-card {
+                display: block;
+                max-width: 32rem;
+                border-radius: 1.5rem;
+            }
+            .login-story {
+                min-height: auto;
+                padding: 1.6rem;
+            }
+            .login-story__title,
+            .login-story__description,
+            .login-story__note {
+                display: none;
+            }
+            .login-panel {
+                min-height: auto;
+                padding: 2rem 1.5rem;
+            }
+            .login-panel__eyebrow {
+                margin-top: 0;
+            }
+        }
+        @media (max-width: 375px) {
+            .google-login-link__description {
+                display: none;
+            }
+            .google-login-link {
+                min-height: 3.8rem;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .gradient-custom {
+                animation: none;
+            }
+            .login-message,
+            .google-login-link,
+            .google-login-link__arrow,
+            .google-login-loading {
+                transition: none;
+            }
+        }
     </style>
 </head>
-<body class="gradient-custom"> <!-- 배경색과 애니메이션 -->
-    <section class="container vh-100">
-        <div class="row h-100 justify-content-center align-items-center">
-            <div class="col-11 col-sm-9 col-md-7 col-lg-5 col-xl-4">
-                <div class="card bg-white rounded-lg">
-                    <div class="login-brand">NewTypeBlog</div>
-                    <div class="card-body p-4 p-sm-5 text-center">
-                        <h2 class="text-dark">LOGIN</h2>
-                        <p id="login-message" class="login-message text-secondary mt-2 mb-5"> <!-- 로그인 안내 문구 전환 -->
-                            구글 계정을 사용하여<br>로그인 해주세요
-                        </p>
-                        <div class="mb-2">
-                            <a th:href="@{/oauth2/authorization/google}" 
-                                href="/oauth2/authorization/google" 
-                                id="google-login-link" 
-                                class="google-login-link d-inline-block"> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
-                                <span class="sr-only">구글 로그인</span>
-                                <img th:src="@{/img/googleLogin.png}" src="/img/googleLogin.png" class="img-fluid" alt="Google 로그인">
-                            </a>
-                            <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 애니메이션 -->
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">로딩 중</span>
-                                </div>
-                                <p class="text-secondary small mt-3 mb-1">로그인 중입니다</p>
-                            </div>
+<body class="gradient-custom tw:font-sans"> <!-- 배경색과 애니메이션 -->
+    <main id="main-content" class="container login-shell tw:relative tw:z-10">
+        <section class="login-card" aria-labelledby="login-title">
+            <div class="login-story">
+                <div>
+                    <p class="login-story__eyebrow">Your space to think</p>
+                    <h2 class="login-story__title">생각이 글이 되는 가장 편안한 공간.</h2>
+                    <p class="login-story__description">
+                        일상의 발견과 새로운 관점을 기록하고,
+                        당신만의 이야기를 차분히 이어가세요.
+                    </p>
+                </div>
+                <p class="login-story__note">
+                    <i class="bi bi-stars" aria-hidden="true"></i>
+                    Write · Share · Grow
+                </p>
+            </div>
+            <div class="login-panel">
+                <a href="/" class="login-brand">
+                    <span class="login-brand__mark" aria-hidden="true">N</span>
+                    NewTypeBlog
+                </a>
+                <p class="login-panel__eyebrow">Welcome back</p>
+                <h1 id="login-title" class="login-panel__title">다시 만나 반가워요.</h1>
+                <p id="login-message" class="login-message"> <!-- 로그인 안내 문구 전환 -->
+                    Google 계정 하나로 안전하고 간편하게<br>블로그를 계속 이용할 수 있어요.
+                </p>
+                <div>
+                    <a th:href="@{/oauth2/authorization/google}"
+                       href="/oauth2/authorization/google"
+                       id="google-login-link"
+                       class="google-login-link"> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
+                        <img th:src="@{/img/googleIcon.png}"
+                             src="/img/googleIcon.png"
+                             alt=""
+                             aria-hidden="true">
+                        <span class="google-login-link__copy">
+                            <span class="google-login-link__title">Google로 계속하기</span>
+                            <span class="google-login-link__description">기존 Google 계정으로 로그인합니다</span>
+                        </span>
+                        <i class="bi bi-arrow-right google-login-link__arrow" aria-hidden="true"></i>
+                    </a>
+                    <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 애니메이션 -->
+                        <div class="google-login-loading__inner">
+                            <span class="spinner-border" aria-hidden="true"></span>
+                            <span>Google 로그인 화면으로 이동하고 있어요.</span>
                         </div>
                     </div>
                 </div>
+                <p class="login-security-note">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                    <span>비밀번호는 NewTypeBlog에 저장되지 않으며 Google 인증을 통해 로그인합니다.</span>
+                </p>
+                <a href="/" class="login-back-link">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    블로그로 돌아가기
+                </a>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <script src="/js/oauthLogin.js"></script> <!-- Google 로그인 스크립트 -->
 </body>

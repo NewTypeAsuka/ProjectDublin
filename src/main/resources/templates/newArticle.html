@@ -3,11 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>✨NewTypeBlog::글쓰기✨</title>
+    <title th:text="${article.id} != null ? '글 수정 · NewTypeBlog' : '새 글 작성 · NewTypeBlog'">새 글 작성 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
+        .editor-shell {
+            position: relative;
+        }
+        .editor-shell::before {
+            content: '';
+            position: absolute;
+            top: 1.5rem;
+            left: 50%;
+            width: min(50rem, 90vw);
+            height: 18rem;
+            border-radius: 999px;
+            background: radial-gradient(circle,
+                rgba(49, 130, 246, 0.1) 0%,
+                rgba(49, 130, 246, 0) 70%);
+            filter: blur(10px);
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .editor-intro {
+            position: relative;
+            max-width: 52rem;
+            margin: 0 auto 1.75rem;
+        }
+        .editor-intro__eyebrow {
+            margin-bottom: 0.65rem;
+            color: rgba(49, 130, 246, 1);
+            font-size: 0.75rem;
+            font-weight: 750;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+        .editor-intro__title {
+            margin-bottom: 0.7rem;
+            color: rgba(25, 31, 40, 1);
+            font-size: clamp(2rem, 6vw, 3.25rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.055em;
+        }
+        .editor-intro__description {
+            max-width: 34rem;
+            margin-bottom: 0;
+            color: rgba(107, 118, 132, 1);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+        .editor-card {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(15, 23, 42, 0.07) !important;
+            border-radius: 1.75rem;
+            background-color: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08) !important;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        .editor-card::before {
+            content: '';
+            display: block;
+            height: 0.28rem;
+            background: linear-gradient(90deg,
+                rgba(49, 130, 246, 1),
+                rgba(92, 124, 250, 1),
+                rgba(49, 130, 246, 0.35));
+        }
+        .editor-card__body {
+            padding: clamp(1.35rem, 4vw, 3.25rem) !important;
+        }
+        .editor-field {
+            margin-bottom: 2rem;
+        }
+        .editor-field__label {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            color: rgba(25, 31, 40, 1);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .editor-field__hint {
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .editor-title-input {
+            min-height: 4rem;
+            padding: 0.85rem 1rem;
+            border: 1px solid rgba(15, 23, 42, 0.09);
+            border-radius: 1rem;
+            color: rgba(25, 31, 40, 1);
+            background-color: rgba(247, 249, 252, 1);
+            font-size: clamp(1.2rem, 3vw, 1.55rem);
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease,
+                background-color 0.18s ease;
+        }
+        .editor-title-input::placeholder {
+            color: rgba(139, 149, 161, 1);
+        }
+        .editor-title-input:focus {
+            border-color: rgba(49, 130, 246, 0.45);
+            color: rgba(25, 31, 40, 1);
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 4px rgba(49, 130, 246, 0.1);
+        }
+
         /* 게시글 제목 글자 수와 제한 안내 */
         .article-title__counter {
             font-variant-numeric: tabular-nums;
@@ -18,20 +127,184 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+        .article-title__feedback {
+            justify-content: flex-end;
+        }
+        .article-title__feedback .text-muted {
+            color: rgba(107, 118, 132, 1) !important;
+        }
+
+        /* Summernote를 집중형 에디터 카드와 같은 톤으로 표시 */
+        .note-editor.note-frame {
+            overflow: hidden;
+            border: 1px solid rgba(15, 23, 42, 0.09);
+            border-radius: 1rem;
+            box-shadow: none;
+        }
+        .note-editor.note-frame .note-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.2rem;
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+            background-color: rgba(247, 249, 252, 1);
+        }
+        .note-editor.note-frame .note-btn-group {
+            margin: 0;
+        }
+        .note-editor.note-frame .note-btn {
+            min-width: 2.4rem;
+            min-height: 2.4rem;
+            border-color: transparent;
+            border-radius: 0.65rem;
+            color: rgba(51, 61, 75, 1);
+            background-color: transparent;
+        }
+        .note-editor.note-frame .note-btn:hover,
+        .note-editor.note-frame .note-btn:focus,
+        .note-editor.note-frame .note-btn.active {
+            border-color: rgba(49, 130, 246, 0.1);
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(235, 244, 255, 1);
+            box-shadow: none;
+        }
+        .note-editor.note-frame .note-editing-area {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .note-editor.note-frame .note-editable {
+            min-height: 30rem;
+            padding: clamp(1.1rem, 3vw, 1.75rem);
+            color: rgba(51, 61, 75, 1);
+            font-size: 1.05rem;
+            line-height: 1.85;
+        }
+        .note-editor.note-frame .note-statusbar {
+            border-top: 1px solid rgba(15, 23, 42, 0.06);
+            background-color: rgba(247, 249, 252, 1);
+        }
+        #image-upload-status {
+            min-height: 1.4rem;
+            padding-left: 0.2rem;
+        }
+        .editor-form-message {
+            border: 0;
+            border-radius: 0.9rem;
+            font-size: 0.9rem;
+        }
+        .editor-action-bar {
+            position: sticky;
+            bottom: 1rem;
+            z-index: 20;
+            margin: 2.5rem -0.75rem -0.75rem;
+            padding: 0.75rem;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 1.15rem;
+            background-color: rgba(255, 255, 255, 0.86);
+            box-shadow: 0 14px 38px rgba(15, 23, 42, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .editor-action-bar > .d-flex {
+            align-items: center;
+            gap: 0.65rem;
+        }
+        .editor-action-bar .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-height: 2.9rem;
+            margin-bottom: 0 !important;
+            padding: 0.6rem 1rem;
+            border-radius: 0.85rem;
+            font-weight: 680;
+        }
+        .editor-action-bar__cancel {
+            border-color: rgba(15, 23, 42, 0.08);
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(247, 249, 252, 1);
+        }
+        .editor-action-bar__submit {
+            min-width: 7rem;
+            border-color: rgba(49, 130, 246, 1);
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(49, 130, 246, 1);
+            box-shadow: 0 10px 24px rgba(49, 130, 246, 0.24);
+        }
+        .editor-action-bar__submit:hover,
+        .editor-action-bar__submit:focus {
+            border-color: rgba(27, 100, 218, 1);
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(27, 100, 218, 1);
+            transform: translateY(-1px);
+        }
+        .editor-action-bar__submit:focus-visible,
+        .editor-action-bar__cancel:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.28);
+            outline-offset: 3px;
+        }
+        @media (max-width: 575.98px) {
+            .editor-shell::before {
+                top: 0;
+                height: 12rem;
+            }
+            .editor-intro {
+                margin-bottom: 1.25rem;
+            }
+            .editor-card {
+                border-radius: 1.25rem;
+            }
+            .editor-field__label {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .note-editor.note-frame .note-toolbar {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            .note-editor.note-frame .note-editable {
+                min-height: 22rem;
+            }
+            .editor-action-bar {
+                bottom: 0.65rem;
+                margin-right: -0.35rem;
+                margin-left: -0.35rem;
+            }
+            .editor-action-bar > .d-flex {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+            }
+            .editor-action-bar .btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <th:block th:replace="~{common :: siteNavbar(false)}"></th:block> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
 
-    <main class="container flex-fill py-4 py-md-5">
+    <main id="main-content"
+          class="container flex-fill py-4 py-md-5 editor-shell tw:relative tw:z-0">
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 col-xl-9">
+            <div class="col-12 col-lg-10 col-xl-9 tw:max-w-5xl">
+                <header class="editor-intro">
+                    <p class="editor-intro__eyebrow">Editor</p>
+                    <h2 class="editor-intro__title"
+                        th:text="${article.id} != null ? '이야기를 다듬어보세요' : '새로운 이야기를 시작하세요'">
+                        새로운 이야기를 시작하세요
+                    </h2>
+                    <p class="editor-intro__description">
+                        읽는 사람에게 오래 남을 생각을 편안하게 기록해보세요.
+                        저장 전 제목과 본문을 한 번 더 확인할 수 있습니다.
+                    </p>
+                </header>
                 <!-- 게시글 작성·수정 카드 -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4 p-md-5">
-                        <article>
+                <div class="card border-0 shadow-sm editor-card">
+                    <div class="card-body p-4 p-md-5 editor-card__body">
+                        <form id="article-form" novalidate>
                             <input type="hidden" id="article-id" th:value="${article.id}"> <!-- 아이디 정보 저장 -->
                             <!-- <header class="mb-4">
                                 <div class="text-uppercase text-muted small mb-2">Editor</div>
@@ -39,14 +312,19 @@
                             </header> -->
                             <section>
                                 <!-- 게시글 제목 글자 수와 40자 제한 안내 -->
-                                <div class="form-group mb-4">
-                                    <label for="title" class="small text-muted">제목</label>
+                                <div class="form-group mb-4 editor-field">
+                                    <label for="title" class="editor-field__label">
+                                        <span>제목</span>
+                                        <span class="editor-field__hint">한눈에 이해할 수 있는 문장으로 적어주세요</span>
+                                    </label>
                                     <input type="text"
-                                           class="form-control"
-                                           placeholder="제목"
+                                           class="form-control editor-title-input"
+                                           placeholder="어떤 이야기를 들려주실 건가요?"
                                            id="title"
                                            data-max-length="40"
                                            aria-describedby="title-length title-error"
+                                           autocomplete="off"
+                                           required
                                            th:value="${article.title}">
                                     <div class="article-title__feedback mt-2" aria-live="polite">
                                         <small id="title-length"
@@ -58,8 +336,11 @@
                                 </div>
 
                                 <!-- Summernote 본문과 이미지 업로드 상태 -->
-                                <div class="form-group mb-4">
-                                    <label for="content" class="small text-muted">내용</label>
+                                <div class="form-group mb-4 editor-field">
+                                    <label for="content" class="editor-field__label">
+                                        <span>본문</span>
+                                        <span class="editor-field__hint">이미지와 링크를 활용해 내용을 풍성하게 구성할 수 있어요</span>
+                                    </label>
                                     <textarea class="form-control" rows="12" placeholder="내용" id="content" th:text="${article.content}"></textarea>
                                     <small id="image-upload-status"
                                            class="d-block mt-2 text-muted"
@@ -67,12 +348,41 @@
                                 </div>
                             </section>
 
+                            <div id="article-form-message"
+                                 class="alert d-none editor-form-message"
+                                 role="status"
+                                 aria-live="polite"></div>
+
                             <!-- 게시글 등록·수정 버튼 -->
-                            <div class="d-flex flex-wrap justify-content-end">
-                                <button th:if="${article.id} != null" type="button" id="modify-btn" class="btn btn-primary btn-sm mb-2">수정</button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
-                                <button th:if="${article.id} == null" type="button" id="create-btn" class="btn btn-primary btn-sm mb-2">등록</button>
+                            <div class="editor-action-bar">
+                                <div class="d-flex flex-wrap justify-content-end">
+                                    <a th:if="${article.id} != null"
+                                       th:href="@{/articles/{id}(id=${article.id})}"
+                                       class="btn btn-sm editor-action-bar__cancel">
+                                        취소
+                                    </a>
+                                    <a th:if="${article.id} == null"
+                                       th:href="@{/articles}"
+                                       class="btn btn-sm editor-action-bar__cancel">
+                                        취소
+                                    </a>
+                                    <button th:if="${article.id} != null"
+                                            type="submit"
+                                            id="modify-btn"
+                                            class="btn btn-primary btn-sm mb-2 editor-action-bar__submit">
+                                        <i class="bi bi-check2" aria-hidden="true"></i>
+                                        <span>수정 완료</span>
+                                    </button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
+                                    <button th:if="${article.id} == null"
+                                            type="submit"
+                                            id="create-btn"
+                                            class="btn btn-primary btn-sm mb-2 editor-action-bar__submit">
+                                        <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                                        <span>글 발행하기</span>
+                                    </button>
+                                </div>
                             </div>
-                        </article>
+                        </form>
                     </div>
                 </div>
             </div>

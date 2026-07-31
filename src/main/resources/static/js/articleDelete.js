@@ -2,6 +2,7 @@
 (function () {
     const deleteButton = document.getElementById('delete-btn');
     const articleId = document.getElementById('article-id')?.value;
+    const actionMessage = document.getElementById('article-action-message');
 
     if (!deleteButton || !articleId) {
         return;
@@ -13,6 +14,9 @@
         }
 
         deleteButton.disabled = true;
+        const defaultContent = deleteButton.innerHTML;
+        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>삭제 중</span>';
+        deleteButton.setAttribute('aria-busy', 'true');
         try {
             const response = await fetch(`/api/articles/${articleId}`, {
                 method: 'DELETE',
@@ -26,11 +30,23 @@
                 throw new Error('article delete failed');
             }
 
-            alert('삭제가 완료되었습니다');
             location.replace('/articles');
         } catch (error) {
-            alert('삭제에 실패했습니다');
+            showActionMessage('게시글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.');
             deleteButton.disabled = false;
+            deleteButton.innerHTML = defaultContent;
+            deleteButton.setAttribute('aria-busy', 'false');
         }
     });
+
+    // 삭제 실패를 팝업 대신 게시글 안에서 안내
+    function showActionMessage(message) {
+        if (!actionMessage) {
+            return;
+        }
+        actionMessage.textContent = message;
+        actionMessage.classList.remove('d-none', 'alert-success');
+        actionMessage.classList.add('alert-danger');
+        actionMessage.setAttribute('role', 'alert');
+    }
 })();
