@@ -223,7 +223,7 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "제목은 40자 이내로 작성해주세요")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "class=\"d-flex flex-wrap justify-content-end\"")))
+                        "class=\"editor-actions\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "src=\"/js/siteNavigation.js\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(

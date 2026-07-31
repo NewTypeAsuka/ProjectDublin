@@ -281,7 +281,7 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.9rem;
-            border-radius: 0.85rem;
+            border-radius: 999px;
             font-weight: 650;
         }
         .article-actions__delete {
@@ -317,7 +317,7 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(49, 130, 246, 1);
-            border-radius: 0.85rem;
+            border-radius: 999px;
             background-color: rgba(49, 130, 246, 1);
             font-weight: 680;
         }
@@ -369,7 +369,7 @@
         .comment-item__actions .btn {
             min-height: 2.5rem;
             padding: 0.45rem 0.65rem;
-            border-radius: 0.7rem;
+            border-radius: 999px;
             font-size: 0.82rem;
             font-weight: 650;
             text-decoration: none;
@@ -400,6 +400,21 @@
         .comment-inline-form textarea {
             min-height: 5.5rem;
             resize: vertical;
+        }
+        .comment-inline-form__controls {
+            gap: 0.6rem;
+        }
+        .comment-inline-form__actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+        .comment-inline-form__button {
+            min-height: 2.75rem;
+            padding: 0.55rem 1rem;
+            border-width: 1px;
+            font-weight: 650;
         }
 
         /* 모바일 대댓글 들여쓰기 */
@@ -512,7 +527,7 @@
                             <!-- 게시글 좋아요 버튼 -->
                             <div class="article-like border-top pt-4 mb-4">
                                 <button type="button" id="like-btn"
-                                        class="article-like__button"
+                                        class="app-button article-like__button"
                                         aria-label="좋아요"
                                         aria-pressed="false"
                                         disabled>
@@ -528,7 +543,7 @@
                                 <!-- 게시글 고정 버튼 -->
                                 <button type="button" id="pin-btn"
                                         th:if="${isAdmin}"
-                                        class="article-pin__button"
+                                        class="app-button article-pin__button"
                                         th:classappend="${article.pinned} ? ' is-pinned'"
                                         th:attr="data-pinned=${article.pinned},
                                                  aria-pressed=${article.pinned},
@@ -546,14 +561,14 @@
                             <div class="article-actions" th:if="${canManageArticle}">
                                 <a id="edit-btn"
                                    th:href="@{/new-article(id=${article.id})}"
-                                   class="btn btn-primary btn-sm">
+                                   class="btn btn-primary btn-sm app-button">
                                     <i class="bi bi-pencil" aria-hidden="true"></i>
-                                    수정
+                                    <span>수정</span>
                                 </a>
                                 <button type="button" id="delete-btn"
-                                        class="btn btn-sm article-actions__delete">
+                                        class="btn btn-sm app-button article-actions__delete">
                                     <i class="bi bi-trash3" aria-hidden="true"></i>
-                                    삭제
+                                    <span>삭제</span>
                                 </button>
                             </div>
                             <div id="article-action-message"
@@ -591,8 +606,9 @@
                                       class="small text-muted article-comments__counter">0 / 1000</span>
                                 <button type="submit"
                                         id="comment-submit"
-                                        class="btn btn-primary btn-sm article-comments__submit">
-                                    댓글 등록
+                                        class="btn btn-primary btn-sm app-button article-comments__submit">
+                                    <i class="bi bi-send" aria-hidden="true"></i>
+                                    <span>등록</span>
                                 </button>
                             </div>
                         </form>

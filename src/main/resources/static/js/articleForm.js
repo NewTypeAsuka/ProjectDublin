@@ -29,7 +29,7 @@ if (articleForm && (modifyButton || createButton)) {
         const editing = Boolean(modifyButton && articleId);
         const submitButton = editing ? modifyButton : createButton;
 
-        setFormBusy(submitButton, true, editing ? '수정하는 중' : '발행하는 중');
+        setFormBusy(submitButton, true);
         hideMessage();
 
         try {
@@ -111,19 +111,31 @@ function countCharacters(value) {
 }
 
 // 저장 중 상태와 화면 내 성공·오류 피드백 표시
-function setFormBusy(button, busy, label) {
+function setFormBusy(button, busy) {
     if (!button) {
         return;
     }
 
     if (!button.dataset.defaultContent) {
         button.dataset.defaultContent = button.innerHTML;
+        button.dataset.defaultLabel = button.querySelector('span')?.textContent.trim()
+            || button.textContent.trim();
     }
     button.disabled = busy;
     button.setAttribute('aria-busy', String(busy));
-    button.innerHTML = busy
-        ? `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>${label}</span>`
-        : button.dataset.defaultContent;
+
+    if (!busy) {
+        button.innerHTML = button.dataset.defaultContent;
+        return;
+    }
+
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner-border spinner-border-sm';
+    spinner.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.textContent = button.dataset.defaultLabel;
+    button.replaceChildren(spinner, label);
 }
 
 function showMessage(message, error) {

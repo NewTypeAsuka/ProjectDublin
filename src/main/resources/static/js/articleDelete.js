@@ -13,9 +13,11 @@
             return;
         }
 
-        deleteButton.disabled = true;
         const defaultContent = deleteButton.innerHTML;
-        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>삭제 중</span>';
+        const defaultLabel = deleteButton.querySelector('span')?.textContent.trim()
+            || deleteButton.textContent.trim();
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>${defaultLabel}</span>`;
         deleteButton.setAttribute('aria-busy', 'true');
         try {
             const response = await fetch(`/api/articles/${articleId}`, {

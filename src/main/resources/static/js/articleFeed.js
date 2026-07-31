@@ -47,6 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return metric;
     }
 
+    // 더보기 버튼의 아이콘을 상태 문구가 바뀌어도 유지합니다.
+    function setLoadButtonContent(label, iconClass = 'bi-arrow-clockwise') {
+        const icon = createElement('i', `bi ${iconClass}`);
+        icon.setAttribute('aria-hidden', 'true');
+        loadButton.replaceChildren(icon, createElement('span', '', label));
+    }
+
     function formatCreatedAt(createdAt) {
         if (typeof createdAt !== 'string') {
             return '';
@@ -132,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const metrics = createElement(
             'div',
-            'article-card__metrics text-muted small mt-3'
+            'article-card__metrics justify-content-end text-muted small mt-3'
         );
         metrics.append(createMetric(
             '조회수',
@@ -235,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             setMessage('게시글을 불러오지 못했습니다. 다시 시도해주세요');
-            loadButton.textContent = '다시 시도';
+            setLoadButtonContent('다시 시도', 'bi-arrow-repeat');
             loadButton.hidden = false;
         } finally {
             isLoading = false;
@@ -246,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (observer) {
                     observer.observe(sentinel);
                 } else {
-                    loadButton.textContent = '게시글 더보기';
+                    setLoadButtonContent('게시글 더보기');
                     loadButton.hidden = false;
                 }
             }

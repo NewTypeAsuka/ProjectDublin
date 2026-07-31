@@ -42,10 +42,7 @@
             return;
         }
 
-        commentSubmit.disabled = true;
-        const defaultSubmitContent = commentSubmit.innerHTML;
-        commentSubmit.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" aria-hidden="true"></span>등록 중';
-        commentSubmit.setAttribute('aria-busy', 'true');
+        setButtonBusy(commentSubmit, true);
         try {
             await request(commentsUrl, {
                 method: 'POST',
@@ -53,14 +50,12 @@
             });
             commentContent.value = '';
             updateLengthCounter(commentContent, commentLength);
-            showMessage('댓글을 등록했습니다.', false);
+            showMessage('댓글을 등록했습니다', false);
             await loadComments();
         } catch (error) {
             showMessage(error.message, true);
         } finally {
-            commentSubmit.disabled = false;
-            commentSubmit.innerHTML = defaultSubmitContent;
-            commentSubmit.setAttribute('aria-busy', 'false');
+            setButtonBusy(commentSubmit, false);
         }
     });
 
@@ -148,12 +143,12 @@
 
         if (!reply && !comment.deleted) {
             actions.appendChild(createActionButton('답글', function () {
-                openInlineForm(item, '', '답글 등록', async value => {
+                openInlineForm(item, '', '등록', async value => {
                     await request(`${commentsUrl}/${comment.id}/replies`, {
                         method: 'POST',
                         body: JSON.stringify({ content: value })
                     });
-                    showMessage('답글을 등록했습니다.', false);
+                    showMessage('답글을 등록했습니다', false);
                 });
             }));
         }
@@ -165,24 +160,27 @@
                         method: 'PUT',
                         body: JSON.stringify({ content: value })
                     });
-                    showMessage('댓글을 수정했습니다.', false);
+                    showMessage('댓글을 수정했습니다', false);
                 });
             }));
         }
 
         if (comment.deletable) {
-            actions.appendChild(createActionButton('삭제', async function () {
+            actions.appendChild(createActionButton('삭제', async function (deleteButton) {
                 if (!window.confirm('댓글을 삭제하시겠습니까?')) {
                     return;
                 }
+                setButtonBusy(deleteButton, true);
                 try {
                     await request(`${commentsUrl}/${comment.id}`, {
                         method: 'DELETE'
                     });
-                    showMessage('댓글을 삭제했습니다.', false);
+                    showMessage('댓글을 삭제했습니다', false);
                     await loadComments();
                 } catch (error) {
                     showMessage(error.message, true);
+                } finally {
+                    setButtonBusy(deleteButton, false);
                 }
             }, 'text-danger'));
         }
@@ -206,10 +204,52 @@
     function createActionButton(label, clickHandler, extraClass = '') {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = `btn btn-link text-secondary ${extraClass}`.trim();
-        button.textContent = label;
-        button.addEventListener('click', clickHandler);
+        button.className = `btn btn-link app-button text-secondary ${extraClass}`.trim();
+        const iconClasses = {
+            '답글': 'bi-reply',
+            '수정': 'bi-pencil',
+            '삭제': 'bi-trash3'
+        };
+        setButtonContent(button, iconClasses[label], label);
+        button.addEventListener('click', function () {
+            clickHandler(button);
+        });
         return button;
+    }
+
+    // 동적으로 생성되는 액션 버튼도 Bootstrap 아이콘과 문구를 함께 표시합니다.
+    function setButtonContent(button, iconClass, label) {
+        const icon = document.createElement('i');
+        icon.className = `bi ${iconClass}`;
+        icon.setAttribute('aria-hidden', 'true');
+
+        const text = document.createElement('span');
+        text.textContent = label;
+        button.replaceChildren(icon, text);
+    }
+
+    // 비동기 처리 중에는 아이콘만 스피너로 바꾸고 버튼 문구는 유지합니다.
+    function setButtonBusy(button, busy) {
+        if (!button.dataset.defaultContent) {
+            button.dataset.defaultContent = button.innerHTML;
+            button.dataset.defaultLabel = button.querySelector('span')?.textContent.trim()
+                || button.textContent.trim();
+        }
+
+        button.disabled = busy;
+        button.setAttribute('aria-busy', String(busy));
+        if (!busy) {
+            button.innerHTML = button.dataset.defaultContent;
+            return;
+        }
+
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner-border spinner-border-sm';
+        spinner.setAttribute('aria-hidden', 'true');
+
+        const label = document.createElement('span');
+        label.textContent = button.dataset.defaultLabel;
+        button.replaceChildren(spinner, label);
     }
 
     // 답글 작성과 댓글 수정에 공통으로 사용하는 인라인 폼
@@ -225,25 +265,29 @@
         textarea.setAttribute('aria-label', submitLabel);
 
         const controls = document.createElement('div');
-        controls.className = 'd-flex align-items-center justify-content-between mt-2';
+        controls.className = 'd-flex align-items-center justify-content-between flex-wrap mt-2 comment-inline-form__controls';
 
         const counter = document.createElement('span');
         counter.className = 'small text-muted article-comments__counter';
 
         const buttons = document.createElement('div');
+        buttons.className = 'comment-inline-form__actions';
 
         const cancelButton = document.createElement('button');
         cancelButton.type = 'button';
-        cancelButton.className = 'btn btn-outline-secondary btn-sm mr-2';
-        cancelButton.textContent = '취소';
+        cancelButton.className = 'btn btn-outline-secondary btn-sm app-button comment-inline-form__button';
+        setButtonContent(cancelButton, 'bi-x-lg', '취소');
         cancelButton.addEventListener('click', function () {
             form.remove();
         });
 
         const submitButton = document.createElement('button');
         submitButton.type = 'submit';
-        submitButton.className = 'btn btn-primary btn-sm';
-        submitButton.textContent = submitLabel;
+        submitButton.className = 'btn btn-primary btn-sm app-button comment-inline-form__button';
+        const submitIconClass = submitLabel === '등록'
+            ? 'bi-reply'
+            : 'bi-check2';
+        setButtonContent(submitButton, submitIconClass, submitLabel);
 
         buttons.append(cancelButton, submitButton);
         controls.append(counter, buttons);
@@ -261,21 +305,16 @@
                 return;
             }
 
-            submitButton.disabled = true;
+            setButtonBusy(submitButton, true);
             cancelButton.disabled = true;
-            const defaultSubmitLabel = submitButton.textContent;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" aria-hidden="true"></span>처리 중';
-            submitButton.setAttribute('aria-busy', 'true');
             try {
                 await submitHandler(content);
                 form.remove();
                 await loadComments();
             } catch (error) {
                 showMessage(error.message, true);
-                submitButton.disabled = false;
+                setButtonBusy(submitButton, false);
                 cancelButton.disabled = false;
-                submitButton.textContent = defaultSubmitLabel;
-                submitButton.setAttribute('aria-busy', 'false');
             }
         });
 
@@ -301,11 +340,11 @@
         const length = countCharacters(content);
 
         if (!content) {
-            showMessage('댓글 내용을 입력해주세요.', true);
+            showMessage('댓글 내용을 입력해주세요', true);
             return null;
         }
         if (length > maxContentLength) {
-            showMessage(`댓글은 ${maxContentLength}자 이하로 작성해주세요.`, true);
+            showMessage(`댓글은 ${maxContentLength}자 이하로 작성해주세요`, true);
             return null;
         }
         return content;
@@ -360,16 +399,16 @@
         const response = await fetch(url, requestOptions);
         if (response.status === 401) {
             location.replace('/login');
-            throw new Error('로그인이 필요합니다.');
+            throw new Error('로그인이 필요합니다');
         }
         if (!response.ok) {
             if (response.status === 403) {
-                throw new Error('댓글을 변경할 권한이 없습니다.');
+                throw new Error('댓글을 변경할 권한이 없습니다');
             }
             if (response.status === 400) {
-                throw new Error('댓글 요청 내용을 확인해주세요.');
+                throw new Error('댓글 요청 내용을 확인해주세요');
             }
-            throw new Error('댓글 처리에 실패했습니다.');
+            throw new Error('댓글 처리에 실패했습니다');
         }
         if (response.status === 204) {
             return null;

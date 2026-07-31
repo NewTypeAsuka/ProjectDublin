@@ -48,6 +48,7 @@
 - 깔끔하고 직관적인 UI를 선호한다.
 - 색상 지정은 rgba 양식으로 통일한다.
 - 기존 Bootstrap과 Bootstrap Icons는 유지하되 충돌하지 않는 범위에서 Tailwind CSS를 적극 활용한다.
+- 아이콘은 모두 Bootstrap Icons을 사용하도록 한다.
 - Tailwind CSS는 `tw:` 접두사를 사용하고 Preflight를 비활성화하는 등 기존 Bootstrap 및 Summernote 스타일과 격리한다.
 - Apple이나 Toss처럼 넉넉한 여백, 명확한 정보 위계, 절제된 색상과 움직임을 활용한 세련되고 모던한 UI/UX를 지향한다.
 - 버튼과 입력 영역의 상태 피드백, 키보드 포커스, 모션 감소 설정을 제공하여 직관성과 접근성을 함께 유지한다.

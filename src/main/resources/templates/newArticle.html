@@ -32,6 +32,9 @@
             margin: 0 auto 1.75rem;
         }
         .editor-intro__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
             margin-bottom: 0.65rem;
             color: rgba(49, 130, 246, 1);
             font-size: 0.75rem;
@@ -46,13 +49,6 @@
             font-weight: 800;
             line-height: 1.15;
             letter-spacing: -0.055em;
-        }
-        .editor-intro__description {
-            max-width: 34rem;
-            margin-bottom: 0;
-            color: rgba(107, 118, 132, 1);
-            font-size: 1rem;
-            line-height: 1.7;
         }
         .editor-card {
             position: relative;
@@ -191,55 +187,46 @@
             border-radius: 0.9rem;
             font-size: 0.9rem;
         }
-        .editor-action-bar {
-            position: sticky;
-            bottom: 1rem;
-            z-index: 20;
-            margin: 2.5rem -0.75rem -0.75rem;
-            padding: 0.75rem;
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            border-radius: 1.15rem;
-            background-color: rgba(255, 255, 255, 0.86);
-            box-shadow: 0 14px 38px rgba(15, 23, 42, 0.1);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-        .editor-action-bar > .d-flex {
+        .editor-actions {
+            display: flex;
             align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
             gap: 0.65rem;
+            margin-top: 2rem;
         }
-        .editor-action-bar .btn {
+        .editor-actions .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
+            width: 7rem;
             min-height: 2.9rem;
             margin-bottom: 0 !important;
             padding: 0.6rem 1rem;
-            border-radius: 0.85rem;
+            border-radius: 999px;
             font-weight: 680;
         }
-        .editor-action-bar__cancel {
+        .editor-actions__cancel {
             border-color: rgba(15, 23, 42, 0.08);
             color: rgba(51, 61, 75, 1);
             background-color: rgba(247, 249, 252, 1);
         }
-        .editor-action-bar__submit {
-            min-width: 7rem;
+        .editor-actions__submit {
             border-color: rgba(49, 130, 246, 1);
             color: rgba(255, 255, 255, 1);
             background-color: rgba(49, 130, 246, 1);
             box-shadow: 0 10px 24px rgba(49, 130, 246, 0.24);
         }
-        .editor-action-bar__submit:hover,
-        .editor-action-bar__submit:focus {
+        .editor-actions__submit:hover,
+        .editor-actions__submit:focus {
             border-color: rgba(27, 100, 218, 1);
             color: rgba(255, 255, 255, 1);
             background-color: rgba(27, 100, 218, 1);
             transform: translateY(-1px);
         }
-        .editor-action-bar__submit:focus-visible,
-        .editor-action-bar__cancel:focus-visible {
+        .editor-actions__submit:focus-visible,
+        .editor-actions__cancel:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
@@ -266,16 +253,11 @@
             .note-editor.note-frame .note-editable {
                 min-height: 22rem;
             }
-            .editor-action-bar {
-                bottom: 0.65rem;
-                margin-right: -0.35rem;
-                margin-left: -0.35rem;
-            }
-            .editor-action-bar > .d-flex {
+            .editor-actions {
                 display: grid !important;
-                grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-            .editor-action-bar .btn {
+            .editor-actions .btn {
                 width: 100%;
             }
         }
@@ -291,15 +273,14 @@
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-5xl">
                 <header class="editor-intro">
-                    <p class="editor-intro__eyebrow">Editor</p>
-                    <h2 class="editor-intro__title"
-                        th:text="${article.id} != null ? '이야기를 다듬어보세요' : '새로운 이야기를 시작하세요'">
-                        새로운 이야기를 시작하세요
-                    </h2>
-                    <p class="editor-intro__description">
-                        읽는 사람에게 오래 남을 생각을 편안하게 기록해보세요.
-                        저장 전 제목과 본문을 한 번 더 확인할 수 있습니다.
+                    <p class="editor-intro__eyebrow">
+                        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                        <span th:text="${article.id} != null ? 'EDIT' : 'WRITE'">WRITE</span>
                     </p>
+                    <h2 class="editor-intro__title"
+                        th:text="${article.id} != null ? '글수정' : '글쓰기'">
+                        글쓰기
+                    </h2>
                 </header>
                 <!-- 게시글 작성·수정 카드 -->
                 <div class="card border-0 shadow-sm editor-card">
@@ -315,11 +296,11 @@
                                 <div class="form-group mb-4 editor-field">
                                     <label for="title" class="editor-field__label">
                                         <span>제목</span>
-                                        <span class="editor-field__hint">한눈에 이해할 수 있는 문장으로 적어주세요</span>
+                                        <span class="editor-field__hint">최대 40자</span>
                                     </label>
                                     <input type="text"
                                            class="form-control editor-title-input"
-                                           placeholder="어떤 이야기를 들려주실 건가요?"
+                                           placeholder="제목을 입력해주세요"
                                            id="title"
                                            data-max-length="40"
                                            aria-describedby="title-length title-error"
@@ -339,7 +320,7 @@
                                 <div class="form-group mb-4 editor-field">
                                     <label for="content" class="editor-field__label">
                                         <span>본문</span>
-                                        <span class="editor-field__hint">이미지와 링크를 활용해 내용을 풍성하게 구성할 수 있어요</span>
+                                        <span class="editor-field__hint">이미지와 링크를 추가할 수 있습니다</span>
                                     </label>
                                     <textarea class="form-control" rows="12" placeholder="내용" id="content" th:text="${article.content}"></textarea>
                                     <small id="image-upload-status"
@@ -354,33 +335,33 @@
                                  aria-live="polite"></div>
 
                             <!-- 게시글 등록·수정 버튼 -->
-                            <div class="editor-action-bar">
-                                <div class="d-flex flex-wrap justify-content-end">
-                                    <a th:if="${article.id} != null"
-                                       th:href="@{/articles/{id}(id=${article.id})}"
-                                       class="btn btn-sm editor-action-bar__cancel">
-                                        취소
-                                    </a>
-                                    <a th:if="${article.id} == null"
-                                       th:href="@{/articles}"
-                                       class="btn btn-sm editor-action-bar__cancel">
-                                        취소
-                                    </a>
-                                    <button th:if="${article.id} != null"
-                                            type="submit"
-                                            id="modify-btn"
-                                            class="btn btn-primary btn-sm mb-2 editor-action-bar__submit">
-                                        <i class="bi bi-check2" aria-hidden="true"></i>
-                                        <span>수정 완료</span>
-                                    </button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
-                                    <button th:if="${article.id} == null"
-                                            type="submit"
-                                            id="create-btn"
-                                            class="btn btn-primary btn-sm mb-2 editor-action-bar__submit">
-                                        <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
-                                        <span>글 발행하기</span>
-                                    </button>
-                                </div>
+                            <div class="editor-actions">
+                                <a th:if="${article.id} != null"
+                                   th:href="@{/articles/{id}(id=${article.id})}"
+                                   class="btn app-button editor-actions__cancel">
+                                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                    <span>취소</span>
+                                </a>
+                                <a th:if="${article.id} == null"
+                                   th:href="@{/articles}"
+                                   class="btn app-button editor-actions__cancel">
+                                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                    <span>취소</span>
+                                </a>
+                                <button th:if="${article.id} != null"
+                                        type="submit"
+                                        id="modify-btn"
+                                        class="btn btn-primary app-button editor-actions__submit">
+                                    <i class="bi bi-check2" aria-hidden="true"></i>
+                                    <span>수정</span>
+                                </button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
+                                <button th:if="${article.id} == null"
+                                        type="submit"
+                                        id="create-btn"
+                                        class="btn btn-primary app-button editor-actions__submit">
+                                    <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                                    <span>등록</span>
+                                </button>
                             </div>
                         </form>
                     </div>
