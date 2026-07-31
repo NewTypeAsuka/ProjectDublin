@@ -14,6 +14,7 @@
             justify-content: space-between;
             gap: 1.5rem;
             flex-wrap: wrap;
+            margin-bottom: 2.5rem;
         }
         .article-list-toolbar__heading {
             max-width: 38rem;
@@ -145,18 +146,24 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            flex-wrap: nowrap;
+            gap: 0.1rem;
+            width: fit-content;
+            max-width: 100%;
+            margin-left: auto;
+            padding: 0.15rem 0.25rem;
+            border-radius: 999px;
+            background-color: rgba(247, 249, 252, 1);
             text-align: right;
+            white-space: nowrap;
         }
         .article-card__metric {
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
-            min-height: 2rem;
-            padding: 0.3rem 0.65rem;
-            border-radius: 999px;
-            background-color: rgba(247, 249, 252, 1);
+            min-height: 1.9rem;
+            padding: 0.25rem 0.45rem;
+            background-color: transparent;
         }
         .article-card__like-icon {
             color: rgba(224, 49, 49, 1);
@@ -235,10 +242,13 @@
             #main-content .article-list-toolbar {
                 margin-bottom: 1.25rem !important;
             }
+            .article-list-toolbar__title {
+                margin-bottom: 0;
+            }
             .article-card__header {
                 display: grid;
                 grid-template-columns: max-content minmax(0, 1fr);
-                align-items: flex-start;
+                align-items: center;
                 gap: 0.5rem;
             }
             .article-card__byline {
@@ -248,9 +258,6 @@
             .article-card__byline-main {
                 white-space: normal;
                 overflow-wrap: anywhere;
-            }
-            .article-card__metrics {
-                gap: 0.35rem;
             }
             .article-list-toolbar__symbol {
                 display: none;
@@ -270,7 +277,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
                 <!-- 게시글 목록 상단 섹션(포스트) -->
-                <div class="article-list-toolbar mb-4 tw:mb-10">
+                <div class="article-list-toolbar">
                     <div class="article-list-toolbar__heading">
                         <span class="article-list-toolbar__eyebrow">
                             <i class="bi bi-journal-richtext" aria-hidden="true"></i>

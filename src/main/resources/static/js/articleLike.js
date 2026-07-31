@@ -43,7 +43,7 @@
             })
             .catch(() => {
                 if (showError) {
-                    showActionMessage('좋아요를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                    showActionMessage('좋아요를 변경하지 못했습니다. 잠시 후 다시 시도해주세요');
                 }
             })
             .finally(() => {

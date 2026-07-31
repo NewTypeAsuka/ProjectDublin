@@ -110,7 +110,7 @@
         /* 게시글 상단 고정 표시와 작성 정보 */
         .article-detail__header {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
             gap: 1rem;
         }
@@ -130,6 +130,9 @@
             font-weight: 700;
             line-height: 1;
         }
+        .article-detail__pin-marker.is-hidden {
+            visibility: hidden;
+        }
         .article-meta {
             display: flex;
             align-items: center;
@@ -139,6 +142,7 @@
             min-width: 0;
             margin-left: auto;
             text-align: right;
+            line-height: 1.55;
         }
         .article-meta__byline {
             white-space: nowrap;
@@ -157,18 +161,24 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: 0.35rem;
+            flex-wrap: nowrap;
+            gap: 0.1rem;
+            width: fit-content;
+            max-width: 100%;
+            margin-left: auto;
+            padding: 0.15rem 0.25rem;
+            border-radius: 999px;
+            background-color: rgba(247, 249, 252, 1);
             text-align: right;
+            white-space: nowrap;
         }
         .article-meta__metric {
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
-            min-height: 2rem;
-            padding: 0.3rem 0.65rem;
-            border-radius: 999px;
-            background-color: rgba(247, 249, 252, 1);
+            min-height: 1.9rem;
+            padding: 0.25rem 0.45rem;
+            background-color: transparent;
         }
         .article-meta__like-icon {
             color: rgba(224, 49, 49, 1);
@@ -428,8 +438,8 @@
             }
             .article-detail__header {
                 display: grid;
-                grid-template-columns: max-content minmax(0, 1fr);
-                align-items: flex-start;
+                grid-template-columns: 2rem minmax(0, 1fr);
+                align-items: center;
                 gap: 0.5rem;
             }
             .article-meta {
@@ -443,8 +453,30 @@
                 overflow-wrap: anywhere;
             }
             .article-detail__metrics {
-                justify-content: flex-start;
-                text-align: left;
+                justify-content: flex-end;
+                text-align: right;
+            }
+            .article-actions,
+            .comment-item__actions,
+            .comment-inline-form__actions {
+                gap: 0.35rem;
+            }
+            .article-actions .btn,
+            .article-comments__submit,
+            .comment-item__actions .btn,
+            .comment-inline-form__button {
+                width: 4.5rem;
+                min-width: 4.5rem;
+                min-height: 2.25rem;
+                padding: 0.35rem 0.55rem;
+                font-size: 0.8rem;
+                line-height: 1.2;
+            }
+            .article-actions .btn > i,
+            .article-comments__submit > i,
+            .comment-item__actions .btn > i,
+            .comment-inline-form__button > i {
+                display: none;
             }
             .comment-replies {
                 margin-left: 0.5rem;
@@ -475,7 +507,8 @@
                         <div class="article-detail__header mb-4">
                             <span id="article-pinned-marker"
                                   class="article-detail__pin-marker"
-                                  th:classappend="${article.pinned} ? '' : ' d-none'">
+                                  th:classappend="${article.pinned} ? '' : ' is-hidden'"
+                                  th:attr="aria-hidden=${!article.pinned}">
                                 <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
                                 <span class="sr-only">고정 게시글</span>
                             </span>

@@ -39,13 +39,13 @@ if (articleForm && (modifyButton || createButton)) {
                 requestBody
             );
             if (!editing && !article?.id) {
-                throw new Error('글 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                throw new Error('글 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요');
             }
 
-            showMessage(editing ? '수정을 완료했습니다.' : '글을 발행했습니다.', false);
+            showMessage(editing ? '수정을 완료했습니다' : '글을 등록했습니다', false);
             location.replace(editing ? `/articles/${articleId}` : `/articles/${article.id}`);
         } catch (error) {
-            showMessage(error.message || '글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.', true);
+            showMessage(error.message || '글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요', true);
             setFormBusy(submitButton, false);
         }
     });
@@ -54,7 +54,7 @@ if (articleForm && (modifyButton || createButton)) {
 // 게시글 저장 요청 본문 생성
 function createArticleRequestBody() {
     if (window.articleEditor && window.articleEditor.isUploading()) {
-        showMessage('이미지 업로드가 완료된 뒤 저장해주세요.', true);
+        showMessage('이미지 업로드가 완료된 뒤 저장해주세요', true);
         return null;
     }
 
@@ -71,18 +71,18 @@ function createArticleRequestBody() {
 
     if (!title) {
         titleInput.setAttribute('aria-invalid', 'true');
-        showMessage('제목을 입력해주세요.', true);
+        showMessage('제목을 입력해주세요', true);
         titleInput.focus();
         return null;
     }
     if (!hasContent) {
-        showMessage('본문 내용을 입력해주세요.', true);
+        showMessage('본문 내용을 입력해주세요', true);
         const editableArea = document.querySelector('.note-editable');
         (editableArea || contentField).focus();
         return null;
     }
     if (countCharacters(title) > maxTitleLength) {
-        showMessage(`제목은 ${maxTitleLength}자 이내로 작성해주세요.`, true);
+        showMessage(`제목은 ${maxTitleLength}자 이내로 작성해주세요`, true);
         titleInput.focus();
         return null;
     }
@@ -174,16 +174,16 @@ async function httpRequest(method, url, body) {
     const response = await fetch(url, options);
     if (response.status === 401) {
         location.replace('/login');
-        throw new Error('로그인이 필요합니다.');
+        throw new Error('로그인이 필요합니다');
     }
     if (!response.ok) {
         if (response.status === 400) {
-            throw new Error('제목과 본문 내용을 다시 확인해주세요.');
+            throw new Error('제목과 본문 내용을 다시 확인해주세요');
         }
         if (response.status === 403) {
-            throw new Error('글을 저장할 권한이 없습니다.');
+            throw new Error('글을 저장할 권한이 없습니다');
         }
-        throw new Error('글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        throw new Error('글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요');
     }
 
     const contentType = response.headers.get('content-type') || '';

@@ -34,7 +34,7 @@
 
             location.replace('/articles');
         } catch (error) {
-            showActionMessage('게시글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.');
+            showActionMessage('게시글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요');
             deleteButton.disabled = false;
             deleteButton.innerHTML = defaultContent;
             deleteButton.setAttribute('aria-busy', 'false');

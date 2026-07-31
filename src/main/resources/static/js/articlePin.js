@@ -43,7 +43,7 @@
                 }
             })
             .catch(() => {
-                showActionMessage('게시글 고정 상태를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                showActionMessage('게시글 고정 상태를 변경하지 못했습니다. 잠시 후 다시 시도해주세요');
             })
             .finally(() => {
                 pinButton.disabled = false;
@@ -59,7 +59,8 @@
         pinIcon.classList.toggle('bi-pin-angle', !pinned);
         pinIcon.classList.toggle('bi-pin-angle-fill', pinned);
         pinLabel.textContent = pinned ? '해제' : '고정';
-        pinnedMarker.classList.toggle('d-none', !pinned);
+        pinnedMarker.classList.toggle('is-hidden', !pinned);
+        pinnedMarker.setAttribute('aria-hidden', String(!pinned));
         hideActionMessage();
     }
 
