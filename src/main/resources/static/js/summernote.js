@@ -34,6 +34,29 @@
         }
     });
 
+    const $editor = $content.siblings('.note-editor').first();
+    // Summernote 드롭다운이 모바일 뷰포트 좌우를 벗어나지 않도록 열린 뒤 위치를 보정한다.
+    $editor.on('shown.bs.dropdown', function (event) {
+        const group = event.target.closest?.('.note-btn-group');
+        const menu = group && Array.from(group.children)
+            .find(child => child.classList.contains('dropdown-menu'));
+        if (!menu) {
+            return;
+        }
+
+        window.requestAnimationFrame(function () {
+            keepDropdownInViewport(menu);
+        });
+    });
+    $editor.on('hidden.bs.dropdown', function (event) {
+        const group = event.target.closest?.('.note-btn-group');
+        const menu = group && Array.from(group.children)
+            .find(child => child.classList.contains('dropdown-menu'));
+        if (menu) {
+            menu.style.removeProperty('margin-left');
+        }
+    });
+
     // 새 글이면 빈 문자열을, 수정이면 기존 HTML을 에디터에 표시한다.
     $content.summernote('code', initialHtml || '');
 
@@ -46,6 +69,23 @@
             return activeUploads > 0;
         }
     };
+
+    function keepDropdownInViewport(menu) {
+        const viewportGutter = 12;
+        menu.style.removeProperty('margin-left');
+
+        const bounds = menu.getBoundingClientRect();
+        let offset = 0;
+        if (bounds.right > window.innerWidth - viewportGutter) {
+            offset -= bounds.right - (window.innerWidth - viewportGutter);
+        }
+        if (bounds.left + offset < viewportGutter) {
+            offset += viewportGutter - (bounds.left + offset);
+        }
+        if (offset !== 0) {
+            menu.style.marginLeft = `${offset}px`;
+        }
+    }
 
     async function uploadImage(file) {
         const formData = new FormData();
