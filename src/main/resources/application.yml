@@ -22,9 +22,6 @@ spring:
 #  datasource:
 #    url: jdbc:h2:mem:testdb # h2 데이터베이스 url(jdbc:h2:mem:xxx 형식)
 #    user: sa # h2 데이터베이스 사용자명
-  h2:
-    console:
-        enabled: true # h2 콘솔 활성화(http://localhost:8080/h2-console)
   security:
     oauth2:
       client:
@@ -48,4 +45,3 @@ aws:
     key-prefix: projectdublin/articles # key-prefix/[사용자id]/[연도]/[월]/[uuid].[확장자] 형식으로 저장됨. key-prefix는 프로젝트별로 다르게 설정 가능
     public-base-url:
     max-file-size: 50MB # 파일 업로드 최대 크기 설정. application.yml에서 설정한 값보다 큰 파일을 업로드하면 500 에러 발생
-    

@@ -2,6 +2,7 @@ package me.newtypeasuka.projectdublin.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.Comment;
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
@@ -26,6 +27,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -200,6 +203,35 @@ class ArticleApiControllerTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @DisplayName("Google OAuth 인증 요청을 세션에 저장하고 직렬화 쿠키를 생성하지 않는다")
+    @Test
+    void storeOAuthAuthorizationRequestInSession() throws Exception {
+        MvcResult result = mockMvc.perform(get("/oauth2/authorization/google"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        HttpSession session = result.getRequest().getSession(false);
+        assertThat(session).isNotNull();
+
+        OAuth2AuthorizationRequest authorizationRequest = (OAuth2AuthorizationRequest) session.getAttribute(
+                HttpSessionOAuth2AuthorizationRequestRepository.class.getName() + ".AUTHORIZATION_REQUEST"
+        );
+
+        assertThat(authorizationRequest).isNotNull();
+        assertThat(authorizationRequest.getState()).isNotBlank();
+        assertThat(result.getResponse().getCookie("oauth2_auth_request")).isNull();
+        assertThat(result.getResponse().getRedirectedUrl())
+                .startsWith("https://accounts.google.com/o/oauth2/v2/auth")
+                .contains("state=");
+    }
+
+    @DisplayName("H2 웹 콘솔은 애플리케이션에 노출하지 않는다")
+    @Test
+    void doNotExposeH2Console() throws Exception {
+        mockMvc.perform(get("/h2-console/").with(loginUser(member)))
+                .andExpect(status().isNotFound());
     }
 
     @DisplayName("한 사용자는 한 글에 좋아요를 한 번만 누르고 취소할 수 있다")

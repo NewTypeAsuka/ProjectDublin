@@ -1,8 +1,6 @@
 package me.newtypeasuka.projectdublin.config;
 
 import lombok.RequiredArgsConstructor;
-import me.newtypeasuka.projectdublin.config.oauth.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import me.newtypeasuka.projectdublin.config.oauth.OAuth2SuccessHandler;
 import me.newtypeasuka.projectdublin.config.oauth.OAuth2UserCustomService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,13 +9,12 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
-
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @RequiredArgsConstructor
 @Configuration
@@ -25,11 +22,10 @@ public class WebOAuthSecurityConfig {
 
     private final OAuth2UserCustomService oAuth2UserCustomService;
 
-    // 스프링 시큐리티 기능 비활성화
+    // 정적 리소스는 인증 없이 제공할 수 있도록 보안 필터에서 제외
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
-                .requestMatchers(toH2Console()) // filterChain 보안 필터 체인 제외
                 .requestMatchers( // filterChain 보안 필터 체인 제외
                         new AntPathRequestMatcher("/img/**"), // 브라우저는 기본적으로 /src/main/resources/static/을 정적 리소스 루트로 이용, 그러므로 /img/**
                         new AntPathRequestMatcher("/css/**"),
@@ -60,9 +56,9 @@ public class WebOAuthSecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2 // OAuth2 로그인 전체 흐름 설정
                         .loginPage("/login") // 인증되지 않은 사용자가 이동할 로그인 페이지
-                        .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())) // Google 리다이렉트 전 요청 저장 및 콜백 시 복원
+                        .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.authorizationRequestRepository(oAuth2AuthorizationRequestRepository())) // Google 리다이렉트 전 요청을 HttpSession에 저장하고 콜백 시 복원
                         .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuth2UserCustomService)) // google 사용자 정보 조회 후 내부 User 저장 및 갱신
-                        .successHandler(oAuth2SuccessHandler()) // google 로그인 성공 후 임시 쿠키 정리 및 /articles 이동
+                        .defaultSuccessUrl("/articles", true) // google 로그인 성공 후 /articles 이동
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling // 인증 실패 상황 시 응답 흐름 설정
                         .defaultAuthenticationEntryPointFor(
@@ -76,14 +72,10 @@ public class WebOAuthSecurityConfig {
                 .build();
     }
 
+    // OAuth 인증 요청을 클라이언트 쿠키가 아닌 서버 HttpSession에 저장
     @Bean
-    public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(oAuth2AuthorizationRequestBasedOnCookieRepository());
-    }
-
-    @Bean
-    public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
-        return new OAuth2AuthorizationRequestBasedOnCookieRepository();
+    public HttpSessionOAuth2AuthorizationRequestRepository oAuth2AuthorizationRequestRepository() {
+        return new HttpSessionOAuth2AuthorizationRequestRepository();
     }
 
 }
