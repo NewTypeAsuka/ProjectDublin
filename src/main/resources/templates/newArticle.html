@@ -381,6 +381,7 @@
           class="container flex-fill py-4 py-md-5 editor-shell tw:relative">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-5xl">
+
                 <!-- 게시글 목록 상단 섹션(글수정/글쓰기) -->
                 <section class="editor-intro">
                     <p class="editor-intro__eyebrow">
@@ -393,15 +394,13 @@
                     </h2>
                 </section>
 
-                <!-- 게시글 작성·수정 섹션 -->
+                <!-- 게시글 작성,수정 섹션 -->
                 <section class="card border-0 shadow-sm editor-card">
                     <div class="card-body p-4 p-md-5 editor-card__body">
                         <form id="article-form" novalidate>
                             <input type="hidden" id="article-id" th:value="${article.id}"> <!-- 아이디 정보 저장 -->
-                            <!-- <header class="mb-4">
-                                <div class="text-uppercase text-muted small mb-2">Editor</div>
-                                <h2 class="h4 mb-0" th:text="${article.id} != null ? '글 수정' : '새 글 작성'">새 글 작성</h2>
-                            </header> -->
+
+                            <!-- 게시글 제목,본문 섹션 -->
                             <section>
                                 <!-- 게시글 제목 글자 수와 40자 제한 안내 -->
                                 <div class="form-group mb-4 editor-field editor-field--title">
@@ -472,9 +471,11 @@
                                     <span>등록</span>
                                 </button>
                             </div>
+
                         </form>
                     </div>
                 </section>
+
             </div>
         </div>
     </main>

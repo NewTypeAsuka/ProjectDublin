@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -99,6 +100,7 @@ class BlogApiControllerTest {
 
         String createResponse = mockMvc.perform(post("/api/articles")
                         .with(loginUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
@@ -143,6 +145,7 @@ class BlogApiControllerTest {
 
         mockMvc.perform(put("/api/articles/{id}", articleId)
                         .with(loginUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
@@ -188,6 +191,7 @@ class BlogApiControllerTest {
 
         String createResponse = mockMvc.perform(post("/api/articles")
                         .with(loginUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated())
@@ -203,6 +207,7 @@ class BlogApiControllerTest {
         );
         mockMvc.perform(put("/api/articles/{id}", articleId)
                         .with(loginUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -254,6 +259,7 @@ class BlogApiControllerTest {
 
         String createResponse = mockMvc.perform(post("/api/articles")
                         .with(loginUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
@@ -271,7 +277,9 @@ class BlogApiControllerTest {
                     assertThat(image.getFileSize()).isEqualTo(9L);
                 });
 
-        mockMvc.perform(delete("/api/articles/{id}", articleId).with(loginUser()))
+        mockMvc.perform(delete("/api/articles/{id}", articleId)
+                        .with(loginUser())
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         assertThat(articleImageRepository.findAllByArticleId(articleId)).isEmpty();

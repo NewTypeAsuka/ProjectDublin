@@ -22,7 +22,7 @@
     function updateLike(method, showError = true) {
         likeButton.disabled = true;
 
-        fetch(`/api/articles/${articleId}/likes`, {
+        window.csrfFetch(`/api/articles/${articleId}/likes`, {
             method,
             credentials: 'same-origin'
         })

@@ -20,7 +20,7 @@
         deleteButton.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>${defaultLabel}</span>`;
         deleteButton.setAttribute('aria-busy', 'true');
         try {
-            const response = await fetch(`/api/articles/${articleId}`, {
+            const response = await window.csrfFetch(`/api/articles/${articleId}`, {
                 method: 'DELETE',
                 credentials: 'same-origin'
             });

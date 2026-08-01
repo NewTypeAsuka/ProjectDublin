@@ -97,7 +97,7 @@
         setUploadStatus('이미지를 업로드하고 있습니다', false);
 
         try {
-            const response = await fetch('/api/articles/images', {
+            const response = await window.csrfFetch('/api/articles/images', {
                 method: 'POST',
                 credentials: 'same-origin',
                 body: formData

@@ -20,7 +20,7 @@
     function updatePinned(method) {
         pinButton.disabled = true;
 
-        fetch(`/api/articles/${articleId}/pin`, {
+        window.csrfFetch(`/api/articles/${articleId}/pin`, {
             method,
             credentials: 'same-origin'
         })

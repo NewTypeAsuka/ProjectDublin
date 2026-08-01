@@ -171,7 +171,7 @@ async function httpRequest(method, url, body) {
         options.body = body;
     }
 
-    const response = await fetch(url, options);
+    const response = await window.csrfFetch(url, options);
     if (response.status === 401) {
         location.replace('/login');
         throw new Error('로그인이 필요합니다');

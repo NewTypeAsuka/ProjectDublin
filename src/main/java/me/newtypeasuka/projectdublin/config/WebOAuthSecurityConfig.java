@@ -7,6 +7,7 @@ import me.newtypeasuka.projectdublin.config.oauth.OAuth2UserCustomService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,11 +41,11 @@ public class WebOAuthSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(AbstractHttpConfigurer::disable) // csrf 설정 비활성화 -> 나중에 켜야 할 듯?
+                .csrf(Customizer.withDefaults()) // 세션 기반 CSRF 토큰으로 상태 변경 요청을 검증
                 .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화(OAuth2 인증이라 꺼둠)
                 .formLogin(AbstractHttpConfigurer::disable) // 이메일/비밀번호 기반 로그인 폼 비활성화
                 .logout(logout -> logout // 로그아웃 설정
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")) // /logout 요청시 로그아웃 처리 -> 현재 csrf 비활성화 상태라 GET /logout 동작 가능
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST")) // CSRF 토큰이 포함된 POST 요청만 로그아웃 처리
                         .logoutSuccessUrl("/login") // 로그아웃 성공 시 이동할 경로 설정
                         .invalidateHttpSession(true) /// 로그아웃 시 세션 무효화
                         .deleteCookies("JSESSIONID")) // 로그아웃 시 JSESSIONID 쿠키 삭제

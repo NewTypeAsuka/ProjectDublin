@@ -40,6 +40,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,6 +49,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
@@ -115,7 +117,8 @@ class ArticleApiControllerTest {
 
         mockMvc.perform(multipart("/api/articles/images")
                         .file(image)
-                        .with(oauth2Login()))
+                        .with(oauth2Login())
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.url").value(
                         "https://projectdublin-test-images.s3.ap-northeast-2.amazonaws.com/"
@@ -133,8 +136,70 @@ class ArticleApiControllerTest {
                 new byte[]{0x01}
         );
 
-        mockMvc.perform(multipart("/api/articles/images").file(image))
+        mockMvc.perform(multipart("/api/articles/images")
+                        .file(image)
+                        .with(csrf()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @DisplayName("CSRF 토큰이 없거나 올바르지 않은 상태 변경 요청을 거절한다")
+    @Test
+    void rejectArticleMutationWithoutValidCsrfToken() throws Exception {
+        String endpoint = "/api/articles/" + article.getId() + "/likes";
+
+        mockMvc.perform(put(endpoint).with(loginUser(member)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(put(endpoint)
+                        .with(loginUser(member))
+                        .with(csrf().useInvalidToken()))
+                .andExpect(status().isForbidden());
+
+        assertThat(articleLikeRepository.count()).isZero();
+
+        // 프론트엔드와 동일하게 CSRF 토큰을 요청 헤더로 보내면 상태 변경을 허용한다.
+        mockMvc.perform(put(endpoint)
+                        .with(loginUser(member))
+                        .with(csrf().asHeader()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.liked").value(true));
+    }
+
+    @DisplayName("화면에 CSRF 토큰과 POST 로그아웃 폼을 제공한다")
+    @Test
+    void renderCsrfTokenAndPostLogoutForm() throws Exception {
+        MvcResult result = mockMvc.perform(
+                        get("/articles/{id}", article.getId()).with(loginUser(member))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element tokenMeta = document.selectFirst("meta[name=_csrf]");
+        Element headerMeta = document.selectFirst("meta[name=_csrf_header]");
+        Element logoutForm = document.selectFirst("form[action=/logout][method=post]");
+
+        assertThat(tokenMeta).isNotNull();
+        assertThat(tokenMeta.attr("content")).isNotBlank();
+        assertThat(headerMeta).isNotNull();
+        assertThat(headerMeta.attr("content")).isEqualTo("X-CSRF-TOKEN");
+        assertThat(document.select("script[src=/js/csrf.js]")).hasSize(1);
+        assertThat(logoutForm).isNotNull();
+        assertThat(logoutForm.select("input[name=_csrf]").attr("value")).isNotBlank();
+        assertThat(document.select("a[href=/logout]")).isEmpty();
+    }
+
+    @DisplayName("로그아웃은 유효한 CSRF 토큰이 포함된 POST 요청만 처리한다")
+    @Test
+    void requireCsrfTokenForLogout() throws Exception {
+        mockMvc.perform(post("/logout").with(loginUser(member)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/logout")
+                        .with(loginUser(member))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @DisplayName("한 사용자는 한 글에 좋아요를 한 번만 누르고 취소할 수 있다")
@@ -147,12 +212,12 @@ class ArticleApiControllerTest {
                 .andExpect(jsonPath("$.liked").value(false))
                 .andExpect(jsonPath("$.likeCount").value(0));
 
-        mockMvc.perform(put(endpoint).with(loginUser(admin)))
+        mockMvc.perform(put(endpoint).with(loginUser(admin)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.liked").value(true))
                 .andExpect(jsonPath("$.likeCount").value(1));
 
-        mockMvc.perform(put(endpoint).with(loginUser(admin)))
+        mockMvc.perform(put(endpoint).with(loginUser(admin)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.liked").value(true))
                 .andExpect(jsonPath("$.likeCount").value(1));
@@ -161,17 +226,17 @@ class ArticleApiControllerTest {
         assertThat(articleLikeRepository.existsById(
                 new ArticleLikeId(admin.getId(), article.getId()))).isTrue();
 
-        mockMvc.perform(put(endpoint).with(loginUser(member)))
+        mockMvc.perform(put(endpoint).with(loginUser(member)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.liked").value(true))
                 .andExpect(jsonPath("$.likeCount").value(2));
 
-        mockMvc.perform(delete(endpoint).with(loginUser(admin)))
+        mockMvc.perform(delete(endpoint).with(loginUser(admin)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.liked").value(false))
                 .andExpect(jsonPath("$.likeCount").value(1));
 
-        mockMvc.perform(delete(endpoint).with(loginUser(admin)))
+        mockMvc.perform(delete(endpoint).with(loginUser(admin)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.liked").value(false))
                 .andExpect(jsonPath("$.likeCount").value(1));
@@ -210,16 +275,16 @@ class ArticleApiControllerTest {
     void onlyAdminCanPinAndUnpinArticle() throws Exception {
         String endpoint = "/api/articles/" + article.getId() + "/pin";
 
-        mockMvc.perform(put(endpoint).with(loginUser(member)))
+        mockMvc.perform(put(endpoint).with(loginUser(member)).with(csrf()))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(put(endpoint).with(loginUser(admin)))
+        mockMvc.perform(put(endpoint).with(loginUser(admin)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pinned").value(true));
 
         assertThat(blogRepository.findById(article.getId()).orElseThrow().isPinned()).isTrue();
 
-        mockMvc.perform(delete(endpoint).with(loginUser(admin)))
+        mockMvc.perform(delete(endpoint).with(loginUser(admin)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pinned").value(false));
 
@@ -241,7 +306,9 @@ class ArticleApiControllerTest {
         );
         commentRepository.save(new Comment(article, member, comment, "목록의 대댓글"));
 
-        mockMvc.perform(put("/api/articles/{id}/pin", article.getId()).with(loginUser(admin)))
+        mockMvc.perform(put("/api/articles/{id}/pin", article.getId())
+                        .with(loginUser(admin))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         MvcResult result = mockMvc.perform(get("/articles").with(loginUser(member)))
@@ -362,23 +429,27 @@ class ArticleApiControllerTest {
         ));
         mockMvc.perform(put("/api/articles/{id}", article.getId())
                         .with(loginUser(member))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(put("/api/articles/{id}", memberArticle.getId())
                         .with(loginUser(admin))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Managed by admin"));
 
         mockMvc.perform(delete("/api/articles/{id}", article.getId())
-                        .with(loginUser(member)))
+                        .with(loginUser(member))
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(delete("/api/articles/{id}", memberArticle.getId())
-                        .with(loginUser(admin)))
+                        .with(loginUser(admin))
+                        .with(csrf()))
                 .andExpect(status().isOk());
         assertThat(blogRepository.findById(memberArticle.getId())).isEmpty();
     }
@@ -386,7 +457,9 @@ class ArticleApiControllerTest {
     @DisplayName("상세 화면의 고정 버튼은 관리자에게만 표시된다")
     @Test
     void showPinButtonOnlyToAdmin() throws Exception {
-        mockMvc.perform(put("/api/articles/{id}/pin", article.getId()).with(loginUser(admin)))
+        mockMvc.perform(put("/api/articles/{id}/pin", article.getId())
+                        .with(loginUser(admin))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(admin)))
@@ -414,6 +487,7 @@ class ArticleApiControllerTest {
 
         MvcResult createdComment = mockMvc.perform(post(commentsEndpoint)
                         .with(loginUser(member))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commentBody("회원 댓글 !*$ 😀")))
                 .andExpect(status().isCreated())
@@ -428,10 +502,11 @@ class ArticleApiControllerTest {
         long commentId = responseId(createdComment);
 
         MvcResult createdReply = mockMvc.perform(post(
-                                commentsEndpoint + "/{commentId}/replies",
-                                commentId
-                        )
+                        commentsEndpoint + "/{commentId}/replies",
+                        commentId
+                )
                         .with(loginUser(admin))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commentBody("관리자 대댓글")))
                 .andExpect(status().isCreated())
@@ -443,6 +518,7 @@ class ArticleApiControllerTest {
 
         mockMvc.perform(put(commentsEndpoint + "/{commentId}", commentId)
                         .with(loginUser(admin))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commentBody("관리자가 수정한 회원 댓글")))
                 .andExpect(status().isOk())
@@ -466,7 +542,8 @@ class ArticleApiControllerTest {
                 .andExpect(jsonPath("$[0].replies[0].content").value("관리자 대댓글"));
 
         mockMvc.perform(delete(commentsEndpoint + "/{commentId}", commentId)
-                        .with(loginUser(admin)))
+                        .with(loginUser(admin))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get(commentsEndpoint).with(loginUser(member)))
@@ -482,18 +559,21 @@ class ArticleApiControllerTest {
         String commentsEndpoint = "/api/articles/" + article.getId() + "/comments";
 
         mockMvc.perform(post(commentsEndpoint)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commentBody("로그인하지 않은 댓글")))
                 .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post(commentsEndpoint)
                         .with(loginUser(member))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commentBody("   ")))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post(commentsEndpoint)
                         .with(loginUser(member))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commentBody("가".repeat(1001))))
                 .andExpect(status().isBadRequest());

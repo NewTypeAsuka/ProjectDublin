@@ -396,7 +396,7 @@
             requestOptions.body = options.body;
         }
 
-        const response = await fetch(url, requestOptions);
+        const response = await window.csrfFetch(url, requestOptions);
         if (response.status === 401) {
             location.replace('/login');
             throw new Error('로그인이 필요합니다');
