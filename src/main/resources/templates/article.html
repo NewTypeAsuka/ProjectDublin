@@ -7,8 +7,7 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
-        /* 게시글 본문: 타이포그래피와 첨부 콘텐츠 */
-        /* 게시글 본문 이미지와 동영상의 반응형 표시 */
+        /* layout: 게시글 본문 타이포그래피와 반응형 첨부 콘텐츠 */
         .article-content img,
         .article-content iframe {
             max-width: 100%;
@@ -69,7 +68,7 @@
             text-underline-offset: 0.2em;
         }
 
-        /* 게시글 탐색: 목록으로 돌아가기 링크 */
+        /* layout: 게시글 목록으로 돌아가기 링크 */
         .article-back-link {
             display: inline-flex;
             align-items: center;
@@ -84,6 +83,7 @@
             transition: color 0.18s ease, background-color 0.18s ease,
                 transform 0.18s ease;
         }
+        /* interaction: 목록 링크의 hover·focus 이동 효과 */
         .article-back-link:hover,
         .article-back-link:focus {
             color: rgba(27, 100, 218, 1);
@@ -91,12 +91,13 @@
             text-decoration: none;
             transform: translateX(-2px);
         }
+        /* 접근성: 목록 링크의 키보드 포커스 표시 */
         .article-back-link:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
 
-        /* 게시글·댓글 카드: 공통 표면과 내부 여백 */
+        /* layout: 게시글·댓글 카드의 공통 표면과 내부 여백 */
         .article-detail-card,
         .article-comments {
             border: 1px solid rgba(15, 23, 42, 0.07) !important;
@@ -116,8 +117,7 @@
             letter-spacing: -0.055em;
         }
 
-        /* 게시글 카드 상단: 고정 상태와 작성 정보 */
-        /* 게시글 상단 고정 표시와 작성 정보 */
+        /* layout: 게시글 상단 고정 표시와 작성 정보 */
         .article-detail__header {
             display: flex;
             align-items: center;
@@ -171,7 +171,7 @@
             line-height: 1;
         }
 
-        /* 게시글 조회수·좋아요·댓글 지표 */
+        /* layout: 게시글 조회수·좋아요·댓글 지표 */
         .article-detail__metrics {
             display: flex;
             align-items: center;
@@ -199,7 +199,7 @@
             color: rgba(224, 49, 49, 1);
         }
 
-        /* 게시글 좋아요 버튼 */
+        /* layout: 게시글 좋아요 버튼 */
         .article-like {
             display: flex;
             align-items: center;
@@ -214,8 +214,9 @@
             min-height: 3.15rem;
             padding: 0.65rem 1.15rem;
             border: 1px solid rgba(15, 23, 42, 0.09);
-            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 1);
             box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
@@ -224,6 +225,7 @@
                 background-color 0.18s ease, transform 0.18s ease,
                 box-shadow 0.18s ease;
         }
+        /* interaction: 좋아요 버튼의 hover·focus 상태 */
         .article-like__button:hover,
         .article-like__button:focus {
             border-color: rgba(224, 49, 49, 1);
@@ -232,11 +234,13 @@
             box-shadow: 0 12px 28px rgba(224, 49, 49, 0.11);
             transform: translateY(-1px);
         }
+        /* 접근성: 좋아요·고정 버튼의 키보드 포커스 표시 */
         .article-like__button:focus-visible,
         .article-pin__button:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
+        /* interaction: 좋아요 버튼의 비활성·선택 상태 */
         .article-like__button:disabled {
             cursor: wait;
             opacity: 0.65;
@@ -257,7 +261,7 @@
             font-weight: 600;
         }
 
-        /* 게시글 고정 버튼 */
+        /* layout: 게시글 고정 버튼 */
         .article-pin__button {
             display: inline-flex;
             align-items: center;
@@ -267,12 +271,14 @@
             min-height: 3.15rem;
             padding: 0.65rem 1.05rem;
             border: 1px solid rgba(15, 23, 42, 0.09);
-            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             color: rgba(108, 117, 125, 1);
             background-color: rgba(255, 255, 255, 1);
             transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
         }
+        /* interaction: 고정 버튼의 hover·focus·선택 상태 */
         .article-pin__button:hover,
         .article-pin__button:focus,
         .article-pin__button.is-pinned {
@@ -285,6 +291,7 @@
         .article-pin__button:focus {
             transform: translateY(-1px);
         }
+        /* interaction: 고정 버튼의 비활성 상태 */
         .article-pin__button:disabled {
             cursor: wait;
             opacity: 0.65;
@@ -295,7 +302,7 @@
             line-height: 1;
         }
 
-        /* 게시글 수정·삭제 버튼 */
+        /* layout: 게시글 수정·삭제 버튼과 상태 메시지 */
         .article-actions {
             display: flex;
             align-items: center;
@@ -310,8 +317,9 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.9rem;
-            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             font-weight: 650;
         }
         .article-actions__delete {
@@ -326,7 +334,7 @@
             font-size: 0.9rem;
         }
 
-        /* 댓글 작성 영역 */
+        /* layout: 댓글 작성 영역 */
         .article-comments__textarea {
             min-height: 7rem;
             padding: 1rem;
@@ -338,6 +346,7 @@
             transition: border-color 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
         }
+        /* interaction: 댓글 입력 영역의 focus 상태 */
         .article-comments__textarea:focus {
             border-color: rgba(49, 130, 246, 0.42);
             background-color: rgba(255, 255, 255, 1);
@@ -347,8 +356,9 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(49, 130, 246, 1);
-            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             background-color: rgba(49, 130, 246, 1);
             font-weight: 680;
         }
@@ -356,7 +366,7 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* 댓글 목록과 액션 버튼 */
+        /* layout: 댓글 목록과 액션 버튼 */
         .comment-list {
             border-top: 1px solid rgba(233, 236, 239, 1);
         }
@@ -400,14 +410,15 @@
         .comment-item__actions .btn {
             min-height: 2.5rem;
             padding: 0.45rem 0.65rem;
-            /* 미사용 보존: 동적 버튼에도 적용되는 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 동적 버튼에도 적용되는 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             font-size: 0.82rem;
             font-weight: 650;
             text-decoration: none;
         }
 
-        /* 대댓글과 인라인 작성·수정 폼 */
+        /* layout: 대댓글과 인라인 작성·수정 폼 */
         .comment-replies {
             margin-top: 1rem;
             margin-left: 2rem;
@@ -449,8 +460,7 @@
             font-weight: 650;
         }
 
-        /* 모바일: 메타데이터·액션 버튼·대댓글 밀도 조정 */
-        /* 모바일 대댓글 들여쓰기 */
+        /* 반응형layout: 모바일 메타데이터·액션 버튼·대댓글 밀도 조정 */
         @media (max-width: 575.98px) {
             .article-back-link {
                 margin-bottom: 0.6rem;

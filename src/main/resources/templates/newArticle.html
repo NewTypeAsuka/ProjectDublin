@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
-        /* 편집 화면 배경과 도입부 */
-        /* 미사용 보존: main 요소의 important tw:relative 유틸리티가 대체한다.
+        /* layout: 편집 화면 배경과 도입부 */
+        /* layout: 미사용 보존 - main 요소의 important tw:relative 유틸리티가 대체한다.
         .editor-shell {
             position: relative;
         }
@@ -54,8 +54,7 @@
             letter-spacing: -0.055em;
         }
 
-        /* 게시글 작성·수정 카드 */
-        /* Summernote의 드롭다운이 작성 카드 경계에서 잘리지 않도록 한다. */
+        /* layout: 게시글 작성·수정 카드와 Summernote 오버레이 영역 */
         .editor-card {
             position: relative;
             overflow: visible;
@@ -82,14 +81,13 @@
         .editor-card__body {
             padding: clamp(1.35rem, 4vw, 3.25rem) !important;
         }
-        /* 미사용 보존: 두 editor-field 모두 Bootstrap mb-4가 여백을 관리한다.
+        /* layout: 미사용 보존 - 두 editor-field 모두 Bootstrap mb-4가 여백을 관리한다.
         .editor-field {
             margin-bottom: 2rem;
         }
         */
 
-        /* 제목 입력 영역 */
-        /* 제목과 본문 사이 간격만 별도로 축소 */
+        /* layout: 제목 입력 영역과 본문 사이 간격 */
         .editor-field--title {
             margin-bottom: 1rem !important;
         }
@@ -119,6 +117,7 @@
             transition: border-color 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
         }
+        /* interaction: 제목 입력창의 placeholder·focus 상태 */
         .editor-title-input::placeholder {
             color: rgba(139, 149, 161, 1);
         }
@@ -129,7 +128,7 @@
             box-shadow: 0 0 0 4px rgba(49, 130, 246, 0.1);
         }
 
-        /* 게시글 제목 글자 수와 제한 안내 */
+        /* layout: 게시글 제목 글자 수와 제한 안내 */
         .article-title__counter {
             font-variant-numeric: tabular-nums;
         }
@@ -140,7 +139,7 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
-        /* 미사용 보존: justify-content를 위의 동일 선택자에 통합했다.
+        /* layout: 미사용 보존 - justify-content를 위의 동일 선택자에 통합했다.
         .article-title__feedback {
             justify-content: flex-end;
         }
@@ -149,8 +148,7 @@
             color: rgba(107, 118, 132, 1) !important;
         }
 
-        /* Summernote 본문: 실행 시 생성되는 note-* 클래스의 카드 표현 */
-        /* Summernote를 집중형 에디터 카드와 같은 톤으로 표시 */
+        /* layout: Summernote 본문 카드와 실행 시 생성되는 note-* 클래스 */
         .note-editor.note-frame {
             overflow: visible;
             border: 1px solid rgba(15, 23, 42, 0.09);
@@ -158,7 +156,7 @@
             box-shadow: none;
         }
 
-        /* Summernote 툴바: 버튼 배치와 상호작용 상태 */
+        /* layout: Summernote 툴바와 버튼 배치 */
         .note-editor.note-frame .note-toolbar {
             position: relative;
             display: flex;
@@ -190,6 +188,7 @@
             color: rgba(51, 61, 75, 1);
             background-color: transparent;
         }
+        /* interaction: Summernote 툴바 버튼의 hover·focus·active 상태 */
         .note-editor.note-frame .note-toolbar > .note-btn-group > .note-btn:hover,
         .note-editor.note-frame .note-toolbar > .note-btn-group > .note-btn:focus,
         .note-editor.note-frame .note-toolbar > .note-btn-group > .note-btn:active,
@@ -205,7 +204,7 @@
             box-shadow: none;
         }
 
-        /* Summernote 편집 본문과 크기 조절 상태바 */
+        /* layout: Summernote 편집 본문과 크기 조절 상태바 */
         .note-editor.note-frame .note-editing-area {
             overflow: hidden;
             background-color: rgba(255, 255, 255, 1);
@@ -223,8 +222,7 @@
             background-color: rgba(247, 249, 252, 1);
         }
 
-        /* Summernote 전체화면 */
-        /* Summernote 전체화면은 작성 카드가 아니라 브라우저 뷰포트를 채운다. */
+        /* layout: Summernote 전체화면은 브라우저 뷰포트를 채움 */
         .note-editor.note-frame.fullscreen {
             position: fixed !important;
             inset: 0 !important;
@@ -247,7 +245,7 @@
             display: none;
         }
 
-        /* 이미지 업로드·폼 처리 상태 */
+        /* interaction: 이미지 업로드·폼 처리 상태 */
         #image-upload-status {
             min-height: 1.4rem;
             padding-left: 0.2rem;
@@ -258,7 +256,7 @@
             font-size: 0.9rem;
         }
 
-        /* 게시글 취소·등록·수정 액션 */
+        /* layout: 게시글 취소·등록·수정 액션 */
         .editor-actions {
             display: flex;
             align-items: center;
@@ -276,8 +274,9 @@
             min-height: 2.9rem;
             margin-bottom: 0 !important;
             padding: 0.6rem 1rem;
-            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             font-weight: 680;
         }
         .editor-actions__cancel {
@@ -291,6 +290,7 @@
             background-color: rgba(49, 130, 246, 1);
             box-shadow: 0 10px 24px rgba(49, 130, 246, 0.24);
         }
+        /* interaction: 게시글 등록·수정 버튼의 hover·focus 상태 */
         .editor-actions__submit:hover,
         .editor-actions__submit:focus {
             border-color: rgba(27, 100, 218, 1);
@@ -298,13 +298,14 @@
             background-color: rgba(27, 100, 218, 1);
             transform: translateY(-1px);
         }
+        /* 접근성: 편집 액션 버튼의 키보드 포커스 표시 */
         .editor-actions__submit:focus-visible,
         .editor-actions__cancel:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
 
-        /* 모바일: 카드 밀도와 Summernote 드롭다운 폭 조정 */
+        /* 반응형layout: 모바일 카드 밀도와 Summernote 드롭다운 폭 조정 */
         @media (max-width: 575.98px) {
             .editor-shell::before {
                 top: 0;
@@ -324,12 +325,12 @@
                 flex-direction: column;
                 gap: 0.25rem;
             }
-            /* 가로 스크롤은 드롭다운까지 자르므로 모바일에서는 툴바를 여러 줄로 배치한다. */
+            /* 반응형layout: 드롭다운이 잘리지 않도록 툴바를 여러 줄로 배치 */
             .note-editor.note-frame .note-toolbar {
                 overflow: visible;
                 flex-wrap: wrap;
             }
-            /* 두 팔레트를 화면 폭 안에 유지하고 색상 셀을 같은 비율로 축소한다. */
+            /* 반응형layout: 색상 팔레트와 셀을 모바일 화면 폭에 맞춤 */
             .note-editor.note-frame .note-toolbar .note-color .dropdown-menu {
                 width: min(21.5rem, calc(100vw - 1.5rem));
                 min-width: 0;

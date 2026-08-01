@@ -7,8 +7,7 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
-        /* 게시글 목록 도입부 */
-        /* 게시글 목록 상단 제목(포스트) */
+        /* layout: 게시글 목록 도입부와 상단 제목 */
         .article-list-toolbar {
             display: flex;
             align-items: flex-end;
@@ -41,7 +40,7 @@
             letter-spacing: -0.055em;
             line-height: 1.08;
         }
-        /* 미사용 보존: 우측 장식 마크업이 현재 HTML에서 주석 처리되어 있다.
+        /* layout: 미사용 보존 - 우측 장식 마크업이 현재 HTML에서 주석 처리되어 있다.
         .article-list-toolbar__symbol {
             display: inline-flex;
             align-items: center;
@@ -57,19 +56,20 @@
         }
         */
 
-        /* 게시글 카드: 외곽 링크와 카드 표면 */
-        /* 게시글 카드 링크와 호버 효과 */
+        /* layout: 게시글 카드 외곽 링크 */
         .article-card-link {
             display: block;
             margin-bottom: 1.15rem;
             color: inherit;
             text-decoration: none;
         }
+        /* interaction: 게시글 카드 링크의 hover·focus 상태 */
         .article-card-link:hover,
         .article-card-link:focus {
             color: inherit;
             text-decoration: none;
         }
+        /* layout: 게시글 카드 표면과 내부 여백 */
         .article-card {
             position: relative;
             overflow: hidden;
@@ -80,6 +80,7 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease,
                 border-color 0.2s ease;
         }
+        /* interaction: 게시글 카드의 hover·focus 부상 효과 */
         .article-card-link:hover .article-card,
         .article-card-link:focus .article-card,
         .article-card-link:focus-visible .article-card {
@@ -87,6 +88,7 @@
             transform: translateY(-3px);
             box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1) !important;
         }
+        /* 접근성: 게시글 카드 링크의 키보드 포커스 표시 */
         .article-card-link:focus-visible {
             border-radius: 1.6rem;
             outline: 3px solid rgba(49, 130, 246, 0.28);
@@ -96,7 +98,7 @@
             padding: clamp(1.35rem, 4vw, 2rem) !important;
         }
 
-        /* 게시글 식별자와 고정 표시 */
+        /* layout: 게시글 식별자와 고정 표시 */
         .article-card__number {
             display: inline-flex;
             align-items: center;
@@ -116,7 +118,7 @@
             font-size: 0.85rem;
             line-height: 1;
         }
-        /* 게시글 작성 일시와 작성자 정보 */
+        /* layout: 게시글 작성 일시와 작성자 정보 */
         .article-card__header {
             display: flex;
             align-items: center;
@@ -145,12 +147,13 @@
             line-height: 1;
         }
 
-        /* 게시글 조회수·좋아요·댓글 지표 */
+        /* layout: 게시글 조회수·좋아요·댓글 지표 */
         .article-card__metrics {
             display: flex;
             align-items: center;
-            /* 미사용 보존: 모든 카드의 Bootstrap justify-content-end가 대체한다. */
-            /* justify-content: flex-end; */
+            /* layout: 미사용 보존 - 모든 카드의 Bootstrap justify-content-end가 대체한다.
+            justify-content: flex-end;
+            */
             flex-wrap: nowrap;
             gap: 0.1rem;
             width: fit-content;
@@ -174,7 +177,7 @@
             color: rgba(224, 49, 49, 1);
         }
 
-        /* 게시글 제목 두 줄 말줄임 */
+        /* layout: 게시글 제목과 미리보기 말줄임 */
         .article-card__title {
             display: -webkit-box;
             max-height: 2.8em;
@@ -199,8 +202,7 @@
             -webkit-line-clamp: 3;
         }
 
-        /* 게시글 피드: 추가 로딩과 빈 목록 상태 */
-        /* 게시글 추가 로딩 상태 */
+        /* layout: 게시글 피드의 추가 로딩과 빈 목록 상태 */
         .article-feed__controls {
             min-height: 4.5rem;
             color: rgba(107, 118, 132, 1);
@@ -213,11 +215,13 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(15, 23, 42, 0.1);
-            /* 미사용 보존: 마크업의 app-button이 important radius를 적용한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 마크업의 app-button이 important radius를 적용한다.
+            border-radius: 999px;
+            */
             color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 0.8);
         }
+        /* interaction: 게시글 추가 로딩 버튼의 hover·focus 상태 */
         .article-feed__load-button:hover,
         .article-feed__load-button:focus {
             border-color: rgba(49, 130, 246, 0.2);
@@ -244,8 +248,7 @@
             font-size: 1.4rem;
         }
 
-        /* 모바일: 목록 도입부와 카드 메타데이터 밀도 조정 */
-        /* 모바일 게시글 카드 작성 정보 */
+        /* 반응형layout: 모바일 목록 도입부와 카드 메타데이터 밀도 조정 */
         @media (max-width: 575.98px) {
             #main-content .article-list-toolbar {
                 margin-bottom: 1.25rem !important;
@@ -267,7 +270,7 @@
                 white-space: normal;
                 overflow-wrap: anywhere;
             }
-            /* 미사용 보존: article-list-toolbar__symbol 마크업과 기본 규칙이 비활성 상태다.
+            /* 반응형layout: 미사용 보존 - article-list-toolbar__symbol 마크업과 기본 규칙이 비활성 상태다.
             .article-list-toolbar__symbol {
                 display: none;
             }

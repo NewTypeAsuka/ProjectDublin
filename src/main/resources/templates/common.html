@@ -7,13 +7,13 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> <!-- Tailwind CSS -->
-        <style type="text/tailwindcss"> /* Tailwind CSS */
-            /* Tailwind CSS를 사용하여 공통 디자인 토큰과 유틸리티를 정의 */
+        <style type="text/tailwindcss"> /* tokens: Tailwind CSS */
+            /* tokens: Tailwind 공통 디자인 토큰과 유틸리티 계층 */
             @layer theme, base, components, utilities;
             @import "tailwindcss/theme.css" layer(theme) prefix(tw);
             @import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
 
-            /* Tailwind 유틸리티에서 사용하는 공통 디자인 토큰 */
+            /* tokens: Tailwind 유틸리티에서 사용하는 공통 디자인 토큰 */
             @theme {
                 --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
                     "Segoe UI", "Noto Sans KR", sans-serif;
@@ -38,7 +38,7 @@
         </style>
     </th:block>
     <style th:fragment="styles">
-        /* 공통 헤더 */
+        /* layout: 공통 헤더 브랜드 링크 */
         .intro-header__title-link,
         .intro-header__title-link:visited,
         .intro-header__title-link:active {
@@ -56,20 +56,20 @@
             color: rgba(3, 105, 161, 1);
             text-decoration: none;
         }
+        /* 접근성: 공통 헤더 링크의 키보드 포커스 표시 */
         .intro-header__title-link:focus-visible {
             outline: 3px solid rgba(3, 105, 161, 0.35);
             outline-offset: 3px;
         }
         .intro-header__title {
             margin-bottom: 0;
-            /* 미사용 보존: 아래의 현대화된 제목 규칙이 같은 속성을 대체한다.
+            /* layout: 미사용 보존 - 아래의 현대화된 제목 규칙이 같은 속성을 대체한다.
             font-weight: 600;
             letter-spacing: 0.04em;
             */
         }
 
-        /* 헤더 그라데이션 배경 */
-        /* 미사용 보존: 아래의 현대화된 공통 헤더가 배경과 모션을 완전히 대체한다.
+        /* animation: 미사용 보존 - 현대화된 공통 헤더가 레거시 배경과 모션을 대체한다.
         .site-header {
             background: linear-gradient(135deg,
                 rgba(230, 243, 255, 1),
@@ -97,8 +97,7 @@
         }
         */
 
-        /* 공통 내비게이션 */
-        /* 미사용 보존: 현재 공통 내비게이션에는 Bootstrap .nav-link 요소가 없다.
+        /* interaction: 미사용 보존 - 현재 공통 내비게이션에는 Bootstrap .nav-link 요소가 없다.
         .site-nav .nav-link {
             transition: color 0.18s ease, transform 0.18s ease;
         }
@@ -108,7 +107,7 @@
         }
         */
 
-        /* 공통 내비게이션: 내부 정렬 */
+        /* layout: 공통 내비게이션 내부 정렬 */
         .site-nav__inner {
             display: flex;
             align-items: center;
@@ -126,7 +125,7 @@
             gap: 0.15rem;
         }
 
-        /* 공통 내비게이션: 메뉴 드롭다운 */
+        /* layout: 공통 내비게이션 메뉴 드롭다운 */
         .site-nav-dropdown {
             position: relative;
             margin: 0;
@@ -137,10 +136,11 @@
             justify-content: center;
             gap: 0.45rem;
             min-width: 2.5rem;
-            /* 미사용 보존: 아래의 min-height가 더 큰 높이를 강제한다. */
-            /* height: 2.5rem; */
+            /* layout: 미사용 보존 - 아래의 min-height가 더 큰 높이를 강제한다.
+            height: 2.5rem;
+            */
             padding: 0 0.8rem;
-            /* 미사용 보존: 아래의 현대화된 드롭다운 규칙이 대체한다.
+            /* layout: 미사용 보존 - 아래의 현대화된 드롭다운 규칙이 대체한다.
             border-radius: 0.35rem;
             color: rgba(255, 255, 255, 0.75);
             */
@@ -154,14 +154,14 @@
         }
         .site-nav-dropdown > summary:hover,
         .site-nav-dropdown > summary:focus {
-            /* 미사용 보존: 아래의 현대화된 hover·focus 규칙이 대체한다.
+            /* interaction: 미사용 보존 - 아래의 현대화된 hover·focus 규칙이 대체한다.
             color: rgba(255, 255, 255, 1);
             background-color: rgba(255, 255, 255, 0.08);
             transform: translateY(-1px);
             */
             outline: none;
         }
-        /* 미사용 보존: 아래의 현대화된 open 상태 규칙이 대체한다.
+        /* interaction: 미사용 보존 - 아래의 현대화된 open 상태 규칙이 대체한다.
         .site-nav-dropdown[open] > summary {
             color: rgba(255, 255, 255, 1);
             background-color: rgba(255, 255, 255, 0.12);
@@ -179,7 +179,7 @@
             top: calc(100% + 0.45rem);
             left: 0;
             min-width: 13rem;
-            /* 미사용 보존: 아래의 현대화된 메뉴 표면 규칙이 대체한다.
+            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 표면 규칙이 대체한다.
             padding: 0.5rem;
             border-radius: 0.8rem;
             background-color: rgba(255, 255, 255, 1);
@@ -188,16 +188,16 @@
             z-index: 1040;
         }
         .site-nav-dropdown__item {
-            /* 미사용 보존: 아래의 현대화된 메뉴 항목 규칙이 대체한다.
+            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 항목 규칙이 대체한다.
             display: block;
             */
             padding: 0.6rem 0.75rem;
-            /* 미사용 보존: 아래의 현대화된 메뉴 항목 규칙이 대체한다.
+            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 항목 규칙이 대체한다.
             border-radius: 0.55rem;
             */
             font-size: 0.92rem;
             line-height: 1.35;
-            /* 미사용 보존: 아래의 현대화된 메뉴 항목 규칙이 대체한다.
+            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 항목 규칙이 대체한다.
             color: rgba(95, 107, 122, 1);
             background-color: rgba(248, 249, 250, 1);
             */
@@ -205,7 +205,7 @@
         }
         .site-nav-dropdown__item:hover,
         .site-nav-dropdown__item:focus {
-            /* 미사용 보존: 아래의 현대화된 hover·focus 규칙이 대체한다.
+            /* interaction: 미사용 보존 - 아래의 현대화된 hover·focus 규칙이 대체한다.
             color: rgba(31, 41, 55, 1);
             background-color: rgba(238, 242, 247, 1);
             */
@@ -213,7 +213,7 @@
             outline: none;
         }
 
-        /* 공통 내비게이션: 글쓰기·로그아웃 액션 */
+        /* layout: 공통 내비게이션 글쓰기·로그아웃 액션 */
         .site-nav__actions {
             display: flex;
             align-items: center;
@@ -226,7 +226,7 @@
             white-space: nowrap;
         }
 
-        /* 공통 내비게이션: 화면별 콘텐츠 폭 */
+        /* 반응형layout: 데스크탑 화면별 내비게이션 콘텐츠 폭 */
         @media (min-width: 992px) {
             .site-nav__inner {
                 max-width: 800px;
@@ -238,15 +238,15 @@
             }
         }
 
-        /* 스크롤 고정 상태 */
+        /* layout: 스크롤 고정 상태 */
         .site-nav {
             position: sticky;
             top: 0;
-            z-index: 1030; /* 네비게이션 화면 앞에 띄우기 */
+            z-index: 1030; /* layout: 내비게이션을 화면 앞에 배치 */
             transition: background-color 0.22s ease, box-shadow 0.22s ease;
         }
         .site-nav.is-stuck {
-            /* 미사용 보존: 아래의 현대화된 고정 상태가 색상과 그림자를 대체한다.
+            /* interaction: 미사용 보존 - 아래의 현대화된 고정 상태가 색상과 그림자를 대체한다.
             background-color: rgba(108, 117, 125, 0.96) !important;
             box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
             */
@@ -254,14 +254,12 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
-        /* 공통 푸터: GitHub 아이콘 */
-        /* GitHub 아이콘 */
+        /* layout: 공통 푸터 GitHub 아이콘 */
         .site-footer__icon {
             margin-right: 0.35rem;
         }
 
-        /* Tailwind와 함께 사용하는 프로젝트 공통 모던 디자인 */
-        /* 공통 디자인 토큰과 문서 기본값 */
+        /* tokens: Tailwind와 함께 사용하는 프로젝트 공통 디자인 토큰 */
         :root {
             --project-canvas: rgba(247, 249, 252, 1);
             --project-surface-soft: rgba(242, 244, 246, 1);
@@ -272,26 +270,29 @@
             --project-brand: rgba(49, 130, 246, 1);
             --project-brand-strong: rgba(27, 100, 218, 1);
 
-            /* 미사용 보존: 현재 공통 CSS에서 참조하지 않는 레거시 토큰이다.
+            /* tokens: 미사용 보존 - 현재 공통 CSS에서 참조하지 않는 레거시 토큰이다.
             --project-surface: rgba(255, 255, 255, 1);
             --project-brand-soft: rgba(235, 244, 255, 1);
             --project-danger: rgba(225, 45, 63, 1);
             */
         }
+        /* base: 문서 스크롤과 프로젝트 공통 배경·타이포그래피 */
         html {
             scroll-behavior: smooth;
         }
         body.project-shell {
-            /* 미사용 보존: 모든 project-shell 화면의 important tw:text-ink가 대체한다. */
-            /* color: var(--project-ink); */
-            /* tw:bg-canvas는 배경색만 대체하므로 배경 이미지 레이어는 유지한다. */
+            /* base: 미사용 보존 - 모든 project-shell 화면의 important tw:text-ink가 대체한다.
+            color: var(--project-ink);
+            */
+            /* base: tw:bg-canvas는 배경색만 대체하므로 배경 이미지 레이어는 유지한다. */
             background:
                 radial-gradient(circle at 12% 8%, rgba(219, 234, 254, 0.72), transparent 25rem),
                 radial-gradient(circle at 88% 18%, rgba(224, 231, 255, 0.58), transparent 24rem),
                 var(--project-canvas);
-            /* 미사용 보존: 모든 project-shell 화면의 important tw:font-sans가 대체한다. */
-            /* font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-                "Segoe UI", "Noto Sans KR", sans-serif; */
+            /* base: 미사용 보존 - 모든 project-shell 화면의 important tw:font-sans가 대체한다.
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                "Segoe UI", "Noto Sans KR", sans-serif;
+            */
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
         }
@@ -319,7 +320,7 @@
             transform: translate(-50%, 0);
         }
 
-        /* 공통 헤더: 배경과 브랜드 문구 */
+        /* layout: 공통 헤더 배경과 브랜드 문구 */
         .site-header {
             position: relative;
             overflow: hidden;
@@ -370,7 +371,7 @@
             line-height: 1.65;
         }
 
-        /* 공통 내비게이션: 현대화된 색상과 드롭다운 표현 */
+        /* layout: 공통 내비게이션 색상과 드롭다운 표현 */
         .site-nav {
             border-bottom: 1px solid var(--project-line);
             background-color: rgba(255, 255, 255, 0.86) !important;
@@ -378,6 +379,7 @@
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
         }
+        /* interaction: 스크롤 고정 내비게이션 상태 */
         .site-nav.is-stuck {
             background-color: rgba(255, 255, 255, 0.92) !important;
             box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
@@ -389,6 +391,7 @@
             color: var(--project-body);
             background-color: transparent;
         }
+        /* interaction: 내비게이션 드롭다운의 hover·focus·open 상태 */
         .site-nav-dropdown > summary:hover,
         .site-nav-dropdown > summary:focus,
         .site-nav-dropdown[open] > summary {
@@ -397,12 +400,14 @@
             background-color: var(--project-surface-soft);
             transform: none;
         }
+        /* 접근성: 내비게이션과 푸터 링크의 키보드 포커스 표시 */
         .site-nav-dropdown > summary:focus-visible,
         .site-nav__actions a:focus-visible,
         .site-footer a:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.3);
             outline-offset: 3px;
         }
+        /* animation: 드롭다운 화살표의 open 회전 효과 */
         .site-nav-dropdown__icon {
             font-size: 0.8rem;
             line-height: 1;
@@ -428,14 +433,14 @@
             color: var(--project-body);
             background-color: transparent;
         }
+        /* interaction: 드롭다운 메뉴 항목의 hover·focus 상태 */
         .site-nav-dropdown__item:hover,
         .site-nav-dropdown__item:focus {
             color: var(--project-ink);
             background-color: var(--project-surface-soft);
         }
 
-        /* 화면 내 일반 액션 버튼 공통 형태 */
-        /* 공통 버튼: 화면 내 일반 액션과 내비게이션 액션 */
+        /* layout: 화면 내 일반 액션과 내비게이션 버튼 공통 형태 */
         .app-button {
             display: inline-flex;
             align-items: center;
@@ -452,8 +457,9 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.95rem;
-            /* 미사용 보존: 두 요소에 함께 적용된 app-button의 important radius가 대체한다. */
-            /* border-radius: 999px; */
+            /* layout: 미사용 보존 - 두 요소에 함께 적용된 app-button의 important radius가 대체한다.
+            border-radius: 999px;
+            */
             font-weight: 650;
             transition: transform 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
@@ -464,6 +470,7 @@
             background-color: var(--project-brand);
             box-shadow: 0 8px 20px rgba(49, 130, 246, 0.22);
         }
+        /* interaction: 글쓰기 버튼의 hover·focus 상태 */
         .site-nav__write:hover,
         .site-nav__write:focus {
             border-color: var(--project-brand-strong);
@@ -476,6 +483,7 @@
             color: var(--project-body);
             background-color: rgba(255, 255, 255, 0.7);
         }
+        /* interaction: 로그아웃 버튼의 hover·focus 상태 */
         .site-nav__logout:hover,
         .site-nav__logout:focus {
             color: var(--project-ink);
@@ -483,7 +491,7 @@
             transform: translateY(-1px);
         }
 
-        /* 공통 푸터: 배경과 링크 */
+        /* layout: 공통 푸터 배경과 링크 */
         .site-footer {
             border-color: var(--project-line) !important;
             background-color: rgba(255, 255, 255, 0.72) !important;
@@ -495,12 +503,13 @@
             font-weight: 550;
             letter-spacing: -0.01em;
         }
+        /* interaction: 공통 푸터 링크의 hover·focus 상태 */
         .site-footer__link:hover,
         .site-footer__link:focus {
             color: var(--project-brand-strong);
         }
 
-        /* 모바일: 내비게이션과 헤더 밀도 조정 */
+        /* 반응형layout: 모바일 내비게이션과 헤더 밀도 조정 */
         @media (max-width: 575.98px) {
             .site-nav {
                 padding-right: 0;

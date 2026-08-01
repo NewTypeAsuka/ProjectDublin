@@ -6,7 +6,7 @@
     <title>로그인 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <style>
-        /* 배경과 애니메이션 */
+        /* animation: 로그인 화면 배경과 장식 모션 */
         .gradient-custom {
             position: relative;
             min-height: 100vh;
@@ -54,7 +54,7 @@
             height: 16rem;
         }
 
-        /* 로그인 쉘 레이아웃 */
+        /* layout: 로그인 쉘 레이아웃 */
         .login-shell {
             position: relative;
             z-index: 1;
@@ -65,7 +65,7 @@
             padding-bottom: 2rem;
         }
 
-        /* 로그인 카드 섹션 레이아웃 */
+        /* layout: 로그인 카드 섹션 레이아웃 */
         .login-card {
             display: grid;
             grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
@@ -80,7 +80,7 @@
             -webkit-backdrop-filter: blur(22px);
         }
 
-        /* 로그인 카드 내 좌측 섹션 레이아웃 */
+        /* layout: 로그인 카드 내 좌측 섹션 레이아웃 */
         .login-story {
             position: relative;
             display: flex;
@@ -131,7 +131,7 @@
             line-height: 1.75;
         }
 
-        /* 로그인 카드 내 우측 섹션 레이아웃 */
+        /* layout: 로그인 카드 내 우측 섹션 레이아웃 */
         .login-panel {
             display: flex;
             flex-direction: column;
@@ -156,7 +156,7 @@
             letter-spacing: -0.055em;
         }
 
-        /* 로그인 안내 문구 */
+        /* layout: 로그인 안내 문구 */
         .login-message {
             min-height: 3.3rem;
             margin: 0.9rem 0 2rem;
@@ -164,7 +164,7 @@
             line-height: 1.65;
         }
 
-        /* Google 로그인 버튼 */
+        /* layout: Google 로그인 버튼 */
         .google-login-link {
             position: relative;
             display: flex;
@@ -195,8 +195,9 @@
             transition: opacity 0.22s ease;
             pointer-events: none;
         }
+        /* interaction: Google 로그인 버튼의 hover·focus glow 상태 */
         .google-login-link:hover,
-        .google-login-link:focus { /* 구글 이미지 버튼 hover 시 glow 효과 */
+        .google-login-link:focus {
             border-color: rgba(49, 130, 246, 0.34);
             color: rgba(25, 31, 40, 1);
             box-shadow: 0 16px 36px rgba(49, 130, 246, 0.14);
@@ -241,12 +242,13 @@
         .google-login-link:hover .google-login-link__arrow {
             transform: translateX(3px);
         }
+        /* 접근성: Google 로그인 버튼의 키보드 포커스 표시 */
         .google-login-link:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.3);
             outline-offset: 3px;
         }
 
-        /* 로딩 상태를 나타내는 애니메이션 */
+        /* animation: Google 로그인 로딩 상태 전환 */
         .google-login-link.is-loading {
             pointer-events: none;
             opacity: 0.62;
@@ -281,7 +283,7 @@
             color: rgba(49, 130, 246, 1) !important;
         }
 
-        /* 로그인 카드 내 우측 보안 안내 */
+        /* layout: 로그인 카드 내 우측 보안 안내 */
         .login-security-note {
             display: flex;
             align-items: flex-start;
@@ -292,7 +294,7 @@
             line-height: 1.55;
         }
 
-        /* 태블릿·모바일: 로그인 카드를 단일 열로 전환 */
+        /* 반응형layout: 태블릿·모바일에서 로그인 카드를 단일 열로 전환 */
         @media (max-width: 767.98px) {
             .login-card {
                 display: block;
@@ -316,7 +318,7 @@
             }
         }
 
-        /* 소형 모바일: Google 로그인 설명을 생략 */
+        /* 반응형layout: 소형 모바일에서 Google 로그인 설명을 생략 */
         @media (max-width: 375px) {
             .google-login-link__description {
                 display: none;
