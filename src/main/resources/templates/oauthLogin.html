@@ -6,7 +6,7 @@
     <title>로그인 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <style>
-        /* 배경색과 애니메이션 */
+        /* 배경과 애니메이션 */
         .gradient-custom {
             position: relative;
             min-height: 100vh;
@@ -65,8 +65,7 @@
             padding-bottom: 2rem;
         }
 
-        /* 로그인 좌측 섹션 레이아웃 */
-        /* 로그인 카드: 좌측 소개와 우측 로그인 패널을 묶는 외곽 영역 */
+        /* 로그인 카드 섹션 레이아웃 */
         .login-card {
             display: grid;
             grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
@@ -81,7 +80,7 @@
             -webkit-backdrop-filter: blur(22px);
         }
 
-        /* 로그인 카드 내 좌측 소개 영역 */
+        /* 로그인 카드 내 좌측 섹션 레이아웃 */
         .login-story {
             position: relative;
             display: flex;
@@ -132,7 +131,7 @@
             line-height: 1.75;
         }
 
-        /* 로그인 우측 섹션 레이아웃 */
+        /* 로그인 카드 내 우측 섹션 레이아웃 */
         .login-panel {
             display: flex;
             flex-direction: column;
@@ -157,24 +156,15 @@
             letter-spacing: -0.055em;
         }
 
-        /* 로그인 안내 문구 전환 */
+        /* 로그인 안내 문구 */
         .login-message {
             min-height: 3.3rem;
             margin: 0.9rem 0 2rem;
             color: rgba(107, 118, 132, 1);
             line-height: 1.65;
-            /* 미사용 보존: oauthLogin.js에서 안내 문구를 전환하지 않는다. */
-            /* transition: opacity 0.5s ease, transform 0.5s ease; */ /* 0.8초의 부드러운 전환 효과 */
         }
-        /* 미사용 보존: oauthLogin.js에서 is-changing 클래스를 추가하지 않는다.
-        .login-message.is-changing {
-            opacity: 0;
-            transform: translateY(4px);
-        }
-        */
 
-        /* 로그인 카드 내 우측 Google 로그인 버튼 */
-        /* 구글 이미지 버튼 hover 시 glow 효과 */
+        /* Google 로그인 버튼 */
         .google-login-link {
             position: relative;
             display: flex;
@@ -206,7 +196,7 @@
             pointer-events: none;
         }
         .google-login-link:hover,
-        .google-login-link:focus {
+        .google-login-link:focus { /* 구글 이미지 버튼 hover 시 glow 효과 */
             border-color: rgba(49, 130, 246, 0.34);
             color: rgba(25, 31, 40, 1);
             box-shadow: 0 16px 36px rgba(49, 130, 246, 0.14);
@@ -341,8 +331,6 @@
             .gradient-custom {
                 animation: none;
             }
-            /* 미사용 보존: login-message 전환 규칙은 현재 비활성 상태다. */
-            /* .login-message, */
             .google-login-link,
             .google-login-link__arrow,
             .google-login-loading {
@@ -351,10 +339,13 @@
         }
     </style>
 </head>
-<body class="gradient-custom tw:font-sans"> <!-- 배경색과 애니메이션 -->
-    <main id="main-content" class="container login-shell tw:relative tw:z-10"> <!-- 로그인 쉘 레이아웃 -->
+<body class="gradient-custom tw:font-sans"> <!-- 배경과 애니메이션 -->
+    <main id="main-content" class="container login-shell tw:relative tw:z-10"> <!-- 로그인 쉘 -->
+
+        <!-- 로그인 카드 섹션 -->
         <section class="login-card" aria-labelledby="login-title">
-            <!-- 좌측 섹션 -->
+
+            <!-- 로그인 카드 내 좌측 섹션 -->
             <section class="login-story">
                 <div>
                     <p class="login-story__eyebrow">MY SPACE TO THINK</p>
@@ -365,25 +356,25 @@
                 </div>
             </section>
 
-            <!-- 우측 섹션 -->
+            <!-- 로그인 카드 내 우측 섹션 -->
             <section class="login-panel">
                 <p class="login-panel__eyebrow">WELCOME</p>
                 <h1 id="login-title" class="login-panel__title">NewTypeBlog</h1>
-                <p id="login-message" class="login-message"> <!-- 로그인 안내 문구 전환 -->
+                <p id="login-message" class="login-message"> <!-- 로그인 안내 문구 -->
                     NewTypeBlog를 이용하기 위해서는<br>Google 계정이 필요합니다
                 </p>
                 <div>
                     <a th:href="@{/oauth2/authorization/google}"
                         href="/oauth2/authorization/google"
                         id="google-login-link"
-                        class="google-login-link"> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
+                        class="google-login-link"> <!-- Google 로그인 버튼 --> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
                         <img th:src="@{/img/googleIcon.png}"
                             src="/img/googleIcon.png"
                             alt="Google"
                             aria-hidden="true">
                         <span class="google-login-link__copy">
                             <span class="google-login-link__title">Google로 계속하기</span>
-                            <span class="google-login-link__description">Google 계정으로 로그인합니다</span>
+                            <span class="google-login-link__description">Google 계정으로 로그인합니다</span> <!-- 소형 모바일: Google 로그인 설명을 생략 -->
                         </span>
                         <i class="bi bi-arrow-right google-login-link__arrow" aria-hidden="true"></i>
                     </a>
@@ -394,11 +385,12 @@
                         </div>
                     </div>
                 </div>
-                <p class="login-security-note">
+                <p class="login-security-note"> <!-- 로그인 카드 내 우측 보안 안내 -->
                     <i class="bi bi-shield-check" aria-hidden="true"></i>
                     <span>비밀번호는 NewTypeBlog에 저장되지 않으며<br>Google OAuth2를 통한 안전한 액세스를 보장합니다</span>
                 </p>
             </section>
+
         </section>
     </main>
 
