@@ -7,6 +7,7 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
+        /* 게시글 본문: 타이포그래피와 첨부 콘텐츠 */
         /* 게시글 본문 이미지와 동영상의 반응형 표시 */
         .article-content img,
         .article-content iframe {
@@ -67,6 +68,8 @@
             text-decoration-color: rgba(49, 130, 246, 0.35);
             text-underline-offset: 0.2em;
         }
+
+        /* 게시글 탐색: 목록으로 돌아가기 링크 */
         .article-back-link {
             display: inline-flex;
             align-items: center;
@@ -92,6 +95,8 @@
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
+
+        /* 게시글·댓글 카드: 공통 표면과 내부 여백 */
         .article-detail-card,
         .article-comments {
             border: 1px solid rgba(15, 23, 42, 0.07) !important;
@@ -111,6 +116,7 @@
             letter-spacing: -0.055em;
         }
 
+        /* 게시글 카드 상단: 고정 상태와 작성 정보 */
         /* 게시글 상단 고정 표시와 작성 정보 */
         .article-detail__header {
             display: flex;
@@ -208,7 +214,8 @@
             min-height: 3.15rem;
             padding: 0.65rem 1.15rem;
             border: 1px solid rgba(15, 23, 42, 0.09);
-            border-radius: 999px;
+            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 1);
             box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
@@ -260,7 +267,8 @@
             min-height: 3.15rem;
             padding: 0.65rem 1.05rem;
             border: 1px solid rgba(15, 23, 42, 0.09);
-            border-radius: 999px;
+            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             color: rgba(108, 117, 125, 1);
             background-color: rgba(255, 255, 255, 1);
             transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
@@ -302,7 +310,8 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.9rem;
-            border-radius: 999px;
+            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             font-weight: 650;
         }
         .article-actions__delete {
@@ -338,7 +347,8 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(49, 130, 246, 1);
-            border-radius: 999px;
+            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             background-color: rgba(49, 130, 246, 1);
             font-weight: 680;
         }
@@ -390,7 +400,8 @@
         .comment-item__actions .btn {
             min-height: 2.5rem;
             padding: 0.45rem 0.65rem;
-            border-radius: 999px;
+            /* 미사용 보존: 동적 버튼에도 적용되는 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             font-size: 0.82rem;
             font-weight: 650;
             text-decoration: none;
@@ -438,6 +449,7 @@
             font-weight: 650;
         }
 
+        /* 모바일: 메타데이터·액션 버튼·대댓글 밀도 조정 */
         /* 모바일 대댓글 들여쓰기 */
         @media (max-width: 575.98px) {
             .article-back-link {
@@ -518,7 +530,7 @@
                     <i class="bi bi-arrow-left" aria-hidden="true"></i>
                     모든 포스트
                 </a>
-                <!-- 게시글 상단 고정 표시와 작성 정보 -->
+                <!-- 게시글 섹션 -->
                 <section class="card border-0 shadow-sm article-detail-card"
                          id="article-detail"
                          aria-labelledby="article-title">
@@ -641,7 +653,7 @@
                     </div>
                 </section>
 
-                <!-- 댓글 작성·목록·대댓글 영역 -->
+                <!-- 댓글 섹션 -->
                 <section class="card border-0 shadow-sm mt-4 article-comments"
                          id="article-comments"
                          aria-labelledby="comment-heading">

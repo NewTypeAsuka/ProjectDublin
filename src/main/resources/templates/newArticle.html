@@ -8,9 +8,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
+        /* 편집 화면 배경과 도입부 */
+        /* 미사용 보존: main 요소의 important tw:relative 유틸리티가 대체한다.
         .editor-shell {
             position: relative;
         }
+        */
         .editor-shell::before {
             content: '';
             position: absolute;
@@ -50,6 +53,8 @@
             line-height: 1.15;
             letter-spacing: -0.055em;
         }
+
+        /* 게시글 작성·수정 카드 */
         /* Summernote의 드롭다운이 작성 카드 경계에서 잘리지 않도록 한다. */
         .editor-card {
             position: relative;
@@ -77,9 +82,13 @@
         .editor-card__body {
             padding: clamp(1.35rem, 4vw, 3.25rem) !important;
         }
+        /* 미사용 보존: 두 editor-field 모두 Bootstrap mb-4가 여백을 관리한다.
         .editor-field {
             margin-bottom: 2rem;
         }
+        */
+
+        /* 제목 입력 영역 */
         /* 제목과 본문 사이 간격만 별도로 축소 */
         .editor-field--title {
             margin-bottom: 1rem !important;
@@ -127,16 +136,20 @@
         .article-title__feedback {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+        /* 미사용 보존: justify-content를 위의 동일 선택자에 통합했다.
         .article-title__feedback {
             justify-content: flex-end;
         }
+        */
         .article-title__feedback .text-muted {
             color: rgba(107, 118, 132, 1) !important;
         }
 
+        /* Summernote 본문: 실행 시 생성되는 note-* 클래스의 카드 표현 */
         /* Summernote를 집중형 에디터 카드와 같은 톤으로 표시 */
         .note-editor.note-frame {
             overflow: visible;
@@ -144,6 +157,8 @@
             border-radius: 1rem;
             box-shadow: none;
         }
+
+        /* Summernote 툴바: 버튼 배치와 상호작용 상태 */
         .note-editor.note-frame .note-toolbar {
             position: relative;
             display: flex;
@@ -189,6 +204,8 @@
             background-color: rgba(235, 244, 255, 1);
             box-shadow: none;
         }
+
+        /* Summernote 편집 본문과 크기 조절 상태바 */
         .note-editor.note-frame .note-editing-area {
             overflow: hidden;
             background-color: rgba(255, 255, 255, 1);
@@ -205,6 +222,8 @@
             border-radius: 0 0 1rem 1rem;
             background-color: rgba(247, 249, 252, 1);
         }
+
+        /* Summernote 전체화면 */
         /* Summernote 전체화면은 작성 카드가 아니라 브라우저 뷰포트를 채운다. */
         .note-editor.note-frame.fullscreen {
             position: fixed !important;
@@ -227,6 +246,8 @@
         .note-editor.note-frame.fullscreen .note-statusbar {
             display: none;
         }
+
+        /* 이미지 업로드·폼 처리 상태 */
         #image-upload-status {
             min-height: 1.4rem;
             padding-left: 0.2rem;
@@ -236,6 +257,8 @@
             border-radius: 0.9rem;
             font-size: 0.9rem;
         }
+
+        /* 게시글 취소·등록·수정 액션 */
         .editor-actions {
             display: flex;
             align-items: center;
@@ -253,7 +276,8 @@
             min-height: 2.9rem;
             margin-bottom: 0 !important;
             padding: 0.6rem 1rem;
-            border-radius: 999px;
+            /* 미사용 보존: 공통 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             font-weight: 680;
         }
         .editor-actions__cancel {
@@ -279,6 +303,8 @@
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
+
+        /* 모바일: 카드 밀도와 Summernote 드롭다운 폭 조정 */
         @media (max-width: 575.98px) {
             .editor-shell::before {
                 top: 0;
@@ -354,7 +380,8 @@
           class="container flex-fill py-4 py-md-5 editor-shell tw:relative">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-5xl">
-                <header class="editor-intro">
+                <!-- 게시글 목록 상단 섹션(글수정/글쓰기) -->
+                <section class="editor-intro">
                     <p class="editor-intro__eyebrow">
                         <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         <span th:text="${article.id} != null ? 'EDIT' : 'WRITE'">WRITE</span>
@@ -363,9 +390,10 @@
                         th:text="${article.id} != null ? '글수정' : '글쓰기'">
                         글쓰기
                     </h2>
-                </header>
-                <!-- 게시글 작성·수정 카드 -->
-                <div class="card border-0 shadow-sm editor-card">
+                </section>
+
+                <!-- 게시글 작성·수정 섹션 -->
+                <section class="card border-0 shadow-sm editor-card">
                     <div class="card-body p-4 p-md-5 editor-card__body">
                         <form id="article-form" novalidate>
                             <input type="hidden" id="article-id" th:value="${article.id}"> <!-- 아이디 정보 저장 -->
@@ -445,7 +473,7 @@
                             </div>
                         </form>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </main>

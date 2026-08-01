@@ -7,6 +7,7 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block>
     <style>
+        /* 게시글 목록 도입부 */
         /* 게시글 목록 상단 제목(포스트) */
         .article-list-toolbar {
             display: flex;
@@ -40,6 +41,7 @@
             letter-spacing: -0.055em;
             line-height: 1.08;
         }
+        /* 미사용 보존: 우측 장식 마크업이 현재 HTML에서 주석 처리되어 있다.
         .article-list-toolbar__symbol {
             display: inline-flex;
             align-items: center;
@@ -53,7 +55,9 @@
             box-shadow: 0 14px 34px rgba(49, 130, 246, 0.12);
             font-size: 1.45rem;
         }
+        */
 
+        /* 게시글 카드: 외곽 링크와 카드 표면 */
         /* 게시글 카드 링크와 호버 효과 */
         .article-card-link {
             display: block;
@@ -145,7 +149,8 @@
         .article-card__metrics {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            /* 미사용 보존: 모든 카드의 Bootstrap justify-content-end가 대체한다. */
+            /* justify-content: flex-end; */
             flex-wrap: nowrap;
             gap: 0.1rem;
             width: fit-content;
@@ -194,6 +199,7 @@
             -webkit-line-clamp: 3;
         }
 
+        /* 게시글 피드: 추가 로딩과 빈 목록 상태 */
         /* 게시글 추가 로딩 상태 */
         .article-feed__controls {
             min-height: 4.5rem;
@@ -207,7 +213,8 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(15, 23, 42, 0.1);
-            border-radius: 999px;
+            /* 미사용 보존: 마크업의 app-button이 important radius를 적용한다. */
+            /* border-radius: 999px; */
             color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 0.8);
         }
@@ -237,6 +244,7 @@
             font-size: 1.4rem;
         }
 
+        /* 모바일: 목록 도입부와 카드 메타데이터 밀도 조정 */
         /* 모바일 게시글 카드 작성 정보 */
         @media (max-width: 575.98px) {
             #main-content .article-list-toolbar {
@@ -259,9 +267,11 @@
                 white-space: normal;
                 overflow-wrap: anywhere;
             }
+            /* 미사용 보존: article-list-toolbar__symbol 마크업과 기본 규칙이 비활성 상태다.
             .article-list-toolbar__symbol {
                 display: none;
             }
+            */
         }
     </style>
 </head>
@@ -277,7 +287,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
                 <!-- 게시글 목록 상단 섹션(포스트) -->
-                <div class="article-list-toolbar">
+                <section class="article-list-toolbar">
                     <div class="article-list-toolbar__heading">
                         <span class="article-list-toolbar__eyebrow">
                             <i class="bi bi-journal-richtext" aria-hidden="true"></i>
@@ -285,13 +295,10 @@
                         </span>
                         <h2 class="article-list-toolbar__title">포스트</h2>
                     </div>
-                    <!-- <span class="article-list-toolbar__symbol" aria-hidden="true">
-                        <i class="bi bi-stars"></i>
-                    </span> -->
-                </div>
+                </section>
 
                 <!-- 게시글 카드 섹션 -->
-                <div id="article-feed"
+                <section id="article-feed"
                     th:attr="data-next-cursor=${nextCursor},
                         data-has-next=${hasNextArticles}">
                     <a th:each="item : ${articles}"
@@ -364,10 +371,10 @@
                             </div>
                         </article>
                     </a>
-                </div>
+                </section>
 
                 <!-- 게시글이 없을 때 섹션 -->
-                <p th:if="${#lists.isEmpty(articles)}"
+                <section th:if="${#lists.isEmpty(articles)}"
                    class="article-empty-state mb-0">
                     <span class="article-empty-state__icon" aria-hidden="true">
                         <i class="bi bi-file-earmark-text"></i>
@@ -383,10 +390,10 @@
                         <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         <span>글쓰기</span>
                     </a>
-                </p>
+                </section>
 
                 <!-- 게시글 로딩 섹션 -->
-                <div class="article-feed__controls text-center py-3"
+                <section class="article-feed__controls text-center py-3"
                     th:hidden="${!hasNextArticles}">  <!-- 게시글 추가 로딩 상태 -->
                     <div id="article-feed-loading"
                         class="text-muted small"
@@ -408,7 +415,7 @@
                         <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
                         <span>게시글 더보기</span>
                     </button>
-                </div>
+                </section>
                 <div id="article-feed-sentinel"
                     class="article-feed__sentinel"
                     aria-hidden="true">

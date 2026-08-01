@@ -54,6 +54,7 @@
             height: 16rem;
         }
 
+        /* 로그인 쉘 레이아웃 */
         .login-shell {
             position: relative;
             z-index: 1;
@@ -63,6 +64,9 @@
             padding-top: 2rem;
             padding-bottom: 2rem;
         }
+
+        /* 로그인 좌측 섹션 레이아웃 */
+        /* 로그인 카드: 좌측 소개와 우측 로그인 패널을 묶는 외곽 영역 */
         .login-card {
             display: grid;
             grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
@@ -76,6 +80,8 @@
             backdrop-filter: blur(22px);
             -webkit-backdrop-filter: blur(22px);
         }
+
+        /* 로그인 카드 내 좌측 소개 영역 */
         .login-story {
             position: relative;
             display: flex;
@@ -125,6 +131,8 @@
             color: rgba(255, 255, 255, 0.78);
             line-height: 1.75;
         }
+
+        /* 로그인 우측 섹션 레이아웃 */
         .login-panel {
             display: flex;
             flex-direction: column;
@@ -155,13 +163,17 @@
             margin: 0.9rem 0 2rem;
             color: rgba(107, 118, 132, 1);
             line-height: 1.65;
-            transition: opacity 0.5s ease, transform 0.5s ease; /* 0.8초의 부드러운 전환 효과 */
+            /* 미사용 보존: oauthLogin.js에서 안내 문구를 전환하지 않는다. */
+            /* transition: opacity 0.5s ease, transform 0.5s ease; */ /* 0.8초의 부드러운 전환 효과 */
         }
+        /* 미사용 보존: oauthLogin.js에서 is-changing 클래스를 추가하지 않는다.
         .login-message.is-changing {
             opacity: 0;
             transform: translateY(4px);
         }
+        */
 
+        /* 로그인 카드 내 우측 Google 로그인 버튼 */
         /* 구글 이미지 버튼 hover 시 glow 효과 */
         .google-login-link {
             position: relative;
@@ -278,6 +290,8 @@
             border-width: 0.13rem;
             color: rgba(49, 130, 246, 1) !important;
         }
+
+        /* 로그인 카드 내 우측 보안 안내 */
         .login-security-note {
             display: flex;
             align-items: flex-start;
@@ -287,6 +301,8 @@
             font-size: 0.75rem;
             line-height: 1.55;
         }
+
+        /* 태블릿·모바일: 로그인 카드를 단일 열로 전환 */
         @media (max-width: 767.98px) {
             .login-card {
                 display: block;
@@ -309,6 +325,8 @@
                 margin-top: 0;
             }
         }
+
+        /* 소형 모바일: Google 로그인 설명을 생략 */
         @media (max-width: 375px) {
             .google-login-link__description {
                 display: none;
@@ -317,11 +335,14 @@
                 min-height: 3.8rem;
             }
         }
+
+        /* 접근성: 사용자가 모션 감소를 선택한 경우 */
         @media (prefers-reduced-motion: reduce) {
             .gradient-custom {
                 animation: none;
             }
-            .login-message,
+            /* 미사용 보존: login-message 전환 규칙은 현재 비활성 상태다. */
+            /* .login-message, */
             .google-login-link,
             .google-login-link__arrow,
             .google-login-loading {
@@ -331,10 +352,10 @@
     </style>
 </head>
 <body class="gradient-custom tw:font-sans"> <!-- 배경색과 애니메이션 -->
-    <main id="main-content" class="container login-shell tw:relative tw:z-10">
+    <main id="main-content" class="container login-shell tw:relative tw:z-10"> <!-- 로그인 쉘 레이아웃 -->
         <section class="login-card" aria-labelledby="login-title">
             <!-- 좌측 섹션 -->
-            <div class="login-story">
+            <section class="login-story">
                 <div>
                     <p class="login-story__eyebrow">MY SPACE TO THINK</p>
                     <h2 class="login-story__title">일상의 생각이<br>글이 되는<br>나만의 공간.</h2>
@@ -342,10 +363,10 @@
                         일상의 발견과 새로운 관점을 기록하고, 저만의 이야기를 차분히 이어가는 곳입니다.
                     </p>
                 </div>
-            </div>
+            </section>
 
             <!-- 우측 섹션 -->
-            <div class="login-panel">
+            <section class="login-panel">
                 <p class="login-panel__eyebrow">WELCOME</p>
                 <h1 id="login-title" class="login-panel__title">NewTypeBlog</h1>
                 <p id="login-message" class="login-message"> <!-- 로그인 안내 문구 전환 -->
@@ -377,7 +398,7 @@
                     <i class="bi bi-shield-check" aria-hidden="true"></i>
                     <span>비밀번호는 NewTypeBlog에 저장되지 않으며<br>Google OAuth2를 통한 안전한 액세스를 보장합니다</span>
                 </p>
-            </div>
+            </section>
         </section>
     </main>
 

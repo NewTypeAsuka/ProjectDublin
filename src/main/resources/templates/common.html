@@ -6,27 +6,27 @@
         <link rel="shortcut icon" href="/favicon.ico?v=1" type="image/x-icon"> <!-- 사이트 공통 favicon -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
-        <!-- 디자인 검토용 Tailwind CSS: Bootstrap과 Summernote 보호를 위해 Preflight 없이 tw: 접두사만 사용 -->
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-        <style type="text/tailwindcss">
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> <!-- Tailwind CSS -->
+        <style type="text/tailwindcss"> /* Tailwind CSS */
+            /* Tailwind CSS를 사용하여 공통 디자인 토큰과 유틸리티를 정의 */
             @layer theme, base, components, utilities;
-
             @import "tailwindcss/theme.css" layer(theme) prefix(tw);
-            @import "tailwindcss/utilities.css" layer(utilities) prefix(tw) important;
+            @import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
 
+            /* Tailwind 유틸리티에서 사용하는 공통 디자인 토큰 */
             @theme {
                 --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
                     "Segoe UI", "Noto Sans KR", sans-serif;
                 --color-canvas: rgba(247, 249, 252, 1);
+                --color-ink: rgba(25, 31, 40, 1);
+                --color-muted: rgba(107, 118, 132, 1);
+                --color-brand: rgba(49, 130, 246, 1);
+                --color-brand-strong: rgba(27, 100, 218, 1);
                 --color-surface: rgba(255, 255, 255, 1);
                 --color-surface-soft: rgba(242, 244, 246, 1);
                 --color-surface-glass: rgba(255, 255, 255, 0.84);
-                --color-ink: rgba(25, 31, 40, 1);
                 --color-body: rgba(51, 61, 75, 1);
-                --color-muted: rgba(107, 118, 132, 1);
                 --color-line: rgba(15, 23, 42, 0.08);
-                --color-brand: rgba(49, 130, 246, 1);
-                --color-brand-strong: rgba(27, 100, 218, 1);
                 --color-brand-soft: rgba(235, 244, 255, 1);
                 --color-danger: rgba(225, 45, 63, 1);
                 --color-success: rgba(0, 145, 100, 1);
@@ -62,11 +62,14 @@
         }
         .intro-header__title {
             margin-bottom: 0;
+            /* 미사용 보존: 아래의 현대화된 제목 규칙이 같은 속성을 대체한다.
             font-weight: 600;
             letter-spacing: 0.04em;
+            */
         }
 
         /* 헤더 그라데이션 배경 */
+        /* 미사용 보존: 아래의 현대화된 공통 헤더가 배경과 모션을 완전히 대체한다.
         .site-header {
             background: linear-gradient(135deg,
                 rgba(230, 243, 255, 1),
@@ -92,8 +95,10 @@
                 transition: none;
             }
         }
+        */
 
         /* 공통 내비게이션 */
+        /* 미사용 보존: 현재 공통 내비게이션에는 Bootstrap .nav-link 요소가 없다.
         .site-nav .nav-link {
             transition: color 0.18s ease, transform 0.18s ease;
         }
@@ -101,6 +106,9 @@
         .site-nav .nav-link:focus {
             transform: translateY(-1px);
         }
+        */
+
+        /* 공통 내비게이션: 내부 정렬 */
         .site-nav__inner {
             display: flex;
             align-items: center;
@@ -117,6 +125,8 @@
             min-width: 0;
             gap: 0.15rem;
         }
+
+        /* 공통 내비게이션: 메뉴 드롭다운 */
         .site-nav-dropdown {
             position: relative;
             margin: 0;
@@ -127,10 +137,13 @@
             justify-content: center;
             gap: 0.45rem;
             min-width: 2.5rem;
-            height: 2.5rem;
+            /* 미사용 보존: 아래의 min-height가 더 큰 높이를 강제한다. */
+            /* height: 2.5rem; */
             padding: 0 0.8rem;
+            /* 미사용 보존: 아래의 현대화된 드롭다운 규칙이 대체한다.
             border-radius: 0.35rem;
             color: rgba(255, 255, 255, 0.75);
+            */
             cursor: pointer;
             list-style: none;
             user-select: none;
@@ -141,15 +154,19 @@
         }
         .site-nav-dropdown > summary:hover,
         .site-nav-dropdown > summary:focus {
+            /* 미사용 보존: 아래의 현대화된 hover·focus 규칙이 대체한다.
             color: rgba(255, 255, 255, 1);
             background-color: rgba(255, 255, 255, 0.08);
             transform: translateY(-1px);
+            */
             outline: none;
         }
+        /* 미사용 보존: 아래의 현대화된 open 상태 규칙이 대체한다.
         .site-nav-dropdown[open] > summary {
             color: rgba(255, 255, 255, 1);
             background-color: rgba(255, 255, 255, 0.12);
         }
+        */
         .site-nav-dropdown__icon {
             display: inline-block;
             width: auto;
@@ -162,29 +179,41 @@
             top: calc(100% + 0.45rem);
             left: 0;
             min-width: 13rem;
+            /* 미사용 보존: 아래의 현대화된 메뉴 표면 규칙이 대체한다.
             padding: 0.5rem;
             border-radius: 0.8rem;
             background-color: rgba(255, 255, 255, 1);
             box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+            */
             z-index: 1040;
         }
         .site-nav-dropdown__item {
+            /* 미사용 보존: 아래의 현대화된 메뉴 항목 규칙이 대체한다.
             display: block;
+            */
             padding: 0.6rem 0.75rem;
+            /* 미사용 보존: 아래의 현대화된 메뉴 항목 규칙이 대체한다.
             border-radius: 0.55rem;
+            */
             font-size: 0.92rem;
             line-height: 1.35;
+            /* 미사용 보존: 아래의 현대화된 메뉴 항목 규칙이 대체한다.
             color: rgba(95, 107, 122, 1);
             background-color: rgba(248, 249, 250, 1);
+            */
             text-decoration: none;
         }
         .site-nav-dropdown__item:hover,
         .site-nav-dropdown__item:focus {
+            /* 미사용 보존: 아래의 현대화된 hover·focus 규칙이 대체한다.
             color: rgba(31, 41, 55, 1);
             background-color: rgba(238, 242, 247, 1);
+            */
             text-decoration: none;
             outline: none;
         }
+
+        /* 공통 내비게이션: 글쓰기·로그아웃 액션 */
         .site-nav__actions {
             display: flex;
             align-items: center;
@@ -196,6 +225,8 @@
             margin: 0;
             white-space: nowrap;
         }
+
+        /* 공통 내비게이션: 화면별 콘텐츠 폭 */
         @media (min-width: 992px) {
             .site-nav__inner {
                 max-width: 800px;
@@ -215,21 +246,24 @@
             transition: background-color 0.22s ease, box-shadow 0.22s ease;
         }
         .site-nav.is-stuck {
+            /* 미사용 보존: 아래의 현대화된 고정 상태가 색상과 그림자를 대체한다.
             background-color: rgba(108, 117, 125, 0.96) !important;
             box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+            */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
 
+        /* 공통 푸터: GitHub 아이콘 */
         /* GitHub 아이콘 */
         .site-footer__icon {
             margin-right: 0.35rem;
         }
 
         /* Tailwind와 함께 사용하는 프로젝트 공통 모던 디자인 */
+        /* 공통 디자인 토큰과 문서 기본값 */
         :root {
             --project-canvas: rgba(247, 249, 252, 1);
-            --project-surface: rgba(255, 255, 255, 1);
             --project-surface-soft: rgba(242, 244, 246, 1);
             --project-ink: rgba(25, 31, 40, 1);
             --project-body: rgba(51, 61, 75, 1);
@@ -237,20 +271,27 @@
             --project-line: rgba(15, 23, 42, 0.08);
             --project-brand: rgba(49, 130, 246, 1);
             --project-brand-strong: rgba(27, 100, 218, 1);
+
+            /* 미사용 보존: 현재 공통 CSS에서 참조하지 않는 레거시 토큰이다.
+            --project-surface: rgba(255, 255, 255, 1);
             --project-brand-soft: rgba(235, 244, 255, 1);
             --project-danger: rgba(225, 45, 63, 1);
+            */
         }
         html {
             scroll-behavior: smooth;
         }
         body.project-shell {
-            color: var(--project-ink);
+            /* 미사용 보존: 모든 project-shell 화면의 important tw:text-ink가 대체한다. */
+            /* color: var(--project-ink); */
+            /* tw:bg-canvas는 배경색만 대체하므로 배경 이미지 레이어는 유지한다. */
             background:
                 radial-gradient(circle at 12% 8%, rgba(219, 234, 254, 0.72), transparent 25rem),
                 radial-gradient(circle at 88% 18%, rgba(224, 231, 255, 0.58), transparent 24rem),
                 var(--project-canvas);
-            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-                "Segoe UI", "Noto Sans KR", sans-serif;
+            /* 미사용 보존: 모든 project-shell 화면의 important tw:font-sans가 대체한다. */
+            /* font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                "Segoe UI", "Noto Sans KR", sans-serif; */
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
         }
@@ -258,6 +299,8 @@
             color: rgba(25, 31, 40, 1);
             background-color: rgba(191, 219, 254, 1);
         }
+
+        /* 접근성: 키보드 사용자를 위한 본문 바로가기 */
         .skip-link {
             position: absolute;
             top: 0.75rem;
@@ -275,6 +318,8 @@
             text-decoration: none;
             transform: translate(-50%, 0);
         }
+
+        /* 공통 헤더: 배경과 브랜드 문구 */
         .site-header {
             position: relative;
             overflow: hidden;
@@ -324,6 +369,8 @@
             font-size: 0.92rem;
             line-height: 1.65;
         }
+
+        /* 공통 내비게이션: 현대화된 색상과 드롭다운 표현 */
         .site-nav {
             border-bottom: 1px solid var(--project-line);
             background-color: rgba(255, 255, 255, 0.86) !important;
@@ -388,6 +435,7 @@
         }
 
         /* 화면 내 일반 액션 버튼 공통 형태 */
+        /* 공통 버튼: 화면 내 일반 액션과 내비게이션 액션 */
         .app-button {
             display: inline-flex;
             align-items: center;
@@ -404,7 +452,8 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.95rem;
-            border-radius: 999px;
+            /* 미사용 보존: 두 요소에 함께 적용된 app-button의 important radius가 대체한다. */
+            /* border-radius: 999px; */
             font-weight: 650;
             transition: transform 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
@@ -433,6 +482,8 @@
             background-color: var(--project-surface-soft);
             transform: translateY(-1px);
         }
+
+        /* 공통 푸터: 배경과 링크 */
         .site-footer {
             border-color: var(--project-line) !important;
             background-color: rgba(255, 255, 255, 0.72) !important;
@@ -448,6 +499,8 @@
         .site-footer__link:focus {
             color: var(--project-brand-strong);
         }
+
+        /* 모바일: 내비게이션과 헤더 밀도 조정 */
         @media (max-width: 575.98px) {
             .site-nav {
                 padding-right: 0;
@@ -475,6 +528,8 @@
                 font-size: 0.86rem;
             }
         }
+
+        /* 접근성: 사용자가 모션 감소를 선택한 경우 */
         @media (prefers-reduced-motion: reduce) {
             html {
                 scroll-behavior: auto;
@@ -496,7 +551,7 @@
         <div class="container py-4 py-md-5 text-center tw:relative tw:z-10">
             <p class="intro-header__eyebrow tw:uppercase">MY SPACE TO THINK</p>
             <a href="/" class="intro-header__title-link tw:no-underline">
-                <h1 class="h2 intro-header__title">NewTypeBlog</h1>
+                <h1 class="h1 intro-header__title">NewTypeBlog</h1>
             </a>
             <p class="intro-header__subtitle">
                 NewTypeBlog에 오신 것을 환영합니다
