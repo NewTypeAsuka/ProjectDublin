@@ -99,7 +99,7 @@ create table comments (
     constraint fk_comments_parent_id
             foreign key (parent_id) references comments (id)
             on update restrict  -- 대댓글이 있으면 부모 댓글의 id 수정 불가능
-            on delete restrict, -- 대댓글이 있으면 부모 댓글을 실제 삭제할 수 없음(삭제된 댓글입니다로 처리)
+            on delete cascade,  -- 부모 댓글이 삭제되면 대댓글도 함께 삭제
     index idx_comments_article_parent_created (article_id, parent_id, created_at, id),
     index idx_comments_commenter_id (commenter_id),
     index idx_comments_parent_id (parent_id)
