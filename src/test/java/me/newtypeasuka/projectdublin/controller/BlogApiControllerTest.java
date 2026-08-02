@@ -3,12 +3,14 @@ package me.newtypeasuka.projectdublin.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.newtypeasuka.projectdublin.domain.Article;
+import me.newtypeasuka.projectdublin.domain.Comment;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
 import me.newtypeasuka.projectdublin.dto.ArticleListViewResponse;
 import me.newtypeasuka.projectdublin.dto.UpdateArticleRequest;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
+import me.newtypeasuka.projectdublin.repository.CommentRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.S3ObjectUrlResolver;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,6 +72,9 @@ class BlogApiControllerTest {
 
     @Autowired
     ArticleImageRepository articleImageRepository;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     @Autowired
     S3ObjectUrlResolver urlResolver;
@@ -140,7 +145,9 @@ class BlogApiControllerTest {
 
         UpdateArticleRequest updateRequest = new UpdateArticleRequest(
                 "Updated title",
-                "<h2>Updated</h2><iframe src=\"//www.youtube.com/embed/video-id\"></iframe>"
+                "<h2>Updated</h2>"
+                        + "<a href=\"https://example.com\" target=\"_blank\">Example</a>"
+                        + "<iframe src=\"//www.youtube.com/embed/video-id\"></iframe>"
         );
 
         mockMvc.perform(put("/api/articles/{id}", articleId)
@@ -151,12 +158,20 @@ class BlogApiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated title"))
                 .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
+                        "target=\"_blank\"")))
+                .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
+                        "rel=\"noopener noreferrer\"")))
+                .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
                         "https://www.youtube.com/embed/video-id")));
 
         mockMvc.perform(get("/articles/{id}", articleId).with(loginUser()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "id=\"article-modified\">수정됨</span>")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "target=\"_blank\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "rel=\"noopener noreferrer\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("Posted on"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
@@ -286,6 +301,38 @@ class BlogApiControllerTest {
         verify(s3Client).deleteObject(argThat(
                 (DeleteObjectRequest request) -> request.key().equals(key)
         ));
+    }
+
+    @DisplayName("댓글과 대댓글이 있는 게시글을 삭제하면 연결된 댓글도 모두 삭제한다")
+    @Test
+    void deleteArticleWithCommentsAndReplies() throws Exception {
+        User replier = userRepository.save(User.builder()
+                .email("replier@example.com")
+                .nickname("Replier")
+                .build());
+        Article article = blogRepository.save(Article.builder()
+                .author(user)
+                .title("Article with comments")
+                .content("<p>Content</p>")
+                .build());
+        Comment comment = commentRepository.save(
+                new Comment(article, user, null, "일반 댓글")
+        );
+        Comment reply = commentRepository.save(
+                new Comment(article, replier, comment, "대댓글")
+        );
+
+        // 게시글 삭제 시 DB의 ON DELETE CASCADE로 댓글과 대댓글도 함께 제거되는지 검증
+        mockMvc.perform(delete("/api/articles/{id}", article.getId())
+                        .with(loginUser())
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        assertThat(blogRepository.existsById(article.getId())).isFalse();
+        assertThat(commentRepository.existsById(comment.getId())).isFalse();
+        assertThat(commentRepository.existsById(reply.getId())).isFalse();
+        assertThat(commentRepository.findAllByArticleIdOldestFirst(article.getId()))
+                .isEmpty();
     }
 
     @DisplayName("관리자는 자신이 업로드한 이미지를 다른 작성자의 게시글에 추가한다")

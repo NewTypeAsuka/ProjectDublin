@@ -25,6 +25,7 @@ public class ArticleContentSummarizer {
     private final S3ObjectUrlResolver s3ObjectUrlResolver;
 
     private final Safelist safelist = Safelist.relaxed()
+            .addAttributes("a", "target", "rel")
             .addAttributes("img", "src", "alt", "title", "width", "height", "class",
                     "loading", "decoding")
             .addProtocols("img", "src", "https")
@@ -44,6 +45,7 @@ public class ArticleContentSummarizer {
         }
 
         Document document = Jsoup.parseBodyFragment(rawHtml);
+        document.select("a").forEach(this::sanitizeLinkTarget);
         document.select("iframe").stream()
                 .filter(iframe -> !isAllowedYoutubeEmbed(iframe))
                 .forEach(Element::remove);
@@ -67,6 +69,18 @@ public class ArticleContentSummarizer {
         }
 
         return sanitizedHtml;
+    }
+
+    // 새 창 링크만 target을 보존하고 탭 가로채기 방지 속성을 강제한다.
+    private void sanitizeLinkTarget(Element link) {
+        boolean opensNewWindow = "_blank".equalsIgnoreCase(link.attr("target"));
+        link.removeAttr("target");
+        link.removeAttr("rel");
+
+        if (opensNewWindow) {
+            link.attr("target", "_blank");
+            link.attr("rel", "noopener noreferrer");
+        }
     }
 
     private boolean isAllowedYoutubeEmbed(Element iframe) {

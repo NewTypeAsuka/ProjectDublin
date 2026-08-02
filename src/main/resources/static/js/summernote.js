@@ -13,6 +13,12 @@
     // 수정 화면에서는 서버가 textarea에 넣어준 기존 HTML을 보관한다.
     const initialHtml = $content.val();
 
+    // 동영상 입력창에는 공급자 목록 없이 간결한 URL 라벨만 표시한다.
+    const koreanLanguage = $.summernote.lang['ko-KR'];
+    if (koreanLanguage?.video) {
+        koreanLanguage.video.providers = '';
+    }
+
     // textarea를 Summernote 에디터로 초기화한다.
     $content.summernote({
         lang: 'ko-KR',
@@ -20,6 +26,8 @@
         tabsize: 2,
         height: 360,
         dialogsInBody: true, // 이미지·링크 창이 편집기 카드의 overflow에 잘리지 않게 한다.
+        linkAddNoOpener: true,
+        linkAddNoReferrer: true,
         toolbar: [
             // ['style', ['style']], // 글자 크기
             ['font', ['bold', 'underline', 'fontsize', 'color', 'clear']], // 글자 스타일
@@ -30,6 +38,9 @@
         callbacks: {
             onImageUpload: function (files) {
                 Array.from(files).forEach(uploadImage);
+            },
+            onPaste: function (event) {
+                insertYoutubeVideoOnPaste(event);
             }
         }
     });
@@ -84,6 +95,63 @@
         }
         if (offset !== 0) {
             menu.style.marginLeft = `${offset}px`;
+        }
+    }
+
+    // youtu.be 공유 링크만 붙여넣기 즉시 안전한 YouTube iframe으로 변환한다.
+    function insertYoutubeVideoOnPaste(event) {
+        const clipboardData = (event.originalEvent || event).clipboardData
+            || window.clipboardData;
+        if (!clipboardData) {
+            return;
+        }
+
+        const pastedText = clipboardData.getData('text/plain')
+            || clipboardData.getData('Text');
+        const embedUrl = createYoutubeEmbedUrl(pastedText);
+        if (!embedUrl) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.width = '640';
+        iframe.height = '360';
+        iframe.title = 'YouTube 동영상';
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute(
+            'allow',
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+        );
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        iframe.className = 'note-video-clip';
+
+        $content.summernote('insertNode', iframe);
+    }
+
+    function createYoutubeEmbedUrl(value) {
+        const candidate = value?.trim();
+        if (!candidate || /\s/.test(candidate)) {
+            return null;
+        }
+
+        try {
+            const url = new URL(candidate);
+            const host = url.hostname.toLowerCase();
+            const pathParts = url.pathname.split('/').filter(Boolean);
+            if (url.protocol !== 'https:'
+                    || (host !== 'youtu.be' && host !== 'www.youtu.be')
+                    || pathParts.length !== 1
+                    || !/^[A-Za-z0-9_-]{11}$/.test(pathParts[0])) {
+                return null;
+            }
+
+            return `https://www.youtube.com/embed/${pathParts[0]}`;
+        } catch (error) {
+            return null;
         }
     }
 

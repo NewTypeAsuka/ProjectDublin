@@ -216,6 +216,13 @@
             font-size: 1.05rem;
             line-height: 1.85;
         }
+        /* layout: 편집기에 삽입된 YouTube 동영상을 본문 폭에 맞춤 */
+        .note-editor.note-frame .note-editable iframe {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
         .note-editor.note-frame .note-statusbar {
             border-top: 1px solid rgba(15, 23, 42, 0.06);
             border-radius: 0 0 1rem 1rem;

@@ -51,6 +51,22 @@ class ArticleContentSanitizerTest {
                 .doesNotContain("https://example.com/unsafe");
     }
 
+    @DisplayName("새 창 링크는 안전 속성과 함께 보존하고 다른 target은 제거한다")
+    @Test
+    void preserveSafeNewWindowLink() {
+        String sanitizedHtml = sanitizer.sanitize("""
+                <a href="https://example.com/new" target="_blank">새 창 링크</a>
+                <a href="https://example.com/same" target="_self" rel="opener">현재 창 링크</a>
+                """);
+
+        assertThat(sanitizedHtml)
+                .contains("href=\"https://example.com/new\"")
+                .contains("target=\"_blank\"")
+                .contains("rel=\"noopener noreferrer\"")
+                .doesNotContain("target=\"_self\"")
+                .doesNotContain("rel=\"opener\"");
+    }
+
     @DisplayName("S3 게시글 이미지는 보존하고 외부 이미지는 제거한다")
     @Test
     void allowOnlyManagedS3Image() {
