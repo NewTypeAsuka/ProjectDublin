@@ -8,6 +8,8 @@ import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Utilities;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -21,7 +23,8 @@ class ArticleContentSanitizerTest {
                     "",
                     "articles",
                     "",
-                    DataSize.ofMegabytes(10)
+                    DataSize.ofMegabytes(10),
+                    Duration.ofHours(24)
             ),
             S3Utilities.builder().region(Region.AP_NORTHEAST_2).build()
     );

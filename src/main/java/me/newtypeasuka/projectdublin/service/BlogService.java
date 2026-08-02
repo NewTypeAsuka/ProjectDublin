@@ -43,7 +43,7 @@ public class BlogService {
         Article article = blogRepository.save(
                 request.toEntity(author, sanitizedTitle, sanitizedContent)
         );
-        articleImageService.synchronize(article);
+        articleImageService.synchronize(article, author);
         return article;
     }
 
@@ -81,14 +81,14 @@ public class BlogService {
     // 블로그 글 단건 조회
     public Article findById(Long id) {
         return blogRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+                .orElseThrow(() -> articleNotFound(id));
     }
 
     // 게시글 상세 조회 시 조회수를 1 증가시킨 후 최신 게시글을 반환
     @Transactional
     public Article findByIdAndIncreaseViewCount(Long id) {
         if (blogRepository.increaseViewCount(id) == 0) {
-            throw new IllegalArgumentException("not found: " + id);
+            throw articleNotFound(id);
         }
 
         return findById(id);
@@ -97,8 +97,7 @@ public class BlogService {
     // 블로그 글 삭제
     @Transactional
     public void delete(long id, String email) {
-        Article article = blogRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+        Article article = findById(id);
 
         authorizeArticleManager(article, findUserByEmail(email));
         articleImageService.removeAllForArticle(article.getId());
@@ -108,14 +107,14 @@ public class BlogService {
     // 블로그 글 수정
     @Transactional // 트랜잭션 처리를 위해 @Transactional 어노테이션 사용
     public Article update(long id, UpdateArticleRequest request, String email) {
-        Article article = blogRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+        Article article = findById(id);
+        User currentUser = findUserByEmail(email);
 
-        authorizeArticleManager(article, findUserByEmail(email));
+        authorizeArticleManager(article, currentUser);
         String sanitizedTitle = sanitizeTitle(request.getTitle());
         String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
         article.update(sanitizedTitle, sanitizedContent);
-        articleImageService.synchronize(article);
+        articleImageService.synchronize(article, currentUser);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
     }
@@ -134,8 +133,7 @@ public class BlogService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "admin role required");
         }
 
-        Article article = blogRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Article article = findById(id);
         article.updatePinned(pinned);
         return article;
     }
@@ -163,6 +161,13 @@ public class BlogService {
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("user not found: " + email));
+    }
+
+    private ResponseStatusException articleNotFound(Long id) {
+        return new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "게시글을 찾을 수 없습니다: " + id
+        );
     }
 
     private ArticleFeed createArticleFeed(List<Article> pinnedArticles,

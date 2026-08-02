@@ -45,3 +45,4 @@ aws:
     key-prefix: projectdublin/articles # key-prefix/[사용자id]/[연도]/[월]/[uuid].[확장자] 형식으로 저장됨. key-prefix는 프로젝트별로 다르게 설정 가능
     public-base-url:
     max-file-size: 50MB # 파일 업로드 최대 크기 설정. application.yml에서 설정한 값보다 큰 파일을 업로드하면 500 에러 발생
+    orphan-retention: 24h # 게시글에 연결되지 않은 신규 업로드를 보관한 뒤 정리할 시간

@@ -288,6 +288,82 @@ class BlogApiControllerTest {
         ));
     }
 
+    @DisplayName("관리자는 자신이 업로드한 이미지를 다른 작성자의 게시글에 추가한다")
+    @Test
+    void allowAdminToAddOwnImageToAnotherAuthorsArticle() throws Exception {
+        User admin = userRepository.save(User.builder()
+                .email("admin@example.com")
+                .nickname("Admin")
+                .role(1)
+                .build());
+        Article article = blogRepository.save(Article.builder()
+                .author(user)
+                .title("Member article")
+                .content("<p>Original content</p>")
+                .build());
+        String key = "articles/%d/2026/08/admin-image.png".formatted(admin.getId());
+        String encodedFilename = Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString("admin-image.png".getBytes(StandardCharsets.UTF_8));
+        when(s3Client.headObject(any(HeadObjectRequest.class))).thenReturn(
+                HeadObjectResponse.builder()
+                        .contentType("image/png")
+                        .contentLength(9L)
+                        .metadata(Map.of(
+                                "uploader-id", admin.getId().toString(),
+                                "original-filename", encodedFilename
+                        ))
+                        .build()
+        );
+        UpdateArticleRequest updateRequest = new UpdateArticleRequest(
+                "Managed by admin",
+                "<p>Updated content</p><img src=\"" + urlResolver.resolve(key) + "\">"
+        );
+
+        mockMvc.perform(put("/api/articles/{id}", article.getId())
+                        .with(loginUser(admin))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Managed by admin"));
+
+        assertThat(blogRepository.findById(article.getId()).orElseThrow().getAuthor().getId())
+                .isEqualTo(user.getId());
+        assertThat(articleImageRepository.findAllByArticleId(article.getId()))
+                .singleElement()
+                .satisfies(image -> assertThat(image.getS3Key()).isEqualTo(key));
+    }
+
+    @DisplayName("존재하지 않는 게시글의 조회·수정·삭제 요청은 404를 반환한다")
+    @Test
+    void returnNotFoundForMissingArticle() throws Exception {
+        long missingArticleId = Long.MAX_VALUE;
+        UpdateArticleRequest updateRequest = new UpdateArticleRequest(
+                "Missing article",
+                "<p>Content</p>"
+        );
+
+        mockMvc.perform(get("/api/articles/{id}", missingArticleId).with(loginUser()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/articles/{id}", missingArticleId).with(loginUser()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/new-article")
+                        .param("id", Long.toString(missingArticleId))
+                        .with(loginUser()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(put("/api/articles/{id}", missingArticleId)
+                        .with(loginUser())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(delete("/api/articles/{id}", missingArticleId)
+                        .with(loginUser())
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
     @DisplayName("작성자가 같은 게시글을 반복 조회해도 매번 조회수가 증가한다")
     @Test
     void increaseViewCountOnEveryDetailView() throws Exception {
@@ -443,9 +519,16 @@ class BlogApiControllerTest {
     }
 
     private RequestPostProcessor loginUser() {
+        return loginUser(user);
+    }
+
+    private RequestPostProcessor loginUser(User currentUser) {
         DefaultOAuth2User oauth2User = new DefaultOAuth2User(
                 List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                Map.of("email", EMAIL, "name", "Writer"),
+                Map.of(
+                        "email", currentUser.getEmail(),
+                        "name", currentUser.getNickname()
+                ),
                 "email"
         );
         return oauth2Login().oauth2User(oauth2User);

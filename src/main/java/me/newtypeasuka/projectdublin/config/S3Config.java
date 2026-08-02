@@ -18,6 +18,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Utilities;
 
+import java.time.Duration;
+
 @Configuration
 @EnableConfigurationProperties(S3Config.S3StorageProperties.class)
 public class S3Config {
@@ -67,7 +69,8 @@ public class S3Config {
             String secretKey,
             @NotBlank String keyPrefix,
             String publicBaseUrl,
-            @NotNull DataSize maxFileSize
+            @NotNull DataSize maxFileSize,
+            @NotNull Duration orphanRetention
     ) {
     }
 }

@@ -27,10 +27,16 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +45,9 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +79,8 @@ class ArticleImageServiceTest {
                 "",
                 "articles",
                 "",
-                DataSize.ofMegabytes(10)
+                DataSize.ofMegabytes(10),
+                Duration.ofHours(24)
         );
         urlResolver = new S3ObjectUrlResolver(
                 properties,
@@ -93,16 +102,16 @@ class ArticleImageServiceTest {
 
     @DisplayName("PNG 파일과 업로더 정보를 UUID 기반 키로 S3에 업로드한다")
     @Test
-    void uploadPngImage() {
+    void uploadPngImage() throws IOException {
         byte[] png = new byte[]{
                 (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x01
         };
-        MockMultipartFile image = new MockMultipartFile(
+        MockMultipartFile image = spy(new MockMultipartFile(
                 "image",
                 "한글 이미지.png",
                 "application/octet-stream",
                 png
-        );
+        ));
         when(userRepository.findByEmail(EMAIL)).thenReturn(java.util.Optional.of(user));
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
@@ -111,7 +120,8 @@ class ArticleImageServiceTest {
 
         ArgumentCaptor<PutObjectRequest> requestCaptor =
                 ArgumentCaptor.forClass(PutObjectRequest.class);
-        verify(s3Client).putObject(requestCaptor.capture(), any(RequestBody.class));
+        ArgumentCaptor<RequestBody> bodyCaptor = ArgumentCaptor.forClass(RequestBody.class);
+        verify(s3Client).putObject(requestCaptor.capture(), bodyCaptor.capture());
         PutObjectRequest request = requestCaptor.getValue();
 
         assertThat(request.bucket()).isEqualTo("projectdublin-test-images");
@@ -119,8 +129,11 @@ class ArticleImageServiceTest {
                 .matches("articles/42/\\d{4}/\\d{2}/[0-9a-f-]+\\.png");
         assertThat(request.contentType()).isEqualTo("image/png");
         assertThat(request.metadata().get("uploader-id")).isEqualTo("42");
+        assertThat(request.metadata().get("orphan-cleanup")).isEqualTo("eligible");
         assertThat(decodeFilename(request.metadata().get("original-filename")))
                 .isEqualTo("한글 이미지.png");
+        assertThat(bodyCaptor.getValue().optionalContentLength()).contains((long) png.length);
+        verify(image, never()).getBytes();
         assertThat(response.url())
                 .startsWith("https://projectdublin-test-images.s3.ap-northeast-2.amazonaws.com/")
                 .endsWith(".png");
@@ -140,7 +153,7 @@ class ArticleImageServiceTest {
                 storedImage("42", "image.png")
         );
 
-        articleImageService.synchronize(article);
+        articleImageService.synchronize(article, user);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Iterable<ArticleImage>> imagesCaptor =
@@ -160,6 +173,42 @@ class ArticleImageServiceTest {
         assertThat(savedImage.getFileSize()).isEqualTo(9L);
     }
 
+    @DisplayName("관리자는 자신이 업로드한 이미지를 다른 작성자의 게시글에 연결한다")
+    @Test
+    void synchronizeAdminImageWithAnotherAuthorsArticle() {
+        User admin = User.builder()
+                .email("admin@example.com")
+                .nickname("Admin")
+                .role(1)
+                .build();
+        ReflectionTestUtils.setField(admin, "id", 7L);
+        String key = "articles/7/2026/07/admin-image.png";
+        Article article = articleWithContent(
+                100L,
+                "<img src=\"" + urlResolver.resolve(key) + "\">"
+        );
+        when(articleImageRepository.findAllByArticleId(100L)).thenReturn(List.of());
+        when(articleImageRepository.findAllByS3KeyIn(any())).thenReturn(List.of());
+        when(s3Client.headObject(any(HeadObjectRequest.class))).thenReturn(
+                storedImage("7", "admin-image.png")
+        );
+
+        articleImageService.synchronize(article, admin);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Iterable<ArticleImage>> imagesCaptor =
+                ArgumentCaptor.forClass(Iterable.class);
+        verify(articleImageRepository).saveAll(imagesCaptor.capture());
+        ArticleImage savedImage = StreamSupport.stream(
+                        imagesCaptor.getValue().spliterator(),
+                        false
+                )
+                .findFirst()
+                .orElseThrow();
+        assertThat(savedImage.getArticle()).isSameAs(article);
+        assertThat(savedImage.getS3Key()).isEqualTo(key);
+    }
+
     @DisplayName("다른 사용자가 업로드한 S3 이미지는 게시글에 연결하지 않는다")
     @Test
     void rejectImageUploadedByAnotherUser() {
@@ -174,7 +223,7 @@ class ArticleImageServiceTest {
                 storedImage("99", "image.png")
         );
 
-        assertThatThrownBy(() -> articleImageService.synchronize(article))
+        assertThatThrownBy(() -> articleImageService.synchronize(article, user))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(exception -> assertThat(
                         ((ResponseStatusException) exception).getStatusCode()
@@ -199,10 +248,64 @@ class ArticleImageServiceTest {
         when(s3Client.deleteObject(any(DeleteObjectRequest.class)))
                 .thenReturn(DeleteObjectResponse.builder().build());
 
-        articleImageService.synchronize(article);
+        articleImageService.synchronize(article, user);
 
         verify(articleImageRepository).deleteAllInBatch(List.of(existingImage));
         verify(s3Client).deleteObject(any(DeleteObjectRequest.class));
+    }
+
+    @DisplayName("24시간이 지난 미연결 신규 업로드만 S3에서 정리한다")
+    @Test
+    void removeOnlyEligibleOrphanedUploads() {
+        Instant now = Instant.now();
+        String linkedKey = "articles/42/2026/07/linked.png";
+        String orphanedKey = "articles/42/2026/07/orphaned.png";
+        String recentKey = "articles/42/2026/07/recent.png";
+        String legacyKey = "articles/42/2026/07/legacy.png";
+        Article article = articleWithContent(100L, "<p>본문</p>");
+        ArticleImage linkedImage = ArticleImage.builder()
+                .article(article)
+                .s3Key(linkedKey)
+                .originalFilename("linked.png")
+                .contentType("image/png")
+                .fileSize(9L)
+                .build();
+        when(s3Client.listObjectsV2(any(ListObjectsV2Request.class))).thenReturn(
+                ListObjectsV2Response.builder()
+                        .contents(List.of(
+                                s3Object(linkedKey, now.minus(Duration.ofDays(2))),
+                                s3Object(orphanedKey, now.minus(Duration.ofDays(2))),
+                                s3Object(recentKey, now.minus(Duration.ofHours(1))),
+                                s3Object(legacyKey, now.minus(Duration.ofDays(2)))
+                        ))
+                        .isTruncated(false)
+                        .build()
+        );
+        when(articleImageRepository.findAllByS3KeyIn(any()))
+                .thenReturn(List.of(linkedImage));
+        when(s3Client.headObject(argThat(
+                (HeadObjectRequest request) -> request != null
+                        && request.key().equals(orphanedKey)
+        ))).thenReturn(HeadObjectResponse.builder()
+                .metadata(Map.of("orphan-cleanup", "eligible"))
+                .build());
+        when(s3Client.headObject(argThat(
+                (HeadObjectRequest request) -> request != null
+                        && request.key().equals(legacyKey)
+        ))).thenReturn(HeadObjectResponse.builder()
+                .metadata(Map.of())
+                .build());
+
+        articleImageService.removeOrphanedUploads();
+
+        verify(s3Client).deleteObject(argThat(
+                (DeleteObjectRequest request) -> request != null
+                        && request.key().equals(orphanedKey)
+        ));
+        verify(s3Client, never()).deleteObject(argThat(
+                (DeleteObjectRequest request) -> request != null
+                        && !request.key().equals(orphanedKey)
+        ));
     }
 
     @DisplayName("이미지로 위장한 파일은 S3에 업로드하지 않는다")
@@ -249,6 +352,14 @@ class ArticleImageServiceTest {
                         "uploader-id", uploaderId,
                         "original-filename", encodedFilename
                 ))
+                .build();
+    }
+
+    private S3Object s3Object(String key, Instant lastModified) {
+        return S3Object.builder()
+                .key(key)
+                .lastModified(lastModified)
+                .size(9L)
                 .build();
     }
 

@@ -30,3 +30,4 @@ aws:
     key-prefix: articles
     public-base-url:
     max-file-size: 10MB
+    orphan-retention: 24h

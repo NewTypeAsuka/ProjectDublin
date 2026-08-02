@@ -11,6 +11,7 @@ import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.jsoup.Jsoup;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -23,11 +24,17 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -49,7 +56,11 @@ public class ArticleImageService {
 
     private static final String UPLOADER_ID_METADATA = "uploader-id";
     private static final String ORIGINAL_FILENAME_METADATA = "original-filename";
+    private static final String ORPHAN_CLEANUP_METADATA = "orphan-cleanup";
+    private static final String ORPHAN_CLEANUP_ELIGIBLE = "eligible";
     private static final int MAX_ORIGINAL_FILENAME_LENGTH = 255;
+    private static final int MAX_IMAGE_SIGNATURE_LENGTH = 12;
+    private static final int S3_LIST_PAGE_SIZE = 1000;
     private static final Set<String> SUPPORTED_CONTENT_TYPES = Set.of(
             "image/png",
             "image/jpeg",
@@ -71,8 +82,7 @@ public class ArticleImageService {
                         "로그인 사용자 정보를 찾을 수 없습니다"
                 ));
 
-        byte[] content = readContent(image);
-        ImageType imageType = ImageType.detect(content);
+        ImageType imageType = ImageType.detect(readSignature(image));
         if (imageType == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -89,16 +99,26 @@ public class ArticleImageService {
                 .bucket(properties.bucket())
                 .key(key)
                 .contentType(imageType.contentType)
-                .contentLength((long) content.length)
+                .contentLength(image.getSize())
                 .cacheControl("public, max-age=31536000, immutable")
                 .metadata(Map.of(
                         UPLOADER_ID_METADATA, uploader.getId().toString(),
-                        ORIGINAL_FILENAME_METADATA, encodeFilename(originalFilename)
+                        ORIGINAL_FILENAME_METADATA, encodeFilename(originalFilename),
+                        ORPHAN_CLEANUP_METADATA, ORPHAN_CLEANUP_ELIGIBLE
                 ))
                 .build();
 
         try {
-            s3Client.putObject(request, RequestBody.fromBytes(content));
+            s3Client.putObject(request, RequestBody.fromContentProvider(
+                    () -> openUploadStream(image),
+                    image.getSize(),
+                    imageType.contentType
+            ));
+        } catch (UncheckedIOException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "이미지 파일을 읽지 못했습니다"
+            );
         } catch (SdkException exception) {
             log.error("S3 게시글 이미지 업로드에 실패했습니다. key={}", key, exception);
             throw new ResponseStatusException(
@@ -110,9 +130,13 @@ public class ArticleImageService {
         return new ImageUploadResponse(urlResolver.resolve(key));
     }
 
-    public void synchronize(Article article) {
+    public void synchronize(Article article, User currentEditor) {
         if (article.getId() == null) {
             throw new IllegalArgumentException("이미지를 연결하려면 게시글이 먼저 저장되어야 합니다");
+        }
+        if (!currentEditor.isAdmin()
+                && !article.getAuthor().getId().equals(currentEditor.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
         Set<String> requestedKeys = extractImageKeys(article.getContent());
@@ -140,7 +164,7 @@ public class ArticleImageService {
                 continue;
             }
 
-            newImages.add(createArticleImage(article, key));
+            newImages.add(createArticleImage(article, currentEditor, key));
         }
         if (!newImages.isEmpty()) {
             articleImageRepository.saveAll(newImages);
@@ -169,24 +193,96 @@ public class ArticleImageService {
                 .toList());
     }
 
-    private ArticleImage createArticleImage(Article article, String key) {
+    // 매일 새벽 4시에 신규 업로드 중 게시글과 연결되지 않은 오래된 S3 객체만 정리
+    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+    public void removeOrphanedUploads() {
+        Instant cutoff = Instant.now().minus(properties.orphanRetention());
+        String continuationToken = null;
+
+        do {
+            ListObjectsV2Request.Builder requestBuilder = ListObjectsV2Request.builder()
+                    .bucket(properties.bucket())
+                    .prefix(urlResolver.normalizedKeyPrefix() + "/")
+                    .maxKeys(S3_LIST_PAGE_SIZE);
+            if (StringUtils.hasText(continuationToken)) {
+                requestBuilder.continuationToken(continuationToken);
+            }
+
+            ListObjectsV2Response response;
+            try {
+                response = s3Client.listObjectsV2(requestBuilder.build());
+                removeOrphanedUploads(response, cutoff);
+            } catch (SdkException exception) {
+                log.error("연결되지 않은 S3 게시글 이미지 정리에 실패했습니다", exception);
+                return;
+            }
+
+            continuationToken = response.nextContinuationToken();
+            if (!Boolean.TRUE.equals(response.isTruncated())) {
+                return;
+            }
+        } while (StringUtils.hasText(continuationToken));
+    }
+
+    private void removeOrphanedUploads(ListObjectsV2Response response, Instant cutoff) {
+        List<String> expiredKeys = response.contents().stream()
+                .filter(object -> StringUtils.hasText(object.key()))
+                .filter(object -> object.lastModified() != null)
+                .filter(object -> object.lastModified().isBefore(cutoff))
+                .map(S3Object::key)
+                .toList();
+        if (expiredKeys.isEmpty()) {
+            return;
+        }
+
+        Set<String> linkedKeys = articleImageRepository.findAllByS3KeyIn(expiredKeys).stream()
+                .map(ArticleImage::getS3Key)
+                .collect(Collectors.toSet());
+        List<String> orphanedKeys = expiredKeys.stream()
+                .filter(key -> !linkedKeys.contains(key))
+                .filter(this::isOrphanCleanupEligible)
+                .toList();
+        deleteObjects(orphanedKeys);
+    }
+
+    private boolean isOrphanCleanupEligible(String key) {
+        try {
+            HeadObjectResponse storedObject = s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(properties.bucket())
+                    .key(key)
+                    .build());
+            return ORPHAN_CLEANUP_ELIGIBLE.equals(
+                    storedObject.metadata().get(ORPHAN_CLEANUP_METADATA)
+            );
+        } catch (S3Exception exception) {
+            if (exception.statusCode() != HttpStatus.NOT_FOUND.value()) {
+                log.warn("정리 대상 S3 게시글 이미지 확인에 실패했습니다. key={}", key, exception);
+            }
+            return false;
+        } catch (SdkException exception) {
+            log.warn("정리 대상 S3 게시글 이미지 확인에 실패했습니다. key={}", key, exception);
+            return false;
+        }
+    }
+
+    private ArticleImage createArticleImage(Article article, User currentEditor, String key) {
         String expectedUserPrefix = "%s/%d/".formatted(
                 urlResolver.normalizedKeyPrefix(),
-                article.getAuthor().getId()
+                currentEditor.getId()
         );
         if (!key.startsWith(expectedUserPrefix)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "현재 사용자가 업로드한 이미지만 연결할 수 있습니다"
+                    "현재 편집자가 업로드한 이미지만 연결할 수 있습니다"
             );
         }
 
         HeadObjectResponse storedObject = loadStoredObject(key);
         String uploaderId = storedObject.metadata().get(UPLOADER_ID_METADATA);
-        if (!article.getAuthor().getId().toString().equals(uploaderId)) {
+        if (!currentEditor.getId().toString().equals(uploaderId)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "현재 사용자가 업로드한 이미지만 연결할 수 있습니다"
+                    "현재 편집자가 업로드한 이미지만 연결할 수 있습니다"
             );
         }
 
@@ -294,14 +390,22 @@ public class ArticleImageService {
         }
     }
 
-    private byte[] readContent(MultipartFile image) {
-        try {
-            return image.getBytes();
+    private byte[] readSignature(MultipartFile image) {
+        try (InputStream inputStream = image.getInputStream()) {
+            return inputStream.readNBytes(MAX_IMAGE_SIGNATURE_LENGTH);
         } catch (IOException exception) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "이미지 파일을 읽지 못했습니다"
             );
+        }
+    }
+
+    private InputStream openUploadStream(MultipartFile image) {
+        try {
+            return image.getInputStream();
+        } catch (IOException exception) {
+            throw new UncheckedIOException(exception);
         }
     }
 
