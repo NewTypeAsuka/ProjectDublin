@@ -7,10 +7,25 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> <!-- Bootstrap Icons CSS -->
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> <!-- Tailwind CSS -->
+
+        <!-- 모든 화면의 링크를 공유할 때 표시할 공통 사이트 정보(Open Graph) -->
+        <meta property="og:type" content="website">
+        <meta property="og:locale" content="ko_KR">
+        <meta property="og:site_name" content="NewTypeBlog">
+        <meta property="og:title" content="NewTypeBlog">
+        <meta property="og:description" content="일상의 생각이 글이 되는 나만의 공간.">
+        <meta property="og:url" content="https://www.newtypeblog.com/">
+        <meta property="og:image" content="https://www.newtypeblog.com/img/newTypeBlogOg.png">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="NewTypeBlog">
+
         <!-- CSRF: 상태 변경 API 요청에 사용할 세션 토큰과 헤더 이름 -->
         <meta name="_csrf" th:content="${_csrf.token}">
         <meta name="_csrf_header" th:content="${_csrf.headerName}">
         <script src="/js/csrf.js"></script> <!-- 상태 변경 요청에 CSRF 토큰 추가 -->
+        
         <style type="text/tailwindcss"> /* tokens: Tailwind CSS */
             /* tokens: Tailwind 공통 디자인 토큰과 유틸리티 계층 */
             @layer theme, base, components, utilities;
