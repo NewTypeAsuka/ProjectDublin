@@ -17,7 +17,7 @@
             margin-bottom: 2.5rem;
         }
         .article-list-toolbar__heading {
-            max-width: 38rem;
+            width: 100%;
             min-width: 0;
             margin-bottom: 0;
         }
@@ -33,12 +33,89 @@
             text-transform: uppercase;
         }
         .article-list-toolbar__title {
-            margin-bottom: 0.7rem;
+            margin: 0;
             color: rgba(25, 31, 40, 1);
             font-size: clamp(2rem, 7vw, 3.5rem);
             font-weight: 780;
             letter-spacing: -0.055em;
             line-height: 1.08;
+        }
+        .article-list-toolbar__title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            min-width: 0;
+            padding-bottom: 0.7rem;
+        }
+
+        /* layout: 게시글 검색 입력창과 아이콘 버튼 */
+        .article-list-search {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.45rem;
+            flex: 0 1 auto;
+            min-width: 2.75rem;
+        }
+        .article-list-search__input {
+            box-sizing: border-box;
+            width: 0;
+            min-width: 0;
+            height: 2.75rem;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            opacity: 0;
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            pointer-events: none;
+            transition: width 0.22s ease, padding 0.22s ease,
+                border-color 0.18s ease, opacity 0.16s ease;
+        }
+        .article-list-search.is-open .article-list-search__input {
+            width: clamp(10rem, 24vw, 17rem);
+            padding: 0.55rem 1rem;
+            border-color: rgba(49, 130, 246, 0.2);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .article-list-search__input::placeholder {
+            color: rgba(139, 149, 161, 1);
+        }
+        .article-list-search__toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 2.75rem;
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            color: rgba(49, 130, 246, 1);
+            background-color: transparent;
+            font-size: 1.05rem;
+            transition: border-color 0.18s ease, color 0.18s ease,
+                background-color 0.18s ease, transform 0.18s ease;
+        }
+        /* interaction: 게시글 검색 컨트롤의 hover·focus·열림 상태 */
+        .article-list-search__toggle:hover,
+        .article-list-search__toggle:focus,
+        .article-list-search.is-open .article-list-search__toggle {
+            border-color: rgba(49, 130, 246, 0.14);
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(235, 244, 255, 1);
+        }
+        .article-list-search__toggle:active {
+            transform: scale(0.96);
+        }
+        /* 접근성: 게시글 검색 컨트롤의 키보드 포커스 표시 */
+        .article-list-search__input:focus-visible,
+        .article-list-search__toggle:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.25);
+            outline-offset: 3px;
         }
         /* layout: 미사용 보존 - 우측 장식 마크업이 현재 HTML에서 주석 처리되어 있다.
         .article-list-toolbar__symbol {
@@ -253,8 +330,23 @@
             #main-content .article-list-toolbar {
                 margin-bottom: 1.25rem !important;
             }
-            .article-list-toolbar__title {
-                margin-bottom: 0;
+            .article-list-toolbar__title-row {
+                gap: 0.35rem;
+                padding-bottom: 0;
+            }
+            .article-list-search {
+                gap: 0.25rem;
+                min-width: 2.5rem;
+            }
+            .article-list-search__toggle {
+                flex-basis: 2.5rem;
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            .article-list-search.is-open .article-list-search__input {
+                width: min(12rem, calc(100vw - 11rem));
+                padding-right: 0.8rem;
+                padding-left: 0.8rem;
             }
             .article-card__header {
                 display: grid;
@@ -297,7 +389,35 @@
                             <i class="bi bi-journal-richtext" aria-hidden="true"></i>
                             POSTS
                         </span>
-                        <h2 class="article-list-toolbar__title">포스트</h2>
+                        <div class="article-list-toolbar__title-row">
+                            <h2 class="article-list-toolbar__title">포스트</h2>
+                            <form class="article-list-search"
+                                  th:action="@{/articles}"
+                                  method="get"
+                                  role="search"
+                                  data-article-search
+                                  novalidate>
+                                <label class="sr-only"
+                                       for="article-list-search-input">포스트 검색</label>
+                                <input id="article-list-search-input"
+                                       class="article-list-search__input"
+                                       type="search"
+                                       name="keyword"
+                                       placeholder="포스트 검색"
+                                       autocomplete="off"
+                                       enterkeyhint="search"
+                                       tabindex="-1"
+                                       aria-hidden="true">
+                                <button class="article-list-search__toggle"
+                                        type="submit"
+                                        aria-controls="article-list-search-input"
+                                        aria-expanded="false"
+                                        aria-label="검색창 열기"
+                                        title="검색창 열기">
+                                    <i class="bi bi-search" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </section>
 
@@ -378,9 +498,31 @@
                     </a>
                 </section>
 
+                <!-- 검색 결과가 없을 때 표시할 섹션 -->
+                <section id="article-search-empty-state"
+                         class="article-empty-state mb-0"
+                         role="status"
+                         aria-live="polite"
+                         aria-atomic="true"
+                         hidden>
+                    <span class="article-empty-state__icon" aria-hidden="true">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <strong class="tw:block tw:text-lg tw:text-ink">검색된 결과가 없습니다</strong>
+                    <span class="tw:mt-2 tw:block tw:text-sm tw:leading-6 tw:text-muted">
+                        다른 검색어로 다시 검색해주세요
+                    </span>
+                    <a th:href="@{/new-article}"
+                       class="btn btn-sm app-button site-nav__write tw:mt-5">
+                        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                        <span>글쓰기</span>
+                    </a>
+                </section>
+
                 <!-- 게시글이 없을 때 섹션 -->
-                <section th:if="${#lists.isEmpty(articles)}"
-                   class="article-empty-state mb-0">
+                <section id="article-empty-state"
+                         th:if="${#lists.isEmpty(articles)}"
+                         class="article-empty-state mb-0">
                     <span class="article-empty-state__icon" aria-hidden="true">
                         <i class="bi bi-file-earmark-text"></i>
                     </span>
@@ -432,6 +574,7 @@
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <script src="/js/siteNavigation.js"></script> <!-- 공통 내비게이션 고정 -->
+    <script src="/js/articleSearch.js"></script> <!-- 게시글 검색 입력창 표시 -->
     <script src="/js/articleFeed.js"></script> <!-- 게시글 무한 스크롤 -->
 </body>
 </html>
