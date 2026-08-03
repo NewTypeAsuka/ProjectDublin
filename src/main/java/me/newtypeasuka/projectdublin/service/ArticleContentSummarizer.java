@@ -75,6 +75,7 @@ public class ArticleContentSummarizer {
 
         Document document = Jsoup.parseBodyFragment(rawHtml);
         document.select("a").forEach(this::sanitizeLinkTarget);
+        document.select("font[color]").forEach(this::normalizeLegacyFontColor);
         document.select("span[style]").forEach(this::sanitizeInlineStyle);
         document.select("iframe").stream()
                 .filter(iframe -> !isAllowedYoutubeEmbed(iframe))
@@ -99,6 +100,29 @@ public class ArticleContentSummarizer {
         }
 
         return sanitizedHtml;
+    }
+
+    // 브라우저가 Summernote 전경색을 font 태그로 생성하는 경우 안전한 span 스타일로 변환한다.
+    private void normalizeLegacyFontColor(Element element) {
+        String color = element.attr("color").trim();
+        String normalizedColor = color.toLowerCase(Locale.ROOT)
+                .replaceAll("\\s+", " ")
+                .trim();
+        String existingStyle = element.attr("style").trim();
+
+        element.tagName("span");
+        element.removeAttr("color");
+        element.removeAttr("face");
+        element.removeAttr("size");
+
+        if (!isAllowedColor(normalizedColor)) {
+            return;
+        }
+
+        String colorStyle = "color: " + color;
+        element.attr("style", existingStyle.isEmpty()
+                ? colorStyle
+                : colorStyle + "; " + existingStyle);
     }
 
     // Summernote 글자 도구가 생성하는 안전한 인라인 서식만 보존한다.

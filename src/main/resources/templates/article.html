@@ -467,6 +467,9 @@
                 padding: 0.3rem 0.45rem;
                 font-size: 0.8rem;
             }
+            #article-title {
+                font-size: clamp(1.2rem, 4vw, 1.5rem);
+            }
             .article-detail__header {
                 display: grid;
                 grid-template-columns: max-content minmax(0, 1fr);
@@ -578,7 +581,7 @@
                         <article>
                             <header class="border-bottom pb-3 mb-4">
                                 <h1 id="article-title"
-                                    class="h3 mb-0 text-break"
+                                    class="h4 mb-0 text-break"
                                     th:text="${article.title}"></h1>
                             </header>
                             <section class="mb-4">

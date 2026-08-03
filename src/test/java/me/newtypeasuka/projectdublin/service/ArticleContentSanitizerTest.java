@@ -96,6 +96,26 @@ class ArticleContentSanitizerTest {
                 .doesNotContain("javascript");
     }
 
+    @DisplayName("Summernote가 font 태그로 생성한 글자색은 안전한 span 스타일로 변환한다")
+    @Test
+    void normalizeSummernoteLegacyFontColor() {
+        String sanitizedHtml = sanitizer.sanitize("""
+                <p>
+                    <font color="#ff0000">빨간 글자</font>
+                    <font color="rgb(0, 128, 255)" style="position: fixed">파란 글자</font>
+                    <font color="expression(alert('xss'))">잘못된 색상</font>
+                </p>
+                """);
+
+        assertThat(sanitizedHtml)
+                .contains("<span style=\"color: #ff0000\">빨간 글자</span>")
+                .contains("<span style=\"color: rgb(0, 128, 255)\">파란 글자</span>")
+                .contains("잘못된 색상")
+                .doesNotContain("<font")
+                .doesNotContain("position")
+                .doesNotContain("expression");
+    }
+
     @DisplayName("새 창 링크는 안전 속성과 함께 보존하고 다른 target은 제거한다")
     @Test
     void preserveSafeNewWindowLink() {
