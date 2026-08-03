@@ -29,14 +29,10 @@ public class BlogViewController {
         return "redirect:/articles";
     }
 
-    // 헬스 체크용
-//    @GetMapping("/health")
-//    @ResponseBody
-//    public String healthCheck() {
-//        return "OK";
-//    }
+    // 단순 헬스 체크용
     @RestController
     public class HealthController {
+        // 애플리케이션 실행 상태 확인 API
         @GetMapping("/health")
         public ResponseEntity<String> health() {
             return ResponseEntity.ok("OK");
@@ -44,8 +40,10 @@ public class BlogViewController {
     }
 
     @GetMapping("/articles")
-    public String getArticles(Model model) {
-        BlogService.ArticleFeed articleFeed = blogService.findInitialFeed();
+    public String getArticles(@RequestParam(defaultValue = "") String keyword,
+                              Model model) {
+        String normalizedKeyword = blogService.normalizeSearchKeyword(keyword);
+        BlogService.ArticleFeed articleFeed = blogService.findInitialFeed(normalizedKeyword);
         List<Article> articleEntities = articleFeed.articles();
         List<Long> articleIds = articleEntities.stream().map(Article::getId).toList();
         Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(articleIds);
@@ -60,6 +58,8 @@ public class BlogViewController {
         model.addAttribute("articles", articles); // 블로그 글 리스트 저장
         model.addAttribute("nextCursor", articleFeed.nextCursor());
         model.addAttribute("hasNextArticles", articleFeed.hasNext());
+        model.addAttribute("keyword", normalizedKeyword);
+        model.addAttribute("searching", !normalizedKeyword.isEmpty());
 
         return "articleList"; // articleList.html 뷰 이름 반환
     }

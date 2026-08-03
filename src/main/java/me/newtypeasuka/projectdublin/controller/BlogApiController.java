@@ -51,9 +51,15 @@ public class BlogApiController {
     @GetMapping("/api/articles/feed")
     public ResponseEntity<ArticleListViewResponse.FeedResponse> findArticleFeed(
             @RequestParam String cursor,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String keyword
     ) {
-        BlogService.ArticleFeed articleFeed = blogService.findArticleFeed(cursor, size);
+        // 검색 중이면 같은 검색어와 검색 커서를 사용하고, 빈 검색어면 기존 피드를 조회
+        BlogService.ArticleFeed articleFeed = blogService.findArticleFeed(
+                cursor,
+                size,
+                keyword
+        );
         List<Article> articleEntities = articleFeed.articles();
         List<Long> articleIds = articleEntities.stream().map(Article::getId).toList();
         Map<Long, Long> likeCounts = articleLikeService.getLikeCounts(articleIds);

@@ -392,6 +392,7 @@
                         <div class="article-list-toolbar__title-row">
                             <h2 class="article-list-toolbar__title">포스트</h2>
                             <form class="article-list-search"
+                                  th:classappend="${searching} ? 'is-open' : ''"
                                   th:action="@{/articles}"
                                   method="get"
                                   role="search"
@@ -403,15 +404,21 @@
                                        class="article-list-search__input"
                                        type="search"
                                        name="keyword"
-                                       placeholder="포스트 검색(준비중)"
+                                       placeholder="포스트 검색"
+                                       maxlength="15"
+                                       data-max-length="15"
+                                       th:value="${keyword}"
                                        autocomplete="off"
                                        enterkeyhint="search"
                                        tabindex="-1"
-                                       aria-hidden="true">
+                                       aria-hidden="true"
+                                       th:attr="tabindex=${searching ? 0 : -1},
+                                           aria-hidden=${!searching}">
                                 <button class="article-list-search__toggle"
                                         type="submit"
                                         aria-controls="article-list-search-input"
                                         aria-expanded="false"
+                                        th:attr="aria-expanded=${searching}"
                                         aria-label="검색창 열기"
                                         title="검색창 열기">
                                     <i class="bi bi-search" aria-hidden="true"></i>
@@ -424,7 +431,8 @@
                 <!-- 게시글 카드 섹션 -->
                 <section id="article-feed"
                     th:attr="data-next-cursor=${nextCursor},
-                        data-has-next=${hasNextArticles}">
+                        data-has-next=${hasNextArticles},
+                        data-keyword=${keyword}">
                     <a th:each="item : ${articles}"
                         th:href="@{/articles/{id}(id=${item.id})}"
                         class="article-card-link"> <!-- 게시글 카드 링크와 호버 효과 -->
@@ -504,7 +512,7 @@
                          role="status"
                          aria-live="polite"
                          aria-atomic="true"
-                         hidden>
+                         th:hidden="${!searching or !#lists.isEmpty(articles)}">
                     <span class="article-empty-state__icon" aria-hidden="true">
                         <i class="bi bi-search"></i>
                     </span>
@@ -521,7 +529,7 @@
 
                 <!-- 게시글이 없을 때 섹션 -->
                 <section id="article-empty-state"
-                         th:if="${#lists.isEmpty(articles)}"
+                         th:if="${!searching and #lists.isEmpty(articles)}"
                          class="article-empty-state mb-0">
                     <span class="article-empty-state__icon" aria-hidden="true">
                         <i class="bi bi-file-earmark-text"></i>

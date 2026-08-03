@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let nextCursor = feed.dataset.nextCursor || '';
     let hasNext = feed.dataset.hasNext === 'true';
+    const keyword = (feed.dataset.keyword || '').trim();
     let isLoading = false;
     let observer = null;
 
@@ -177,7 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             observer.disconnect();
         }
         if (feed.children.length > 0) {
-            setMessage('모든 게시글을 불러왔습니다');
+            setMessage(keyword
+                ? '모든 검색 결과를 불러왔습니다'
+                : '모든 게시글을 불러왔습니다');
         }
     }
 
@@ -201,6 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 cursor: nextCursor,
                 size: '10'
             });
+            if (keyword) {
+                params.set('keyword', keyword);
+            }
             const response = await fetch(`/api/articles/feed?${params}`, {
                 headers: {
                     Accept: 'application/json'

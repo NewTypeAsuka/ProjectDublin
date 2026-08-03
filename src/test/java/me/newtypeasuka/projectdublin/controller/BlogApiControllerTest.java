@@ -13,6 +13,7 @@ import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.CommentRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.S3ObjectUrlResolver;
+import org.jsoup.Jsoup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -550,6 +551,215 @@ class BlogApiControllerTest {
         assertThat(finalPage.get("nextCursor").isNull()).isTrue();
     }
 
+    @DisplayName("검색어의 대소문자와 앞뒤 공백을 무시하고 제목 또는 본문을 검색한다")
+    @Test
+    void searchArticlesByTitleOrContentCaseInsensitively() throws Exception {
+        Article titleMatch = blogRepository.save(Article.builder()
+                .author(user)
+                .title("NEW project")
+                .content("<p>제목으로 검색되는 글</p>")
+                .build());
+        titleMatch.updatePinned(true);
+        blogRepository.save(titleMatch);
+        Article contentMatch = blogRepository.save(Article.builder()
+                .author(user)
+                .title("본문 검색")
+                .content("<p>Welcome to the new blog</p>")
+                .build());
+        Article koreanMatch = blogRepository.save(Article.builder()
+                .author(user)
+                .title("한글 부분 일치")
+                .content("<p>게시글 검색 기능을 소개합니다</p>")
+                .build());
+        blogRepository.save(Article.builder()
+                .author(user)
+                .title("Unrelated")
+                .content("<p>일치하지 않는 본문</p>")
+                .build());
+
+        var englishResult = mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "  New  "))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("keyword", "New"))
+                .andExpect(model().attribute("searching", true))
+                .andExpect(model().attribute("hasNextArticles", false))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "maxlength=\"15\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "data-keyword=\"New\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("포스트 검색(준비중)"))))
+                .andReturn();
+
+        @SuppressWarnings("unchecked")
+        List<ArticleListViewResponse> englishArticles =
+                (List<ArticleListViewResponse>) englishResult
+                        .getModelAndView()
+                        .getModel()
+                        .get("articles");
+        assertThat(englishArticles)
+                .extracting(ArticleListViewResponse::getId)
+                .containsExactly(titleMatch.getId(), contentMatch.getId());
+
+        var koreanResult = mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "검색 기능"))
+                .andExpect(status().isOk())
+                .andReturn();
+        @SuppressWarnings("unchecked")
+        List<ArticleListViewResponse> koreanArticles =
+                (List<ArticleListViewResponse>) koreanResult
+                        .getModelAndView()
+                        .getModel()
+                        .get("articles");
+        assertThat(koreanArticles)
+                .extracting(ArticleListViewResponse::getId)
+                .containsExactly(koreanMatch.getId());
+
+        mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "   "))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("keyword", ""))
+                .andExpect(model().attribute("searching", false));
+
+        var missingResult = mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "missing"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("searching", true))
+                .andReturn();
+        var missingDocument = Jsoup.parse(
+                missingResult.getResponse().getContentAsString()
+        );
+        assertThat(missingDocument.getElementById("article-search-empty-state")
+                .hasAttr("hidden")).isFalse();
+        assertThat(missingDocument.getElementById("article-empty-state")).isNull();
+    }
+
+    @DisplayName("검색 결과를 고정 글 우선으로 10개씩 커서 조회한다")
+    @Test
+    void loadSearchResultsByCursor() throws Exception {
+        List<Article> normalArticles = new ArrayList<>();
+        for (int number = 1; number <= 12; number++) {
+            normalArticles.add(blogRepository.save(Article.builder()
+                    .author(user)
+                    .title("Match " + number)
+                    .content("<p>Search content</p>")
+                    .build()));
+        }
+        for (int number = 1; number <= 2; number++) {
+            Article pinnedArticle = blogRepository.save(Article.builder()
+                    .author(user)
+                    .title("Pinned match " + number)
+                    .content("<p>Pinned search content</p>")
+                    .build());
+            pinnedArticle.updatePinned(true);
+            blogRepository.save(pinnedArticle);
+        }
+        blogRepository.save(Article.builder()
+                .author(user)
+                .title("Not included")
+                .content("<p>Nothing to find</p>")
+                .build());
+
+        var initialResult = mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "match"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("hasNextArticles", true))
+                .andReturn();
+
+        @SuppressWarnings("unchecked")
+        List<ArticleListViewResponse> initialArticles =
+                (List<ArticleListViewResponse>) initialResult
+                        .getModelAndView()
+                        .getModel()
+                        .get("articles");
+        assertThat(initialArticles).hasSize(10);
+        assertThat(initialArticles.subList(0, 2))
+                .allMatch(ArticleListViewResponse::isPinned);
+        assertThat(initialArticles.subList(2, 10))
+                .extracting(ArticleListViewResponse::getId)
+                .containsExactly(
+                        normalArticles.get(11).getId(),
+                        normalArticles.get(10).getId(),
+                        normalArticles.get(9).getId(),
+                        normalArticles.get(8).getId(),
+                        normalArticles.get(7).getId(),
+                        normalArticles.get(6).getId(),
+                        normalArticles.get(5).getId(),
+                        normalArticles.get(4).getId()
+                );
+
+        String cursor = (String) initialResult
+                .getModelAndView()
+                .getModel()
+                .get("nextCursor");
+        assertThat(cursor).isNotBlank();
+
+        mockMvc.perform(get("/api/articles/feed")
+                        .with(loginUser())
+                        .param("keyword", "MATCH")
+                        .param("cursor", cursor)
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.articles.length()").value(4))
+                .andExpect(jsonPath("$.articles[0].id")
+                        .value(normalArticles.get(3).getId()))
+                .andExpect(jsonPath("$.articles[3].id")
+                        .value(normalArticles.get(0).getId()))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.nextCursor").isEmpty());
+    }
+
+    @DisplayName("LIKE 와일드카드는 문자 그대로 검색하고 검색어는 15자로 제한한다")
+    @Test
+    void escapeSearchWildcardsAndLimitKeywordLength() throws Exception {
+        Article percentArticle = blogRepository.save(Article.builder()
+                .author(user)
+                .title("100% complete")
+                .content("<p>Percent</p>")
+                .build());
+        Article underscoreArticle = blogRepository.save(Article.builder()
+                .author(user)
+                .title("under_score")
+                .content("<p>Underscore</p>")
+                .build());
+        Article backslashArticle = blogRepository.save(Article.builder()
+                .author(user)
+                .title("back\\slash")
+                .content("<p>Backslash</p>")
+                .build());
+        blogRepository.save(Article.builder()
+                .author(user)
+                .title("Ordinary article")
+                .content("<p>No wildcard characters</p>")
+                .build());
+
+        assertThat(searchArticleIds("%"))
+                .containsExactly(percentArticle.getId());
+        assertThat(searchArticleIds("_"))
+                .containsExactly(underscoreArticle.getId());
+        assertThat(searchArticleIds("\\"))
+                .containsExactly(backslashArticle.getId());
+
+        mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "가".repeat(15)))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", "가".repeat(16)))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/articles/feed")
+                        .with(loginUser())
+                        .param("keyword", "a".repeat(16))
+                        .param("cursor", "invalid-cursor"))
+                .andExpect(status().isBadRequest());
+    }
+
     @DisplayName("게시글 피드는 잘못된 커서와 과도한 조회 크기를 거부한다")
     @Test
     void rejectInvalidArticleFeedRequest() throws Exception {
@@ -563,6 +773,23 @@ class BlogApiControllerTest {
                         .param("cursor", "invalid-cursor")
                         .param("size", "51"))
                 .andExpect(status().isBadRequest());
+    }
+
+    private List<Long> searchArticleIds(String keyword) throws Exception {
+        var searchResult = mockMvc.perform(get("/articles")
+                        .with(loginUser())
+                        .param("keyword", keyword))
+                .andExpect(status().isOk())
+                .andReturn();
+        @SuppressWarnings("unchecked")
+        List<ArticleListViewResponse> articles =
+                (List<ArticleListViewResponse>) searchResult
+                        .getModelAndView()
+                        .getModel()
+                        .get("articles");
+        return articles.stream()
+                .map(ArticleListViewResponse::getId)
+                .toList();
     }
 
     private RequestPostProcessor loginUser() {

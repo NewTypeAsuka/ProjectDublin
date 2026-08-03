@@ -39,6 +39,7 @@ public class ArticleApiController {
     private final BlogService blogService;
     private final CommentService commentService;
 
+    // 게시글 본문에 첨부할 이미지 업로드 API
     @PostMapping(
             value = "/images",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -51,24 +52,28 @@ public class ArticleApiController {
                 .body(articleImageService.upload(image, principal.getName()));
     }
 
+    // 게시글의 좋아요 수와 현재 사용자의 좋아요 여부 조회 API
     @GetMapping("/{articleId}/likes")
     public ResponseEntity<LikeResponse> getLikeStatus(@PathVariable long articleId,
                                                       Principal principal) {
         return ResponseEntity.ok(articleLikeService.getStatus(articleId, principal.getName()));
     }
 
+    // 게시글 좋아요 등록 API
     @PutMapping("/{articleId}/likes")
     public ResponseEntity<LikeResponse> like(@PathVariable long articleId,
                                              Principal principal) {
         return ResponseEntity.ok(articleLikeService.like(articleId, principal.getName()));
     }
 
+    // 게시글 좋아요 취소 API
     @DeleteMapping("/{articleId}/likes")
     public ResponseEntity<LikeResponse> unlike(@PathVariable long articleId,
                                                Principal principal) {
         return ResponseEntity.ok(articleLikeService.unlike(articleId, principal.getName()));
     }
 
+    // 관리자용 게시글 고정 API
     @PutMapping("/{articleId}/pin")
     public ResponseEntity<PinResponse> pin(@PathVariable long articleId,
                                            Principal principal) {
@@ -76,6 +81,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(new PinResponse(article.isPinned()));
     }
 
+    // 관리자용 게시글 고정 해제 API
     @DeleteMapping("/{articleId}/pin")
     public ResponseEntity<PinResponse> unpin(@PathVariable long articleId,
                                              Principal principal) {

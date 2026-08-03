@@ -20,12 +20,14 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 
 @RequiredArgsConstructor // lombok의 RequiredArgsConstructor 어노테이션으로 final이 붙거나 @NotNull 어노테이션이 붙은 생성자 자동 생성
 @Service // 스프링의 Service 어노테이션으로 빈 등록
 public class BlogService {
 
     public static final int DEFAULT_FEED_SIZE = 10;
+    public static final int MAX_SEARCH_KEYWORD_LENGTH = 15;
     private static final int MAX_FEED_SIZE = 50;
     private static final String CURSOR_SEPARATOR = "|";
 
@@ -65,6 +67,20 @@ public class BlogService {
         return createArticleFeed(pinnedArticles, normalCandidates, DEFAULT_FEED_SIZE);
     }
 
+    // 검색어가 있으면 제목·본문 부분 일치 결과를 고정 글 우선으로 10개 조회
+    public ArticleFeed findInitialFeed(String keyword) {
+        String normalizedKeyword = normalizeSearchKeyword(keyword);
+        if (normalizedKeyword.isEmpty()) {
+            return findInitialFeed();
+        }
+
+        List<Article> candidates = blogRepository.findSearchMatches(
+                createSearchPattern(normalizedKeyword),
+                PageRequest.of(0, DEFAULT_FEED_SIZE + 1)
+        );
+        return createSearchArticleFeed(candidates, DEFAULT_FEED_SIZE);
+    }
+
     // 마지막으로 조회한 일반 글 이후의 게시글을 커서 기준으로 조회
     public ArticleFeed findArticleFeed(String cursor, int size) {
         int validatedSize = validateFeedSize(size);
@@ -76,6 +92,42 @@ public class BlogService {
         );
 
         return createArticleFeed(List.of(), normalCandidates, validatedSize);
+    }
+
+    // 검색 결과의 마지막 글 이후를 검색 전용 커서로 이어서 조회
+    public ArticleFeed findArticleFeed(String cursor, int size, String keyword) {
+        String normalizedKeyword = normalizeSearchKeyword(keyword);
+        if (normalizedKeyword.isEmpty()) {
+            return findArticleFeed(cursor, size);
+        }
+
+        int validatedSize = validateFeedSize(size);
+        ArticleSearchCursor articleCursor = decodeSearchCursor(cursor);
+        List<Article> candidates = blogRepository.findSearchMatchesAfterCursor(
+                createSearchPattern(normalizedKeyword),
+                articleCursor.pinned(),
+                articleCursor.createdAt(),
+                articleCursor.id(),
+                PageRequest.of(0, validatedSize + 1)
+        );
+        return createSearchArticleFeed(candidates, validatedSize);
+    }
+
+    // 검색어의 앞뒤 공백을 제거하고 백엔드에서도 15자 제한을 검증
+    public String normalizeSearchKeyword(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return "";
+        }
+
+        String normalizedKeyword = keyword.strip();
+        int length = normalizedKeyword.codePointCount(0, normalizedKeyword.length());
+        if (length > MAX_SEARCH_KEYWORD_LENGTH) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "검색어는 15자 이하로 입력해주세요"
+            );
+        }
+        return normalizedKeyword;
     }
 
     // 블로그 글 단건 조회
@@ -189,6 +241,26 @@ public class BlogService {
         return new ArticleFeed(List.copyOf(articles), nextCursor, hasNext);
     }
 
+    private ArticleFeed createSearchArticleFeed(List<Article> candidates, int size) {
+        boolean hasNext = candidates.size() > size;
+        List<Article> articles = List.copyOf(
+                candidates.subList(0, Math.min(size, candidates.size()))
+        );
+        String nextCursor = hasNext && !articles.isEmpty()
+                ? encodeSearchCursor(articles.get(articles.size() - 1))
+                : null;
+        return new ArticleFeed(articles, nextCursor, hasNext);
+    }
+
+    // LIKE의 와일드카드는 이스케이프하고 로마자는 소문자로 통일
+    private String createSearchPattern(String keyword) {
+        String escapedKeyword = keyword.toLowerCase(Locale.ROOT)
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
+        return "%" + escapedKeyword + "%";
+    }
+
     private int validateFeedSize(int size) {
         if (size < 1 || size > MAX_FEED_SIZE) {
             throw new ResponseStatusException(
@@ -201,6 +273,17 @@ public class BlogService {
 
     private String encodeCursor(Article article) {
         String value = article.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                + CURSOR_SEPARATOR
+                + article.getId();
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String encodeSearchCursor(Article article) {
+        String value = (article.isPinned() ? "1" : "0")
+                + CURSOR_SEPARATOR
+                + article.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                 + CURSOR_SEPARATOR
                 + article.getId();
         return Base64.getUrlEncoder()
@@ -232,6 +315,36 @@ public class BlogService {
                 throw invalidCursor();
             }
             return new ArticleCursor(createdAt, id);
+        } catch (IllegalArgumentException | DateTimeParseException exception) {
+            throw invalidCursor();
+        }
+    }
+
+    private ArticleSearchCursor decodeSearchCursor(String cursor) {
+        if (cursor == null || cursor.isBlank()) {
+            throw invalidCursor();
+        }
+
+        try {
+            String decoded = new String(
+                    Base64.getUrlDecoder().decode(cursor),
+                    StandardCharsets.UTF_8
+            );
+            String[] values = decoded.split("\\|", -1);
+            if (values.length != 3 || !(values[0].equals("1") || values[0].equals("0"))) {
+                throw invalidCursor();
+            }
+
+            boolean pinned = values[0].equals("1");
+            LocalDateTime createdAt = LocalDateTime.parse(
+                    values[1],
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            );
+            long id = Long.parseLong(values[2]);
+            if (id <= 0) {
+                throw invalidCursor();
+            }
+            return new ArticleSearchCursor(pinned, createdAt, id);
         } catch (IllegalArgumentException | DateTimeParseException exception) {
             throw invalidCursor();
         }
@@ -269,6 +382,9 @@ public class BlogService {
     }
 
     private record ArticleCursor(LocalDateTime createdAt, long id) {
+    }
+
+    private record ArticleSearchCursor(boolean pinned, LocalDateTime createdAt, long id) {
     }
 
 }

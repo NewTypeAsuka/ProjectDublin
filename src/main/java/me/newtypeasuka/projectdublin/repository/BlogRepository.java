@@ -37,6 +37,35 @@ public interface BlogRepository extends JpaRepository<Article, Long> {
             Pageable pageable
     );
 
+    // 제목 또는 본문에 검색어가 포함된 글을 고정 여부와 최신순으로 조회
+    @EntityGraph(attributePaths = "author")
+    @Query("SELECT article FROM Article article "
+            + "WHERE (LOWER(article.title) LIKE :pattern ESCAPE '!' "
+            + "OR LOWER(CAST(article.content AS String)) LIKE :pattern ESCAPE '!') "
+            + "ORDER BY article.pinned DESC, article.createdAt DESC, article.id DESC")
+    List<Article> findSearchMatches(
+            @Param("pattern") String pattern,
+            Pageable pageable
+    );
+
+    // 검색 결과의 마지막 글 이후를 고정 여부·작성일시·ID 커서로 조회
+    @EntityGraph(attributePaths = "author")
+    @Query("SELECT article FROM Article article "
+            + "WHERE (LOWER(article.title) LIKE :pattern ESCAPE '!' "
+            + "OR LOWER(CAST(article.content AS String)) LIKE :pattern ESCAPE '!') "
+            + "AND ((article.pinned = :pinned "
+            + "AND (article.createdAt < :createdAt "
+            + "OR (article.createdAt = :createdAt AND article.id < :id))) "
+            + "OR (:pinned = true AND article.pinned = false)) "
+            + "ORDER BY article.pinned DESC, article.createdAt DESC, article.id DESC")
+    List<Article> findSearchMatchesAfterCursor(
+            @Param("pattern") String pattern,
+            @Param("pinned") boolean pinned,
+            @Param("createdAt") LocalDateTime createdAt,
+            @Param("id") Long id,
+            Pageable pageable
+    );
+
     @Override
     @EntityGraph(attributePaths = "author")
     Optional<Article> findById(Long id);
