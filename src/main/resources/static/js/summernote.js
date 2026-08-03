@@ -30,7 +30,7 @@
         linkAddNoReferrer: true,
         toolbar: [
             // ['style', ['style']], // 글자 크기
-            ['font', ['bold', 'underline', 'fontsize', 'color', 'clear']], // 글자 스타일
+            ['font', ['bold', 'strikethrough', 'underline', 'fontsize', 'color', 'clear']], // 글자 스타일
             // ['para', ['ul', 'ol', 'paragraph']], // 문단 스타일
             ['insert', ['link', 'picture', 'video', 'hr']], // 링크, 이미지, 동영상 삽입
             ['view', ['fullscreen']] // 전체화면

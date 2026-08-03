@@ -51,6 +51,51 @@ class ArticleContentSanitizerTest {
                 .doesNotContain("https://example.com/unsafe");
     }
 
+    @DisplayName("Summernote 구분선은 보존하고 위험한 속성은 제거한다")
+    @Test
+    void preserveHorizontalRule() {
+        String sanitizedHtml = sanitizer.sanitize("""
+                <p>구분선 위</p>
+                <hr class="note-hr" onclick="alert('xss')">
+                <p>구분선 아래</p>
+                """);
+
+        assertThat(sanitizedHtml)
+                .contains("<hr>")
+                .doesNotContain("class=")
+                .doesNotContain("onclick");
+    }
+
+    @DisplayName("Summernote 글자 도구의 서식은 보존하고 위험한 CSS는 제거한다")
+    @Test
+    void preserveSummernoteFontToolbarStyles() {
+        String sanitizedHtml = sanitizer.sanitize("""
+                <p>
+                    <b>굵게</b>
+                    <strike>취소선</strike>
+                    <u>밑줄</u>
+                    <span style="font-size: 24px; color: rgb(255, 0, 0);
+                        background-color: #ffff00; position: fixed;
+                        background-image: url(javascript:alert('xss'))">크기와 색상</span>
+                    <span style="font-weight: bold;
+                        text-decoration: underline line-through">인라인 서식</span>
+                </p>
+                """);
+
+        assertThat(sanitizedHtml)
+                .contains("<b>굵게</b>")
+                .contains("<strike>취소선</strike>")
+                .contains("<u>밑줄</u>")
+                .contains("font-size: 24px")
+                .contains("color: rgb(255, 0, 0)")
+                .contains("background-color: #ffff00")
+                .contains("font-weight: bold")
+                .contains("text-decoration: underline line-through")
+                .doesNotContain("position")
+                .doesNotContain("background-image")
+                .doesNotContain("javascript");
+    }
+
     @DisplayName("새 창 링크는 안전 속성과 함께 보존하고 다른 target은 제거한다")
     @Test
     void preserveSafeNewWindowLink() {
