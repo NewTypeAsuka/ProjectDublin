@@ -102,6 +102,14 @@ public class ArticleContentSummarizer {
         return sanitizedHtml;
     }
 
+    // 검색 시 HTML 태그나 속성이 일치하지 않도록 화면에 보이는 평문만 추출한다.
+    public String extractSearchContent(String sanitizedHtml) {
+        if (sanitizedHtml == null) {
+            throw invalidContent();
+        }
+        return Jsoup.parseBodyFragment(sanitizedHtml).text();
+    }
+
     // 브라우저가 Summernote 전경색을 font 태그로 생성하는 경우 안전한 span 스타일로 변환한다.
     private void normalizeLegacyFontColor(Element element) {
         String color = element.attr("color").trim();

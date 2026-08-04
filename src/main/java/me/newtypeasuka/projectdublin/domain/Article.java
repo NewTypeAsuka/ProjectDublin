@@ -36,8 +36,10 @@ public class Article {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @Column(name = "summary", length = 500)
-    private String summary;
+    // HTML 태그와 속성을 제외하고 본문 검색에 사용하는 평문
+    @Column(name = "search_content")
+    @Lob
+    private String searchContent;
 
     @Column(name = "view_count", nullable = false)
     private long viewCount;
@@ -49,18 +51,20 @@ public class Article {
     private String language;
 
     @Builder // 빌더 패턴으로 객체 생성
-    public Article(User author, String title, String content) {
+    public Article(User author, String title, String content, String searchContent) {
         this.author = author;
         this.title = title;
         this.content = content;
+        this.searchContent = searchContent;
         this.viewCount = 0L;
         this.pinned = false;
         this.language = "korean";
     }
 
-    public void update(String title, String content) { // 블로그 글 수정
+    public void update(String title, String content, String searchContent) { // 블로그 글 수정
         this.title = title;
         this.content = content;
+        this.searchContent = searchContent;
     }
 
     public void updatePinned(boolean pinned) {

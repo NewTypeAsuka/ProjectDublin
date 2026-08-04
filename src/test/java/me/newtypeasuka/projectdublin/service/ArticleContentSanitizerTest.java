@@ -66,6 +66,23 @@ class ArticleContentSanitizerTest {
                 .doesNotContain("onclick");
     }
 
+    @DisplayName("검색용 본문은 HTML 태그와 속성을 제외한 평문만 추출한다")
+    @Test
+    void extractPlainTextForSearch() {
+        String sanitizedHtml = sanitizer.sanitize("""
+                <p>구분선 위</p>
+                <hr>
+                <a href="https://example.com/path">표시되는 링크</a>
+                <p>구분선 아래</p>
+                """);
+
+        String searchContent = sanitizer.extractSearchContent(sanitizedHtml);
+
+        assertThat(searchContent)
+                .isEqualTo("구분선 위 표시되는 링크 구분선 아래")
+                .doesNotContain("hr", "href", "example.com");
+    }
+
     @DisplayName("Summernote 글자 도구의 서식은 보존하고 위험한 CSS는 제거한다")
     @Test
     void preserveSummernoteFontToolbarStyles() {

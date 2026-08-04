@@ -101,7 +101,8 @@ class BlogApiControllerTest {
     void createReadAndUpdateSummernoteArticle() throws Exception {
         AddArticleRequest createRequest = new AddArticleRequest(
                 "Summernote title",
-                "<p>Hello <strong>Summernote</strong></p><script>alert('xss')</script>"
+                "<p>Hello <strong>Summernote</strong></p><hr>"
+                        + "<script>alert('xss')</script>"
         );
 
         String createResponse = mockMvc.perform(post("/api/articles")
@@ -111,7 +112,9 @@ class BlogApiControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.authorId").value(user.getId()))
-                .andExpect(jsonPath("$.content").value("<p>Hello <strong>Summernote</strong></p>"))
+                .andExpect(jsonPath("$.content").value(
+                        "<p>Hello <strong>Summernote</strong></p>\n<hr>"
+                ))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -121,6 +124,9 @@ class BlogApiControllerTest {
         assertThat(savedArticle.getAuthor().getId()).isEqualTo(user.getId());
         assertThat(savedArticle.getContent()).contains("<strong>Summernote</strong>");
         assertThat(savedArticle.getContent()).doesNotContain("<script");
+        assertThat(savedArticle.getSearchContent()).isEqualTo("Hello Summernote");
+        assertThat(searchArticleIds("Hello")).containsExactly(articleId);
+        assertThat(searchArticleIds("hr")).isEmpty();
 
         mockMvc.perform(get("/api/articles/{id}", articleId).with(loginUser()))
                 .andExpect(status().isOk())
@@ -164,6 +170,12 @@ class BlogApiControllerTest {
                         "rel=\"noopener noreferrer\"")))
                 .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString(
                         "https://www.youtube.com/embed/video-id")));
+
+        Article updatedArticle = blogRepository.findById(articleId).orElseThrow();
+        assertThat(updatedArticle.getSearchContent()).isEqualTo("Updated Example");
+        assertThat(searchArticleIds("Example")).containsExactly(articleId);
+        assertThat(searchArticleIds("iframe")).isEmpty();
+        assertThat(searchArticleIds("example.com")).isEmpty();
 
         mockMvc.perform(get("/articles/{id}", articleId).with(loginUser()))
                 .andExpect(status().isOk())
@@ -565,11 +577,13 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("본문 검색")
                 .content("<p>Welcome to the new blog</p>")
+                .searchContent("Welcome to the new blog")
                 .build());
         Article koreanMatch = blogRepository.save(Article.builder()
                 .author(user)
                 .title("한글 부분 일치")
                 .content("<p>게시글 검색 기능을 소개합니다</p>")
+                .searchContent("게시글 검색 기능을 소개합니다")
                 .build());
         blogRepository.save(Article.builder()
                 .author(user)

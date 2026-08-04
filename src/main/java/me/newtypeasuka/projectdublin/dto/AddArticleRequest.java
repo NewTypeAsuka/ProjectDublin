@@ -20,10 +20,12 @@ public class AddArticleRequest {
 
     public Article toEntity(User author,
                             String sanitizedTitle,
-                            String sanitizedContent) { // 생성자를 사용해 객체 생성
+                            String sanitizedContent,
+                            String searchContent) { // 생성자를 사용해 객체 생성
         return Article.builder()
                 .title(sanitizedTitle)
                 .content(sanitizedContent)
+                .searchContent(searchContent)
                 .author(author)
                 .build();
     }

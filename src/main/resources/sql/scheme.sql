@@ -39,6 +39,10 @@ create table articles (
     index idx_article_list_created (language, pinned, created_at, id)
 );
 
+alter table articles
+    change column summary search_content longtext null
+    after content;
+
 create table article_likes (
     user_id bigint unsigned not null,
     article_id bigint unsigned not null,
