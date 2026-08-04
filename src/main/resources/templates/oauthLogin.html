@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
 
-    <!-- 모든 화면의 링크를 공유할 때 표시할 공통 사이트 정보(Open Graph) -->
+    <!-- 링크를 공유할 때 표시할 공통 사이트 정보(Open Graph) -->
     <meta property="og:type" content="website">
     <meta property="og:locale" content="ko_KR">
     <meta property="og:site_name" content="NewTypeBlog">
@@ -16,7 +16,6 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="NewTypeBlog">
-
     
     <title>로그인 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
@@ -210,6 +209,7 @@
             transition: opacity 0.22s ease;
             pointer-events: none;
         }
+
         /* interaction: Google 로그인 버튼의 hover·focus glow 상태 */
         .google-login-link:hover,
         .google-login-link:focus {
@@ -257,6 +257,7 @@
         .google-login-link:hover .google-login-link__arrow {
             transform: translateX(3px);
         }
+
         /* 접근성: Google 로그인 버튼의 키보드 포커스 표시 */
         .google-login-link:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.3);
@@ -356,14 +357,14 @@
         }
     </style>
 </head>
-<body class="gradient-custom tw:font-sans"> <!-- 배경과 애니메이션 -->
-    <main id="main-content" class="container login-shell tw:relative tw:z-10"> <!-- 로그인 쉘 -->
+<body class="gradient-custom tw:font-sans">
+    <main id="main-content" class="container login-shell tw:relative tw:z-10">
 
         <!-- 로그인 카드 섹션 -->
         <section class="login-card" aria-labelledby="login-title">
 
-            <!-- 로그인 카드 내 좌측 섹션 -->
-            <section class="login-story">
+            <!-- 로그인 카드 내 좌측 영역 -->
+            <div class="login-story">
                 <div>
                     <p class="login-story__eyebrow">MY SPACE TO THINK</p>
                     <h2 class="login-story__title">일상의 생각이<br>글이 되는<br>나만의 공간.</h2>
@@ -371,42 +372,42 @@
                         일상의 발견과 새로운 관점을 기록하고, 저만의 이야기를 차분히 이어가는 곳입니다.
                     </p>
                 </div>
-            </section>
+            </div>
 
-            <!-- 로그인 카드 내 우측 섹션 -->
-            <section class="login-panel">
+            <!-- 로그인 카드 내 우측 영역 -->
+            <div class="login-panel">
                 <p class="login-panel__eyebrow">WELCOME</p>
                 <h1 id="login-title" class="login-panel__title">NewTypeBlog</h1>
-                <p id="login-message" class="login-message"> <!-- 로그인 안내 문구 -->
+                <p id="login-message" class="login-message">
                     NewTypeBlog를 이용하기 위해서는<br>Google 계정이 필요합니다
                 </p>
                 <div>
                     <a th:href="@{/oauth2/authorization/google}"
                         href="/oauth2/authorization/google"
                         id="google-login-link"
-                        class="google-login-link"> <!-- Google 로그인 버튼 --> <!-- 구글 이미지 버튼 hover 시 glow 효과 -->
+                        class="google-login-link">
                         <img th:src="@{/img/googleIcon.png}"
                             src="/img/googleIcon.png"
                             alt="Google"
                             aria-hidden="true">
                         <span class="google-login-link__copy">
                             <span class="google-login-link__title">Google로 계속하기</span>
-                            <span class="google-login-link__description">Google 계정으로 로그인합니다</span> <!-- 소형 모바일: Google 로그인 설명을 생략 -->
+                            <span class="google-login-link__description">Google 계정으로 로그인합니다</span>
                         </span>
                         <i class="bi bi-arrow-right google-login-link__arrow" aria-hidden="true"></i>
                     </a>
-                    <div id="google-login-loading" class="google-login-loading" aria-live="polite"> <!-- 로딩 상태를 나타내는 애니메이션 -->
+                    <div id="google-login-loading" class="google-login-loading" aria-live="polite">
                         <div class="google-login-loading__inner">
                             <span class="spinner-border" aria-hidden="true"></span>
                             <span>Google 로그인 화면으로 이동하고 있어요</span>
                         </div>
                     </div>
                 </div>
-                <p class="login-security-note"> <!-- 로그인 카드 내 우측 보안 안내 -->
+                <p class="login-security-note">
                     <i class="bi bi-shield-check" aria-hidden="true"></i>
                     <span>비밀번호는 NewTypeBlog에 저장되지 않으며<br>Google OAuth2를 통한 안전한 액세스를 보장합니다</span>
                 </p>
-            </section>
+            </div>
 
         </section>
     </main>

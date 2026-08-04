@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
     <title th:text="|${article.title} · NewTypeBlog|">NewTypeBlog · 포스트</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
-    <th:block th:replace="~{common :: styles}"></th:block>
+    <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
         /* layout: 게시글 본문 타이포그래피와 반응형 첨부 콘텐츠 */
         .article-content img,
@@ -83,6 +83,7 @@
             transition: color 0.18s ease, background-color 0.18s ease,
                 transform 0.18s ease;
         }
+
         /* interaction: 목록 링크의 hover·focus 이동 효과 */
         .article-back-link:hover,
         .article-back-link:focus {
@@ -91,6 +92,7 @@
             text-decoration: none;
             transform: translateX(-2px);
         }
+
         /* 접근성: 목록 링크의 키보드 포커스 표시 */
         .article-back-link:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.28);
@@ -214,9 +216,6 @@
             min-height: 3.15rem;
             padding: 0.65rem 1.15rem;
             border: 1px solid rgba(15, 23, 42, 0.09);
-            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 1);
             box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
@@ -225,6 +224,7 @@
                 background-color 0.18s ease, transform 0.18s ease,
                 box-shadow 0.18s ease;
         }
+
         /* interaction: 좋아요 버튼의 hover·focus 상태 */
         .article-like__button:hover,
         .article-like__button:focus {
@@ -234,12 +234,14 @@
             box-shadow: 0 12px 28px rgba(224, 49, 49, 0.11);
             transform: translateY(-1px);
         }
+
         /* 접근성: 좋아요·고정 버튼의 키보드 포커스 표시 */
         .article-like__button:focus-visible,
         .article-pin__button:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.28);
             outline-offset: 3px;
         }
+
         /* interaction: 좋아요 버튼의 비활성·선택 상태 */
         .article-like__button:disabled {
             cursor: wait;
@@ -271,13 +273,11 @@
             min-height: 3.15rem;
             padding: 0.65rem 1.05rem;
             border: 1px solid rgba(15, 23, 42, 0.09);
-            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             color: rgba(108, 117, 125, 1);
             background-color: rgba(255, 255, 255, 1);
             transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
         }
+
         /* interaction: 고정 버튼의 hover·focus·선택 상태 */
         .article-pin__button:hover,
         .article-pin__button:focus,
@@ -291,6 +291,7 @@
         .article-pin__button:focus {
             transform: translateY(-1px);
         }
+
         /* interaction: 고정 버튼의 비활성 상태 */
         .article-pin__button:disabled {
             cursor: wait;
@@ -317,9 +318,6 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.9rem;
-            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             font-weight: 650;
         }
         .article-actions__delete {
@@ -346,6 +344,7 @@
             transition: border-color 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
         }
+
         /* interaction: 댓글 입력 영역의 focus 상태 */
         .article-comments__textarea:focus {
             border-color: rgba(49, 130, 246, 0.42);
@@ -356,9 +355,6 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(49, 130, 246, 1);
-            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             background-color: rgba(49, 130, 246, 1);
             font-weight: 680;
         }
@@ -410,9 +406,6 @@
         .comment-item__actions .btn {
             min-height: 2.5rem;
             padding: 0.45rem 0.65rem;
-            /* layout: 미사용 보존 - 동적 버튼에도 적용되는 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             font-size: 0.82rem;
             font-weight: 650;
             text-decoration: none;
@@ -531,12 +524,14 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
+    <!-- 공통 헤더 섹션 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
+    <!-- 공통 네비게이션 섹션 -->
     <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
 
     <main id="main-content"
-          class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
+        class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
                 <a th:href="@{/articles}" class="article-back-link">
@@ -546,15 +541,17 @@
 
                 <!-- 게시글 섹션 -->
                 <section class="card border-0 shadow-sm article-detail-card"
-                         id="article-detail"
-                         aria-labelledby="article-title">
+                        id="article-detail"
+                        aria-labelledby="article-title">
                     <div class="card-body p-4 p-md-5 article-detail-card__body">
                         <input type="hidden" id="article-id" th:value="${article.id}">
+
+                        <!-- 게시글 헤더 영역(제목 상단) -->
                         <div class="article-detail__header mb-4">
                             <span id="article-pinned-marker"
-                                  class="article-detail__pin-marker"
-                                  th:classappend="${article.pinned} ? '' : ' is-hidden'"
-                                  th:attr="aria-hidden=${!article.pinned}">
+                                    class="article-detail__pin-marker"
+                                    th:classappend="${article.pinned} ? '' : ' is-hidden'"
+                                    th:attr="aria-hidden=${!article.pinned}">
                                 <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
                                 <span class="sr-only">고정 게시글</span> 
                             </span>
@@ -577,18 +574,18 @@
                             </div>
                         </div>
 
-                        <!-- 게시글 본문 이미지와 동영상의 반응형 표시 -->
+                        <!-- 게시글 메인 영역 -->
                         <article>
                             <header class="border-bottom pb-3 mb-4">
                                 <h1 id="article-title"
                                     class="h4 mb-0 text-break"
-                                    th:text="${article.title}"></h1>
+                                    th:text="${article.title}"></h1> <!-- 게시글 제목 -->
                             </header>
                             <section class="mb-4">
                                 <div class="mb-0 text-break article-content tw:max-w-none"
-                                     th:utext="${article.content}"></div>
+                                    th:utext="${article.content}"></div> <!-- 게시글 본문 -->
 
-                                <!-- 게시글 조회수·좋아요·댓글 지표 -->
+                                <!-- 게시글 조회수·좋아요·댓글 영역 -->
                                 <div class="article-detail__metrics text-muted small mt-4">
                                     <span class="article-meta__metric" title="조회수">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
@@ -598,7 +595,7 @@
                                     <span class="article-meta__separator" aria-hidden="true">·</span>
                                     <span class="article-meta__metric" title="좋아요">
                                         <i class="bi bi-heart-fill article-meta__like-icon"
-                                           aria-hidden="true"></i>
+                                            aria-hidden="true"></i>
                                         <span class="sr-only">좋아요</span>
                                         <span id="article-like-count" th:text="${article.likeCount}"></span>
                                     </span>
@@ -607,12 +604,13 @@
                                         <i class="bi bi-chat-dots" aria-hidden="true"></i>
                                         <span class="sr-only">댓글</span>
                                         <span id="article-comment-count"
-                                              th:text="${article.commentCount}"></span>
+                                                th:text="${article.commentCount}"></span>
                                     </span>
                                 </div>
+
                             </section>
 
-                            <!-- 게시글 좋아요 버튼 -->
+                            <!-- 게시글 좋아요·고정 버튼 영역 -->
                             <div class="article-like border-top pt-4 mb-4">
                                 <button type="button" id="like-btn"
                                         class="app-button article-like__button"
@@ -620,36 +618,34 @@
                                         aria-pressed="false"
                                         disabled>
                                     <i id="like-icon"
-                                       class="bi bi-heart article-like__icon"
-                                       aria-hidden="true"></i>
+                                        class="bi bi-heart article-like__icon"
+                                        aria-hidden="true"></i>
                                     <span>좋아요</span>
                                     <span id="like-count"
-                                          class="article-like__count"
-                                          th:text="${article.likeCount}">0</span>
+                                        class="article-like__count"
+                                        th:text="${article.likeCount}">0</span>
                                 </button>
-
-                                <!-- 게시글 고정 버튼 -->
                                 <button type="button" id="pin-btn"
                                         th:if="${isAdmin}"
                                         class="app-button article-pin__button"
                                         th:classappend="${article.pinned} ? ' is-pinned'"
                                         th:attr="data-pinned=${article.pinned},
-                                                 aria-pressed=${article.pinned},
-                                                 aria-label=${article.pinned} ? '글 고정 해제' : '글 고정'">
+                                                aria-pressed=${article.pinned},
+                                                aria-label=${article.pinned} ? '글 고정 해제' : '글 고정'">
                                     <i id="pin-icon"
-                                       class="bi article-pin__icon"
-                                       th:classappend="${article.pinned} ? ' bi-pin-angle-fill' : ' bi-pin-angle'"
-                                       aria-hidden="true"></i>
+                                        class="bi article-pin__icon"
+                                        th:classappend="${article.pinned} ? ' bi-pin-angle-fill' : ' bi-pin-angle'"
+                                        aria-hidden="true"></i>
                                     <span id="pin-label"
-                                          th:text="${article.pinned} ? '해제' : '고정'"></span>
+                                        th:text="${article.pinned} ? '해제' : '고정'"></span>
                                 </button>
                             </div>
 
-                            <!-- 게시글 수정·삭제 버튼 -->
+                            <!-- 게시글 수정·삭제 버튼 영역 -->
                             <div class="article-actions" th:if="${canManageArticle}">
                                 <a id="edit-btn"
-                                   th:href="@{/new-article(id=${article.id})}"
-                                   class="btn btn-primary btn-sm app-button">
+                                    th:href="@{/new-article(id=${article.id})}"
+                                    class="btn btn-primary btn-sm app-button">
                                     <i class="bi bi-pencil" aria-hidden="true"></i>
                                     <span>수정</span>
                                 </a>
@@ -660,23 +656,25 @@
                                 </button>
                             </div>
                             <div id="article-action-message"
-                                 class="alert d-none article-action-message"
-                                 role="status"
-                                 aria-live="polite"></div>
+                                class="alert d-none article-action-message"
+                                role="status"
+                                aria-live="polite">
+                            </div>
+
                         </article>
+
                     </div>
                 </section>
 
                 <!-- 댓글 섹션 -->
                 <section class="card border-0 shadow-sm mt-4 article-comments"
-                         id="article-comments"
-                         aria-labelledby="comment-heading">
+                        id="article-comments"
+                        aria-labelledby="comment-heading">
                     <div class="card-body p-4 p-md-5 article-comments__body">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h2 class="h5 mb-0" id="comment-heading">
                                 댓글
-                                <span id="comment-count"
-                                      class="text-muted tw:ml-1">0</span>
+                                <span id="comment-count" class="text-muted tw:ml-1">0</span>
                             </h2>
                         </div>
 
@@ -684,14 +682,14 @@
                         <form id="comment-form" novalidate>
                             <label class="sr-only" for="comment-content">내용</label>
                             <textarea id="comment-content"
-                                      class="form-control article-comments__textarea"
-                                      data-max-length="1000"
-                                      placeholder="댓글을 입력해주세요"
-                                      aria-describedby="comment-length"
-                                      required></textarea>
+                                    class="form-control article-comments__textarea"
+                                    data-max-length="1000"
+                                    placeholder="댓글을 입력해주세요"
+                                    aria-describedby="comment-length"
+                                    required></textarea>
                             <div class="d-flex align-items-center justify-content-between mt-2">
                                 <span id="comment-length"
-                                      class="small text-muted article-comments__counter">0 / 1000</span>
+                                    class="small text-muted article-comments__counter">0 / 1000</span>
                                 <button type="submit"
                                         id="comment-submit"
                                         class="btn btn-primary btn-sm app-button article-comments__submit">
@@ -701,32 +699,34 @@
                             </div>
                         </form>
 
-                        <!-- 댓글 목록과 액션 버튼 -->
+                        <!-- 댓글 목록 영역 -->
                         <div id="comment-message"
-                             class="alert d-none mt-3 mb-0"
-                             role="status"
-                             aria-live="polite"></div>
+                            class="alert d-none mt-3 mb-0"
+                            role="status"
+                            aria-live="polite">
+                        </div>
                         <div id="comment-loading"
-                             class="py-4 text-center text-muted">
+                            class="py-4 text-center text-muted">
                             <span class="spinner-border spinner-border-sm mr-2"
-                                  aria-hidden="true"></span>
+                                    aria-hidden="true"></span>
                             댓글을 불러오는 중입니다
                         </div>
-                        <!-- 대댓글과 인라인 작성·수정 폼 -->
-                        <!-- 모바일 대댓글 들여쓰기 -->
-                        <div id="comment-list" class="comment-list d-none"></div>
+                        <div id="comment-list" class="comment-list d-none"></div> <!-- 댓글 목록 렌더링 -->
                         <p id="comment-empty"
-                           class="d-none py-4 mb-0 text-center text-muted">
+                            class="d-none py-4 mb-0 text-center text-muted">
                             <i class="bi bi-chat-square-text tw:mb-2 tw:block tw:text-2xl"
-                               aria-hidden="true"></i>
+                                aria-hidden="true"></i>
                             아직 작성된 댓글이 없습니다
                         </p>
+
                     </div>
                 </section>
+
             </div>
         </div>
     </main>
 
+    <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <script src="/js/siteNavigation.js"></script> <!-- 공통 내비게이션 고정 -->

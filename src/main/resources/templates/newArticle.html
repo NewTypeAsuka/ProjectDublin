@@ -6,14 +6,9 @@
     <title th:text="${article.id} != null ? '글 수정 · NewTypeBlog' : '새 글 작성 · NewTypeBlog'">새 글 작성 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
-    <th:block th:replace="~{common :: styles}"></th:block>
+    <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
         /* layout: 편집 화면 배경과 도입부 */
-        /* layout: 미사용 보존 - main 요소의 important tw:relative 유틸리티가 대체한다.
-        .editor-shell {
-            position: relative;
-        }
-        */
         .editor-shell::before {
             content: '';
             position: absolute;
@@ -66,11 +61,6 @@
         .editor-card__body {
             padding: clamp(1.35rem, 4vw, 3.25rem) !important;
         }
-        /* layout: 미사용 보존 - 두 editor-field 모두 Bootstrap mb-4가 여백을 관리한다.
-        .editor-field {
-            margin-bottom: 2rem;
-        }
-        */
 
         /* layout: 제목 입력 영역과 본문 사이 간격 */
         .editor-field--title {
@@ -102,6 +92,7 @@
             transition: border-color 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
         }
+
         /* interaction: 제목 입력창의 placeholder·focus 상태 */
         .editor-title-input::placeholder {
             color: rgba(139, 149, 161, 1);
@@ -124,11 +115,6 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
-        /* layout: 미사용 보존 - justify-content를 위의 동일 선택자에 통합했다.
-        .article-title__feedback {
-            justify-content: flex-end;
-        }
-        */
         .article-title__feedback .text-muted {
             color: rgba(107, 118, 132, 1) !important;
         }
@@ -173,6 +159,7 @@
             color: rgba(51, 61, 75, 1);
             background-color: transparent;
         }
+
         /* interaction: Summernote 툴바 버튼의 hover·focus·active 상태 */
         .note-editor.note-frame .note-toolbar > .note-btn-group > .note-btn:hover,
         .note-editor.note-frame .note-toolbar > .note-btn-group > .note-btn:focus,
@@ -201,6 +188,7 @@
             font-size: 1.05rem;
             line-height: 1.85;
         }
+
         /* layout: 편집기에 삽입된 YouTube 동영상을 본문 폭에 맞춤 */
         .note-editor.note-frame .note-editable iframe {
             aspect-ratio: 16 / 9;
@@ -266,9 +254,6 @@
             min-height: 2.9rem;
             margin-bottom: 0 !important;
             padding: 0.6rem 1rem;
-            /* layout: 미사용 보존 - 공통 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             font-weight: 680;
         }
         .editor-actions__cancel {
@@ -282,6 +267,7 @@
             background-color: rgba(49, 130, 246, 1);
             box-shadow: 0 10px 24px rgba(49, 130, 246, 0.24);
         }
+
         /* interaction: 게시글 등록·수정 버튼의 hover·focus 상태 */
         .editor-actions__submit:hover,
         .editor-actions__submit:focus {
@@ -290,6 +276,7 @@
             background-color: rgba(27, 100, 218, 1);
             transform: translateY(-1px);
         }
+
         /* 접근성: 편집 액션 버튼의 키보드 포커스 표시 */
         .editor-actions__submit:focus-visible,
         .editor-actions__cancel:focus-visible {
@@ -314,13 +301,11 @@
                 flex-direction: column;
                 gap: 0.25rem;
             }
-            /* 반응형layout: 드롭다운이 잘리지 않도록 툴바를 여러 줄로 배치 */
-            .note-editor.note-frame .note-toolbar {
+            .note-editor.note-frame .note-toolbar { /* 드롭다운이 잘리지 않도록 툴바를 여러 줄로 배치 */
                 overflow: visible;
                 flex-wrap: wrap;
             }
-            /* 반응형layout: 색상 팔레트와 셀을 모바일 화면 폭에 맞춤 */
-            .note-editor.note-frame .note-toolbar .note-color .dropdown-menu {
+            .note-editor.note-frame .note-toolbar .note-color .dropdown-menu { /* 색상 팔레트와 셀을 모바일 화면 폭에 맞춤 */
                 width: min(21.5rem, calc(100vw - 1.5rem));
                 min-width: 0;
                 padding: 0.45rem;
@@ -362,12 +347,14 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
+    <!-- 공통 헤더 섹션 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
+    <!-- 공통 네비게이션 섹션 -->
     <th:block th:replace="~{common :: siteNavbar(false)}"></th:block> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
 
     <main id="main-content"
-          class="container flex-fill py-4 py-md-5 editor-shell tw:relative">
+            class="container flex-fill py-4 py-md-5 editor-shell tw:relative">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-5xl">
 
@@ -391,57 +378,58 @@
 
                             <!-- 게시글 제목,본문 섹션 -->
                             <section>
-                                <!-- 게시글 제목 글자 수와 40자 제한 안내 -->
+
+                                <!-- 제목 영역 -->
                                 <div class="form-group mb-4 editor-field editor-field--title">
                                     <label for="title" class="editor-field__label">
                                         <span class="editor-field__title">제목</span>
                                     </label>
                                     <input type="text"
-                                           class="form-control editor-title-input"
-                                           placeholder="제목을 입력해주세요"
-                                           id="title"
-                                           data-max-length="40"
-                                           aria-describedby="title-length title-error"
-                                           autocomplete="off"
-                                           required
-                                           th:value="${article.title}">
+                                            class="form-control editor-title-input"
+                                            placeholder="제목을 입력해주세요"
+                                            id="title"
+                                            data-max-length="40"
+                                            aria-describedby="title-length title-error"
+                                            autocomplete="off"
+                                            required
+                                            th:value="${article.title}">
                                     <div class="article-title__feedback mt-2" aria-live="polite">
                                         <small id="title-length"
-                                               class="text-muted article-title__counter">0 / 40</small>
+                                                class="text-muted article-title__counter">0 / 40</small>
                                         <small id="title-error"
-                                               class="d-none text-danger"
-                                               aria-hidden="true">제목은 40자 이내로 작성해주세요</small>
+                                                class="d-none text-danger"
+                                                aria-hidden="true">제목은 40자 이내로 작성해주세요</small>
                                     </div>
                                 </div>
 
-                                <!-- Summernote 본문과 이미지 업로드 상태 -->
+                                <!-- Summernote 본문 영역 -->
                                 <div class="form-group mb-4 editor-field">
                                     <label for="content" class="editor-field__label">
                                         <span class="editor-field__title">본문</span>
                                     </label>
                                     <textarea class="form-control" rows="12" placeholder="내용" id="content" th:text="${article.content}"></textarea>
                                     <small id="image-upload-status"
-                                           class="d-block mt-2 text-muted"
-                                           aria-live="polite"></small>
+                                            class="d-block mt-2 text-muted"
+                                            aria-live="polite"></small> <!-- 이미지 업로드 상태 메시지 -->
                                 </div>
                             </section>
 
                             <div id="article-form-message"
-                                 class="alert d-none editor-form-message"
-                                 role="status"
-                                 aria-live="polite"></div>
+                                class="alert d-none editor-form-message"
+                                role="status"
+                                aria-live="polite"></div>
 
-                            <!-- 게시글 등록·수정 버튼 -->
+                            <!-- 게시글 등록·수정 버튼 영역 -->
                             <div class="editor-actions">
                                 <a th:if="${article.id} != null"
-                                   th:href="@{/articles/{id}(id=${article.id})}"
-                                   class="btn app-button editor-actions__cancel">
+                                    th:href="@{/articles/{id}(id=${article.id})}"
+                                    class="btn app-button editor-actions__cancel">
                                     <i class="bi bi-x-lg" aria-hidden="true"></i>
                                     <span>취소</span>
                                 </a>
                                 <a th:if="${article.id} == null"
-                                   th:href="@{/articles}"
-                                   class="btn app-button editor-actions__cancel">
+                                    th:href="@{/articles}"
+                                    class="btn app-button editor-actions__cancel">
                                     <i class="bi bi-x-lg" aria-hidden="true"></i>
                                     <span>취소</span>
                                 </a>
@@ -451,7 +439,7 @@
                                         class="btn btn-primary app-button editor-actions__submit">
                                     <i class="bi bi-check2" aria-hidden="true"></i>
                                     <span>수정</span>
-                                </button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼을 보여줍니다. -->
+                                </button> <!-- id가 있을 때는 수정 버튼을, id가 없을 때는 등록 버튼 -->
                                 <button th:if="${article.id} == null"
                                         type="submit"
                                         id="create-btn"
@@ -469,6 +457,7 @@
         </div>
     </main>
 
+    <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <!-- Summernote 사용을 위한 외부 스크립트 -->

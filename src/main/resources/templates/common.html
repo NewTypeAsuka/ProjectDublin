@@ -62,6 +62,7 @@
             color: rgba(3, 105, 161, 1);
             text-decoration: none;
         }
+
         /* 접근성: 공통 헤더 링크의 키보드 포커스 표시 */
         .intro-header__title-link:focus-visible {
             outline: 3px solid rgba(3, 105, 161, 0.35);
@@ -69,49 +70,7 @@
         }
         .intro-header__title {
             margin-bottom: 0;
-            /* layout: 미사용 보존 - 아래의 현대화된 제목 규칙이 같은 속성을 대체한다.
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            */
         }
-
-        /* animation: 미사용 보존 - 현대화된 공통 헤더가 레거시 배경과 모션을 대체한다.
-        .site-header {
-            background: linear-gradient(135deg,
-                rgba(230, 243, 255, 1),
-                rgba(200, 231, 255, 1),
-                rgba(170, 214, 255, 1),
-                rgba(205, 236, 255, 1)
-            );
-            background-size: 240% 240%;
-            animation: headerGradientAnimation 30s ease-in-out infinite;
-        }
-        @keyframes headerGradientAnimation {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 100% 30%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 0% 70%; }
-            100% { background-position: 0% 50%; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .site-header {
-                animation: none;
-            }
-            .intro-header__title-link {
-                transition: none;
-            }
-        }
-        */
-
-        /* interaction: 미사용 보존 - 현재 공통 내비게이션에는 Bootstrap .nav-link 요소가 없다.
-        .site-nav .nav-link {
-            transition: color 0.18s ease, transform 0.18s ease;
-        }
-        .site-nav .nav-link:hover,
-        .site-nav .nav-link:focus {
-            transform: translateY(-1px);
-        }
-        */
 
         /* layout: 공통 내비게이션 내부 정렬 */
         .site-nav__inner {
@@ -142,14 +101,7 @@
             justify-content: center;
             gap: 0.45rem;
             min-width: 2.5rem;
-            /* layout: 미사용 보존 - 아래의 min-height가 더 큰 높이를 강제한다.
-            height: 2.5rem;
-            */
             padding: 0 0.8rem;
-            /* layout: 미사용 보존 - 아래의 현대화된 드롭다운 규칙이 대체한다.
-            border-radius: 0.35rem;
-            color: rgba(255, 255, 255, 0.75);
-            */
             cursor: pointer;
             list-style: none;
             user-select: none;
@@ -160,19 +112,8 @@
         }
         .site-nav-dropdown > summary:hover,
         .site-nav-dropdown > summary:focus {
-            /* interaction: 미사용 보존 - 아래의 현대화된 hover·focus 규칙이 대체한다.
-            color: rgba(255, 255, 255, 1);
-            background-color: rgba(255, 255, 255, 0.08);
-            transform: translateY(-1px);
-            */
             outline: none;
         }
-        /* interaction: 미사용 보존 - 아래의 현대화된 open 상태 규칙이 대체한다.
-        .site-nav-dropdown[open] > summary {
-            color: rgba(255, 255, 255, 1);
-            background-color: rgba(255, 255, 255, 0.12);
-        }
-        */
         .site-nav-dropdown__icon {
             display: inline-block;
             width: auto;
@@ -185,36 +126,16 @@
             top: calc(100% + 0.45rem);
             left: 0;
             min-width: 13rem;
-            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 표면 규칙이 대체한다.
-            padding: 0.5rem;
-            border-radius: 0.8rem;
-            background-color: rgba(255, 255, 255, 1);
-            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
-            */
             z-index: 1040;
         }
         .site-nav-dropdown__item {
-            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 항목 규칙이 대체한다.
-            display: block;
-            */
             padding: 0.6rem 0.75rem;
-            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 항목 규칙이 대체한다.
-            border-radius: 0.55rem;
-            */
             font-size: 0.92rem;
             line-height: 1.35;
-            /* layout: 미사용 보존 - 아래의 현대화된 메뉴 항목 규칙이 대체한다.
-            color: rgba(95, 107, 122, 1);
-            background-color: rgba(248, 249, 250, 1);
-            */
             text-decoration: none;
         }
         .site-nav-dropdown__item:hover,
         .site-nav-dropdown__item:focus {
-            /* interaction: 미사용 보존 - 아래의 현대화된 hover·focus 규칙이 대체한다.
-            color: rgba(31, 41, 55, 1);
-            background-color: rgba(238, 242, 247, 1);
-            */
             text-decoration: none;
             outline: none;
         }
@@ -252,10 +173,6 @@
             transition: background-color 0.22s ease, box-shadow 0.22s ease;
         }
         .site-nav.is-stuck {
-            /* interaction: 미사용 보존 - 아래의 현대화된 고정 상태가 색상과 그림자를 대체한다.
-            background-color: rgba(108, 117, 125, 0.96) !important;
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
-            */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
@@ -275,30 +192,17 @@
             --project-line: rgba(15, 23, 42, 0.08);
             --project-brand: rgba(49, 130, 246, 1);
             --project-brand-strong: rgba(27, 100, 218, 1);
-
-            /* tokens: 미사용 보존 - 현재 공통 CSS에서 참조하지 않는 레거시 토큰이다.
-            --project-surface: rgba(255, 255, 255, 1);
-            --project-brand-soft: rgba(235, 244, 255, 1);
-            --project-danger: rgba(225, 45, 63, 1);
-            */
         }
+
         /* base: 문서 스크롤과 프로젝트 공통 배경·타이포그래피 */
         html {
             scroll-behavior: smooth;
         }
         body.project-shell {
-            /* base: 미사용 보존 - 모든 project-shell 화면의 important tw:text-ink가 대체한다.
-            color: var(--project-ink);
-            */
-            /* base: tw:bg-canvas는 배경색만 대체하므로 배경 이미지 레이어는 유지한다. */
             background:
                 radial-gradient(circle at 12% 8%, rgba(219, 234, 254, 0.72), transparent 25rem),
                 radial-gradient(circle at 88% 18%, rgba(224, 231, 255, 0.58), transparent 24rem),
                 var(--project-canvas);
-            /* base: 미사용 보존 - 모든 project-shell 화면의 important tw:font-sans가 대체한다.
-            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-                "Segoe UI", "Noto Sans KR", sans-serif;
-            */
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
         }
@@ -385,6 +289,7 @@
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
         }
+
         /* interaction: 스크롤 고정 내비게이션 상태 */
         .site-nav.is-stuck {
             background-color: rgba(255, 255, 255, 0.92) !important;
@@ -397,6 +302,7 @@
             color: var(--project-body);
             background-color: transparent;
         }
+
         /* interaction: 내비게이션 드롭다운의 hover·focus·open 상태 */
         .site-nav-dropdown > summary:hover,
         .site-nav-dropdown > summary:focus,
@@ -406,6 +312,7 @@
             background-color: var(--project-surface-soft);
             transform: none;
         }
+
         /* 접근성: 내비게이션과 푸터 링크의 키보드 포커스 표시 */
         .site-nav-dropdown > summary:focus-visible,
         .site-nav__actions a:focus-visible,
@@ -413,6 +320,7 @@
             outline: 3px solid rgba(49, 130, 246, 0.3);
             outline-offset: 3px;
         }
+
         /* animation: 드롭다운 화살표의 open 회전 효과 */
         .site-nav-dropdown__icon {
             font-size: 0.8rem;
@@ -439,6 +347,7 @@
             color: var(--project-body);
             background-color: transparent;
         }
+
         /* interaction: 드롭다운 메뉴 항목의 hover·focus 상태 */
         .site-nav-dropdown__item:hover,
         .site-nav-dropdown__item:focus {
@@ -463,13 +372,11 @@
             gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0.55rem 0.95rem;
-            /* layout: 미사용 보존 - 두 요소에 함께 적용된 app-button의 important radius가 대체한다.
-            border-radius: 999px;
-            */
             font-weight: 650;
             transition: transform 0.18s ease, box-shadow 0.18s ease,
                 background-color 0.18s ease;
         }
+
         /* layout: POST 로그아웃 폼이 내비게이션 버튼 정렬에 영향을 주지 않게 한다. */
         .site-nav__logout-form {
             margin: 0;
@@ -480,6 +387,7 @@
             background-color: var(--project-brand);
             box-shadow: 0 8px 20px rgba(49, 130, 246, 0.22);
         }
+
         /* interaction: 글쓰기 버튼의 hover·focus 상태 */
         .site-nav__write:hover,
         .site-nav__write:focus {
@@ -493,6 +401,7 @@
             color: var(--project-body);
             background-color: rgba(255, 255, 255, 0.7);
         }
+
         /* interaction: 로그아웃 버튼의 hover·focus 상태 */
         .site-nav__logout:hover,
         .site-nav__logout:focus {
@@ -513,6 +422,7 @@
             font-weight: 550;
             letter-spacing: -0.01em;
         }
+
         /* interaction: 공통 푸터 링크의 hover·focus 상태 */
         .site-footer__link:hover,
         .site-footer__link:focus {
@@ -564,8 +474,8 @@
     </style>
 </head>
 <body>
-    <!-- 공통 헤더 -->
-    <header th:fragment="siteHeader" class="site-header border-bottom"> <!-- 헤더 그라데이션 배경 -->
+    <!-- 공통 헤더 섹션 -->
+    <header th:fragment="siteHeader" class="site-header border-bottom">
         <a class="skip-link" href="#main-content">본문 바로가기</a>
         <div class="container py-4 py-md-5 text-center tw:relative tw:z-10">
             <p class="intro-header__eyebrow tw:uppercase">MY SPACE TO THINK</p>
@@ -578,11 +488,13 @@
         </div>
     </header>
 
-    <!-- 공통 내비게이션 -->
+    <!-- 공통 내비게이션 섹션 -->
     <nav th:fragment="siteNavbar(showCreateButton)"
         class="navbar py-2 site-nav"
-        id="site-nav"> <!--스크를 고정 상태 -->
+        id="site-nav">
         <div class="container site-nav__inner">
+
+            <!-- 네비게이션 메뉴 영역 -->
             <div class="navbar-nav flex-row site-nav__menu">
                 <details class="site-nav-dropdown">
                     <summary aria-label="둘러보기 메뉴 열기">
@@ -603,6 +515,8 @@
                     </div>
                 </details>
             </div>
+
+            <!-- 네비게이션 버튼 영역 -->
             <div class="site-nav__actions">
                 <a th:if="${showCreateButton}"
                     th:href="@{/new-article}"
@@ -611,26 +525,26 @@
                     <i class="bi bi-pencil-square" aria-hidden="true"></i>
                     <span>글쓰기</span>
                 </a> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
-                <!-- CSRF: 로그아웃도 토큰을 검증할 수 있도록 POST 폼으로 전송 -->
                 <form action="/logout" method="post" class="site-nav__logout-form">
                     <input type="hidden"
-                           th:name="${_csrf.parameterName}"
-                           th:value="${_csrf.token}">
+                            th:name="${_csrf.parameterName}"
+                            th:value="${_csrf.token}"> <!-- 로그아웃도 토큰을 검증할 수 있도록 POST 폼으로 전송(csrf) -->
                     <button type="submit" class="btn btn-sm app-button site-nav__logout">
                         <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
                         <span>로그아웃</span>
                     </button>
                 </form>
             </div>
+            
         </div>
     </nav>
 
-    <!-- 공통 푸터 -->
+    <!-- 공통 푸터 섹션 -->
     <footer th:fragment="siteFooter" class="mt-auto bg-white border-top site-footer">
         <div class="container py-4 text-center small">
             <a href="https://github.com/NewTypeAsuka/ProjectDublin"
                 class="intro-header__title-link site-footer__link">
-                <i class="bi bi-github site-footer__icon" aria-hidden="true"></i> <!-- GitHub 아이콘 -->
+                <i class="bi bi-github site-footer__icon" aria-hidden="true"></i>
                 2026 NewTypeAsuka. All rights reserved.
             </a>
         </div>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
     <title>포스트 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
-    <th:block th:replace="~{common :: styles}"></th:block>
+    <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
         /* layout: 게시글 목록 도입부와 상단 제목 */
         .article-list-toolbar {
@@ -100,6 +100,7 @@
             transition: border-color 0.18s ease, color 0.18s ease,
                 background-color 0.18s ease, transform 0.18s ease;
         }
+
         /* interaction: 게시글 검색 컨트롤의 hover·focus·열림 상태 */
         .article-list-search__toggle:hover,
         .article-list-search__toggle:focus,
@@ -111,27 +112,13 @@
         .article-list-search__toggle:active {
             transform: scale(0.96);
         }
+
         /* 접근성: 게시글 검색 컨트롤의 키보드 포커스 표시 */
         .article-list-search__input:focus-visible,
         .article-list-search__toggle:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.25);
             outline-offset: 3px;
         }
-        /* layout: 미사용 보존 - 우측 장식 마크업이 현재 HTML에서 주석 처리되어 있다.
-        .article-list-toolbar__symbol {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 4rem;
-            height: 4rem;
-            border: 1px solid rgba(49, 130, 246, 0.12);
-            border-radius: 1.35rem;
-            color: rgba(49, 130, 246, 1);
-            background-color: rgba(235, 244, 255, 1);
-            box-shadow: 0 14px 34px rgba(49, 130, 246, 0.12);
-            font-size: 1.45rem;
-        }
-        */
 
         /* layout: 게시글 카드 외곽 링크 */
         .article-card-link {
@@ -140,12 +127,14 @@
             color: inherit;
             text-decoration: none;
         }
+
         /* interaction: 게시글 카드 링크의 hover·focus 상태 */
         .article-card-link:hover,
         .article-card-link:focus {
             color: inherit;
             text-decoration: none;
         }
+
         /* layout: 게시글 카드 표면과 내부 여백 */
         .article-card {
             position: relative;
@@ -157,6 +146,7 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease,
                 border-color 0.2s ease;
         }
+
         /* interaction: 게시글 카드의 hover·focus 부상 효과 */
         .article-card-link:hover .article-card,
         .article-card-link:focus .article-card,
@@ -165,6 +155,7 @@
             transform: translateY(-3px);
             box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1) !important;
         }
+
         /* 접근성: 게시글 카드 링크의 키보드 포커스 표시 */
         .article-card-link:focus-visible {
             border-radius: 1.6rem;
@@ -195,6 +186,7 @@
             font-size: 0.85rem;
             line-height: 1;
         }
+
         /* layout: 게시글 작성 일시와 작성자 정보 */
         .article-card__header {
             display: flex;
@@ -228,9 +220,6 @@
         .article-card__metrics {
             display: flex;
             align-items: center;
-            /* layout: 미사용 보존 - 모든 카드의 Bootstrap justify-content-end가 대체한다.
-            justify-content: flex-end;
-            */
             flex-wrap: nowrap;
             gap: 0.1rem;
             width: fit-content;
@@ -292,12 +281,10 @@
             min-height: 2.75rem;
             padding: 0.55rem 1rem;
             border-color: rgba(15, 23, 42, 0.1);
-            /* layout: 미사용 보존 - 마크업의 app-button이 important radius를 적용한다.
-            border-radius: 999px;
-            */
             color: rgba(51, 61, 75, 1);
             background-color: rgba(255, 255, 255, 0.8);
         }
+
         /* interaction: 게시글 추가 로딩 버튼의 hover·focus 상태 */
         .article-feed__load-button:hover,
         .article-feed__load-button:focus {
@@ -362,19 +349,14 @@
                 white-space: normal;
                 overflow-wrap: anywhere;
             }
-            /* 반응형layout: 미사용 보존 - article-list-toolbar__symbol 마크업과 기본 규칙이 비활성 상태다.
-            .article-list-toolbar__symbol {
-                display: none;
-            }
-            */
         }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
-    <!-- 공통 헤더 -->
+    <!-- 공통 헤더 섹션 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
-    <!-- 공통 네비게이션 -->
+    <!-- 공통 네비게이션 섹션 -->
     <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
 
     <main id="main-content"
@@ -435,13 +417,13 @@
                         data-keyword=${keyword}">
                     <a th:each="item : ${articles}"
                         th:href="@{/articles/{id}(id=${item.id})}"
-                        class="article-card-link"> <!-- 게시글 카드 링크와 호버 효과 -->
+                        class="article-card-link">
                         <article class="card border-0 shadow-sm article-card">
                             <div class="card-body p-4 article-card__body">
 
-                                <!-- 게시글 카드 1단 -->
-                                <div class="article-card__header text-muted small mb-3"> <!-- 게시글 작성 일시와 작성자 정보 -->
-                                    <div class="article-card__number"> <!-- 게시글 식별자와 고정 표시 -->
+                                <!-- 게시글 카드 1단 영역 -->
+                                <div class="article-card__header text-muted small mb-3">
+                                    <div class="article-card__number">
                                         <i th:if="${item.pinned}"
                                             class="bi bi-pin-angle-fill article-card__pin"
                                             aria-hidden="true"></i>
@@ -468,16 +450,16 @@
                                     </div>
                                 </div>
 
-                                <!-- 게시글 카드 2단 -->
+                                <!-- 게시글 카드 2단 영역(제목+본문) -->
                                 <div>
                                     <h3 class="h5 mb-2 article-card__title"
-                                        th:text="${item.title}"></h3> <!-- 게시글 제목 두 줄 말줄임 -->
+                                        th:text="${item.title}"></h3>
                                     <p class="mb-0 text-secondary text-break article-card__preview"
                                         th:text="${item.content}"></p>
                                 </div>
 
-                                <!-- 게시글 카드 3단 -->
-                                <div class="article-card__metrics justify-content-end text-muted small mt-3"> <!-- 게시글 조회수·좋아요·댓글 지표 -->
+                                <!-- 게시글 카드 3단 영역 -->
+                                <div class="article-card__metrics justify-content-end text-muted small mt-3">
                                     <span class="article-card__metric" title="조회수">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
                                         <span class="sr-only">조회수</span>
@@ -547,7 +529,7 @@
 
                 <!-- 게시글 로딩 섹션 -->
                 <section class="article-feed__controls text-center py-3"
-                    th:hidden="${!hasNextArticles}">  <!-- 게시글 추가 로딩 상태 -->
+                    th:hidden="${!hasNextArticles}">
                     <div id="article-feed-loading"
                         class="text-muted small"
                         role="status"
@@ -578,7 +560,7 @@
         </div>
     </main>
 
-    <!-- 공통 푸터 -->
+    <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <script src="/js/siteNavigation.js"></script> <!-- 공통 내비게이션 고정 -->
