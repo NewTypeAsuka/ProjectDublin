@@ -1,4 +1,6 @@
 // 게시글 삭제와 삭제 후 목록 이동을 관리하는 스크립트
+// 사용처: article.html
+
 (function () {
     const deleteButton = document.getElementById('delete-btn');
     const articleId = document.getElementById('article-id')?.value;

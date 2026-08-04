@@ -461,13 +461,13 @@
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
     <!-- Summernote 사용을 위한 외부 스크립트 -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/lang/summernote-ko-KR.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Summernote 실행에 필요한 jQuery 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script> <!-- Summernote의 Bootstrap UI와 드롭다운·대화상자 지원 -->
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.js"></script> <!-- Bootstrap 기반 Summernote 본문 편집기 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/lang/summernote-ko-KR.min.js"></script> <!-- Summernote 한국어 번역 로드 -->
 
-    <script src="/js/siteNavigation.js"></script>  <!-- 공통 내비게이션 고정 -->
-    <script src="/js/summernote.js"></script> <!-- Summernote 본문과 이미지 업로드 -->
-    <script src="/js/articleForm.js"></script> <!-- 게시글 작성·수정과 제목 글자 수 제한 -->
+    <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
+    <script src="/js/summernote.js"></script> <!-- Summernote 초기화·모바일 메뉴 보정과 게시글 이미지 업로드 관리 -->
+    <script src="/js/articleForm.js"></script> <!-- 게시글 작성·수정 검증·제출과 제목 글자 수 제한 관리 -->
 </body>
 </html>

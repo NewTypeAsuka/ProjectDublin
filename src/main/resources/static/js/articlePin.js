@@ -1,4 +1,6 @@
 // 관리자용 게시글 고정 상태 변경과 화면 표시를 관리하는 스크립트
+// 사용처: article.html
+
 (function () {
     const pinButton = document.getElementById('pin-btn');
     const articleId = document.getElementById('article-id')?.value;

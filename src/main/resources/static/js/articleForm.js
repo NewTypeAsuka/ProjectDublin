@@ -1,4 +1,6 @@
 // 게시글 작성·수정과 제목 40자 제한을 관리하는 스크립트
+// 사용처: newArticle.html
+
 const articleForm = document.getElementById('article-form');
 const modifyButton = document.getElementById('modify-btn');
 const createButton = document.getElementById('create-btn');

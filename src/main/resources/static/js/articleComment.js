@@ -1,4 +1,6 @@
 // 댓글·대댓글의 조회, 작성, 수정, 삭제와 화면 렌더링을 관리하는 스크립트
+// 사용처: article.html
+
 (function () {
     const articleId = document.getElementById('article-id')?.value;
     const commentForm = document.getElementById('comment-form');

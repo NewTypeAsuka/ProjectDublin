@@ -729,10 +729,10 @@
     <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
-    <script src="/js/siteNavigation.js"></script> <!-- 공통 내비게이션 고정 -->
-    <script src="/js/articleLike.js?v=2"></script> <!-- 게시글 좋아요 상태 관리(캐시 지우기를 위한 ?v=2) -->
-    <script src="/js/articlePin.js"></script> <!-- 게시글 고정 상태 관리 -->
-    <script src="/js/articleComment.js"></script> <!-- 댓글·대댓글 작성, 수정, 삭제 -->
-    <script src="/js/articleDelete.js"></script> <!-- 게시글 삭제 -->
+    <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
+    <script src="/js/articleLike.js?v=2"></script> <!-- 게시글 좋아요 조회·등록·취소와 개수 갱신(캐시 갱신용 ?v=2) -->
+    <script src="/js/articlePin.js"></script> <!-- 관리자용 게시글 고정·해제와 화면 상태 갱신 -->
+    <script src="/js/articleComment.js"></script> <!-- 댓글·대댓글 조회·작성·수정·삭제와 화면 렌더링 -->
+    <script src="/js/articleDelete.js"></script> <!-- 게시글 삭제와 삭제 후 목록 이동 -->
 </body>
 </html>

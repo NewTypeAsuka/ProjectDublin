@@ -1,4 +1,6 @@
 // Summernote 본문 편집기 초기화와 게시글 이미지 업로드를 관리하는 스크립트
+// 사용처: newArticle.html
+
 (function ($) {
     // 글 작성 화면의 본문 textarea를 찾는다.
     const $content = $('#content');
