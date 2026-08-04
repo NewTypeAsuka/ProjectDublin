@@ -100,6 +100,7 @@ class ArticleApiControllerTest {
                 .author(admin)
                 .title("Article API test")
                 .content("<p>Content</p>")
+                .searchContent("Content")
                 .build());
     }
 
@@ -330,6 +331,7 @@ class ArticleApiControllerTest {
                 .author(member)
                 .title("Newer article")
                 .content("<p>Newer content</p>")
+                .searchContent("Newer content")
                 .build());
         articleLikeRepository.save(new ArticleLike(admin, article));
         articleLikeRepository.save(new ArticleLike(member, article));
@@ -390,6 +392,7 @@ class ArticleApiControllerTest {
                 .author(member)
                 .title("Member article")
                 .content("<p>Member content</p>")
+                .searchContent("Member content")
                 .build());
 
         MvcResult adminArticleResult = mockMvc.perform(
@@ -426,6 +429,7 @@ class ArticleApiControllerTest {
                 .author(member)
                 .title("Member article")
                 .content("<p>Member content</p>")
+                .searchContent("Member content")
                 .build());
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser(member)))

@@ -22,8 +22,8 @@ create table articles (
     id bigint unsigned not null auto_increment,
     author_id bigint unsigned not null,
     title varchar(255) not null,
-    summary varchar(500) null,
     content longtext not null,
+    search_content longtext not null,
     view_count bigint unsigned not null default 0,
     pinned tinyint(1) not null default 0,
     language varchar(30) not null default 'korean',
@@ -38,10 +38,6 @@ create table articles (
     index idx_article_author_id (author_id),
     index idx_article_list_created (language, pinned, created_at, id)
 );
-
-alter table articles
-    change column summary search_content longtext null
-    after content;
 
 create table article_likes (
     user_id bigint unsigned not null,

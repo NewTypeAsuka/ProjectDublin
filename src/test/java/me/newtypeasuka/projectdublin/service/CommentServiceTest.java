@@ -279,6 +279,7 @@ class CommentServiceTest {
                 .author(author)
                 .title(title)
                 .content("<p>Content</p>")
+                .searchContent("Content")
                 .build());
     }
 

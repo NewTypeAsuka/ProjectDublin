@@ -327,6 +327,7 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("Article with comments")
                 .content("<p>Content</p>")
+                .searchContent("Content")
                 .build());
         Comment comment = commentRepository.save(
                 new Comment(article, user, null, "일반 댓글")
@@ -360,6 +361,7 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("Member article")
                 .content("<p>Original content</p>")
+                .searchContent("Original content")
                 .build());
         String key = "articles/%d/2026/08/admin-image.png".formatted(admin.getId());
         String encodedFilename = Base64.getUrlEncoder()
@@ -431,6 +433,7 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("View count")
                 .content("<p>Content</p>")
+                .searchContent("Content")
                 .build());
 
         mockMvc.perform(get("/articles/{id}", article.getId()).with(loginUser()))
@@ -461,6 +464,7 @@ class BlogApiControllerTest {
                     .author(user)
                     .title("Normal " + number)
                     .content("<p>Content " + number + "</p>")
+                    .searchContent("Content " + number)
                     .build()));
         }
         for (int number = 1; number <= 2; number++) {
@@ -468,6 +472,7 @@ class BlogApiControllerTest {
                     .author(user)
                     .title("Pinned " + number)
                     .content("<p>Pinned content</p>")
+                    .searchContent("Pinned content")
                     .build());
             pinnedArticle.updatePinned(true);
             blogRepository.save(pinnedArticle);
@@ -570,6 +575,7 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("NEW project")
                 .content("<p>제목으로 검색되는 글</p>")
+                .searchContent("제목으로 검색되는 글")
                 .build());
         titleMatch.updatePinned(true);
         blogRepository.save(titleMatch);
@@ -589,6 +595,7 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("Unrelated")
                 .content("<p>일치하지 않는 본문</p>")
+                .searchContent("일치하지 않는 본문")
                 .build());
 
         var englishResult = mockMvc.perform(get("/articles")
@@ -661,6 +668,7 @@ class BlogApiControllerTest {
                     .author(user)
                     .title("Match " + number)
                     .content("<p>Search content</p>")
+                    .searchContent("Search content")
                     .build()));
         }
         for (int number = 1; number <= 2; number++) {
@@ -668,6 +676,7 @@ class BlogApiControllerTest {
                     .author(user)
                     .title("Pinned match " + number)
                     .content("<p>Pinned search content</p>")
+                    .searchContent("Pinned search content")
                     .build());
             pinnedArticle.updatePinned(true);
             blogRepository.save(pinnedArticle);
@@ -676,6 +685,7 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("Not included")
                 .content("<p>Nothing to find</p>")
+                .searchContent("Nothing to find")
                 .build());
 
         var initialResult = mockMvc.perform(get("/articles")
@@ -735,21 +745,25 @@ class BlogApiControllerTest {
                 .author(user)
                 .title("100% complete")
                 .content("<p>Percent</p>")
+                .searchContent("Percent")
                 .build());
         Article underscoreArticle = blogRepository.save(Article.builder()
                 .author(user)
                 .title("under_score")
                 .content("<p>Underscore</p>")
+                .searchContent("Underscore")
                 .build());
         Article backslashArticle = blogRepository.save(Article.builder()
                 .author(user)
                 .title("back\\slash")
                 .content("<p>Backslash</p>")
+                .searchContent("Backslash")
                 .build());
         blogRepository.save(Article.builder()
                 .author(user)
                 .title("Ordinary article")
                 .content("<p>No wildcard characters</p>")
+                .searchContent("No wildcard characters")
                 .build());
 
         assertThat(searchArticleIds("%"))

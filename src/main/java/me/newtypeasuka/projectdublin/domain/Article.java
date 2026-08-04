@@ -37,7 +37,7 @@ public class Article {
     private User author;
 
     // HTML 태그와 속성을 제외하고 본문 검색에 사용하는 평문
-    @Column(name = "search_content")
+    @Column(name = "search_content", nullable = false)
     @Lob
     private String searchContent;
 

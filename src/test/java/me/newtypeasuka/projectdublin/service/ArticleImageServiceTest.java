@@ -336,6 +336,7 @@ class ArticleImageServiceTest {
                 .author(user)
                 .title("Title")
                 .content(content)
+                .searchContent("")
                 .build();
         ReflectionTestUtils.setField(article, "id", id);
         return article;
