@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title th:text="${article.id} != null ? '글 수정 · NewTypeBlog' : '새 글 작성 · NewTypeBlog'">새 글 작성 · NewTypeBlog</title>
+    <title th:text="${article.id} != null ? '글수정 · NewTypeBlog' : '글쓰기 · NewTypeBlog'">글쓰기 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
     <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->

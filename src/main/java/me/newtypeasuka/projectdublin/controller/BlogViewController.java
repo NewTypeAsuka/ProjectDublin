@@ -32,7 +32,6 @@ public class BlogViewController {
     // 단순 헬스 체크용
     @RestController
     public class HealthController {
-        // 애플리케이션 실행 상태 확인 API
         @GetMapping("/health")
         public ResponseEntity<String> health() {
             return ResponseEntity.ok("OK");
