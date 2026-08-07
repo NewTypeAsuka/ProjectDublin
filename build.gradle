@@ -29,6 +29,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-oauth2-client') // 구글 로그인을 위한 OAuth2 클라이언트
     implementation('org.jsoup:jsoup:1.22.2') // Summernote HTML 정제 및 평문 미리보기 생성
     implementation('com.mysql:mysql-connector-j') // MySQL 데이터베이스 연결
+    implementation('com.yahoofinance-api:YahooFinanceAPI:3.17.0') // Yahoo Finance API
     developmentOnly('com.h2database:h2') // local-h2 프로필의 로컬 실행에서만 사용하는 H2 데이터베이스
     testImplementation('org.springframework.boot:spring-boot-starter-test') // 스프링부트 테스트
     testImplementation('org.springframework.security:spring-security-test') // 스프링 시큐리티 테스트
