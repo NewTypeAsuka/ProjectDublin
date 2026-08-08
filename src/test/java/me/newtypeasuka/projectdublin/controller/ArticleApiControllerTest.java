@@ -806,6 +806,12 @@ class ArticleApiControllerTest {
                         "src=\"/js/articleComment.js\"")))
                 .andExpect(content().string(containsString(
                         "src=\"/js/articleDelete.js\"")));
+
+        mockMvc.perform(get("/js/articleComment.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "modifiedIcon.className = 'bi bi-brush'")))
+                .andExpect(content().string(not(containsString(" · 수정됨"))));
     }
 
     private long responseId(MvcResult result) throws Exception {

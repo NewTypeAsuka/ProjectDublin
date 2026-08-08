@@ -8,7 +8,7 @@ create table users (
     id bigint unsigned not null auto_increment,
     email varchar(320) not null,
     name varchar(255) not null,
-    nickname varchar(12) not null,
+    nickname varchar(255) not null,
     password varchar(255),
     role tinyint unsigned not null default 2 comment '1: admin / 2: user / 3: other',
     auth_provider varchar(30) not null default 'GOOGLE',

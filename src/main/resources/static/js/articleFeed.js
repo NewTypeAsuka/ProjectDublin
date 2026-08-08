@@ -92,11 +92,22 @@ document.addEventListener('DOMContentLoaded', () => {
         articleNumber.append(createElement('span', '', `#${article.id}`));
 
         const byline = createElement('div', 'article-card__byline');
-        const bylineMain = createElement('span', 'article-card__byline-main');
-        bylineMain.append(document.createTextNode(
-            `${formatCreatedAt(article.createdAt)} by `
-        ));
-        bylineMain.append(createElement('span', '', article.author || ''));
+        const articleDate = createElement('span', 'article-card__date');
+        const createdAt = createElement('time', '', formatCreatedAt(article.createdAt));
+        createdAt.dateTime = article.createdAt || '';
+        articleDate.append(createdAt);
+
+        if (isModified(article)) {
+            const modifiedIcon = createElement('i', 'bi bi-brush');
+            modifiedIcon.setAttribute('role', 'img');
+            modifiedIcon.setAttribute('aria-label', '수정됨');
+            modifiedIcon.title = '수정됨';
+            articleDate.append(modifiedIcon);
+        }
+
+        const articleAuthor = createElement('span', 'article-card__author');
+        articleAuthor.append(createElement('span', '', 'by'));
+        articleAuthor.append(createElement('span', '', article.author || ''));
 
         if (article.authorAdmin === true) {
             const adminBadge = createElement(
@@ -106,18 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
             adminBadge.setAttribute('role', 'img');
             adminBadge.setAttribute('aria-label', '관리자');
             adminBadge.title = '관리자';
-            bylineMain.append(adminBadge);
+            articleAuthor.append(adminBadge);
         }
-        byline.append(bylineMain);
-
-        if (isModified(article)) {
-            byline.append(createSeparator());
-            byline.append(createElement(
-                'span',
-                'article-card__modified',
-                '수정됨'
-            ));
-        }
+        byline.append(articleDate, articleAuthor);
 
         header.append(articleNumber, byline);
 

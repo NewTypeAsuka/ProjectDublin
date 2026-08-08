@@ -123,13 +123,24 @@
             author.appendChild(adminBadge);
         }
 
-        const date = document.createElement('time');
-        date.className = 'comment-item__date';
-        date.dateTime = comment.createdAt;
-        date.textContent = formatDate(comment.createdAt)
-            + (isEdited(comment) ? ' · 수정됨' : '');
+        const dateMeta = document.createElement('span');
+        dateMeta.className = 'comment-item__date';
 
-        header.append(author, date);
+        const date = document.createElement('time');
+        date.dateTime = comment.createdAt;
+        date.textContent = formatDate(comment.createdAt);
+        dateMeta.appendChild(date);
+
+        if (isEdited(comment)) {
+            const modifiedIcon = document.createElement('i');
+            modifiedIcon.className = 'bi bi-brush';
+            modifiedIcon.setAttribute('role', 'img');
+            modifiedIcon.setAttribute('aria-label', '수정됨');
+            modifiedIcon.title = '수정됨';
+            dateMeta.appendChild(modifiedIcon);
+        }
+
+        header.append(author, dateMeta);
 
         const content = document.createElement('p');
         content.className = 'comment-item__content';

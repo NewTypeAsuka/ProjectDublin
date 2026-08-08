@@ -183,7 +183,15 @@ class BlogApiControllerTest {
         mockMvc.perform(get("/articles/{id}", articleId).with(loginUser()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "id=\"article-modified\">수정됨</span>")))
+                        "id=\"article-modified\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"bi bi-brush\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"article-meta__date\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"article-meta__author\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString(">수정됨<"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "target=\"_blank\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
@@ -202,13 +210,28 @@ class BlogApiControllerTest {
         mockMvc.perform(get("/articles").with(loginUser()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "class=\"article-card__modified\">수정됨</span>")))
+                        "class=\"article-card__date\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"article-card__author\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"bi bi-brush\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString(">수정됨<"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-card__comment-count\">0</span>")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"h5 mb-2 article-card__title\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("글 번호"))));
+
+        mockMvc.perform(get("/js/articleFeed.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "'article-card__date'")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "'article-card__author'")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "'bi bi-brush'")));
     }
 
     @DisplayName("게시글 제목은 40자까지 허용하고 작성 화면에 글자 수 표시를 제공한다")

@@ -204,8 +204,16 @@
             text-align: right;
             line-height: 1.55;
         }
-        .article-card__byline-main {
+        .article-card__date,
+        .article-card__author {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
             white-space: nowrap;
+        }
+        .article-card__date > .bi-brush {
+            font-size: 0.78rem;
+            line-height: 1;
         }
         .article-card__separator {
             color: rgba(190, 198, 207, 1);
@@ -345,10 +353,6 @@
                 justify-content: flex-end;
                 text-align: right;
             }
-            .article-card__byline-main {
-                white-space: normal;
-                overflow-wrap: anywhere;
-            }
         }
     </style>
 </head>
@@ -431,22 +435,26 @@
                                         <span th:text="|#${item.id}|"></span>
                                     </div>
                                     <div class="article-card__byline">
-                                        <span class="article-card__byline-main">
-                                            <span th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                                            <span>by <span th:text="${item.author}"></span><i
-                                                    th:if="${item.authorAdmin}"
-                                                    class="bi bi-patch-check-fill author-admin-badge"
-                                                    role="img"
-                                                    aria-label="관리자"
-                                                    title="관리자"></i></span>
+                                        <span class="article-card__date">
+                                            <time th:datetime="${item.createdAt}"
+                                                th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></time>
+                                            <i th:if="${item.updatedAt != null
+                                                    and item.createdAt != null
+                                                    and item.updatedAt.isAfter(item.createdAt)}"
+                                                class="bi bi-brush"
+                                                role="img"
+                                                aria-label="수정됨"
+                                                title="수정됨"></i>
                                         </span>
-                                        <th:block th:if="${item.updatedAt != null
-                                                and item.createdAt != null
-                                                and item.updatedAt.isAfter(item.createdAt)}">
-                                            <span class="article-card__separator"
-                                                    aria-hidden="true">·</span>
-                                            <span class="article-card__modified">수정됨</span>
-                                        </th:block>
+                                        <span class="article-card__author">
+                                            <span>by</span>
+                                            <span th:text="${item.author}"></span><i
+                                                th:if="${item.authorAdmin}"
+                                                class="bi bi-patch-check-fill author-admin-badge"
+                                                role="img"
+                                                aria-label="관리자"
+                                                title="관리자"></i>
+                                        </span>
                                     </div>
                                 </div>
 
