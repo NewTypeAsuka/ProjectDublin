@@ -22,15 +22,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -53,8 +58,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @Transactional
 @SpringBootTest
@@ -85,6 +92,10 @@ class ArticleApiControllerTest {
     @Autowired
     EntityManager entityManager;
 
+    @Autowired
+    @Qualifier("oAuth2AuthenticationSuccessHandler")
+    AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
     User admin;
     User member;
     Article article;
@@ -94,11 +105,13 @@ class ArticleApiControllerTest {
         admin = userRepository.save(User.builder()
                 .email("admin@example.com")
                 .name("Admin")
+                .nickname("관리자닉")
                 .role(1)
                 .build());
         member = userRepository.save(User.builder()
                 .email("member@example.com")
                 .name("Member")
+                .nickname("회원닉네임")
                 .build());
         article = blogRepository.save(Article.builder()
                 .author(admin)
@@ -108,33 +121,23 @@ class ArticleApiControllerTest {
                 .build());
     }
 
-    @DisplayName("사용자 이름과 nullable 닉네임을 서로 다른 컬럼에 저장한다")
+    @DisplayName("Google 이름과 필수 닉네임을 서로 다른 컬럼에 저장한다")
     @Test
-    void mapUserNameAndNullableNickname() {
-        User userWithoutNickname = userRepository.saveAndFlush(User.builder()
-                .email("without-nickname@example.com")
-                .name("Google Name")
-                .build());
-        User userWithNickname = userRepository.save(User.builder()
+    void mapUserNameAndRequiredNickname() {
+        User user = userRepository.save(User.builder()
                 .email("with-nickname@example.com")
                 .name("Old Google Name")
-                .nickname("별명")
+                .nickname("공개별명")
                 .build());
-        userWithNickname.updateName("New Google Name");
+        user.updateName("New Google Name");
         userRepository.flush();
-        Long userWithoutNicknameId = userWithoutNickname.getId();
-        Long userWithNicknameId = userWithNickname.getId();
+        Long userId = user.getId();
         entityManager.clear();
 
-        User savedUserWithoutNickname =
-                userRepository.findById(userWithoutNicknameId).orElseThrow();
-        User savedUserWithNickname =
-                userRepository.findById(userWithNicknameId).orElseThrow();
+        User savedUser = userRepository.findById(userId).orElseThrow();
 
-        assertThat(savedUserWithoutNickname.getName()).isEqualTo("Google Name");
-        assertThat(savedUserWithoutNickname.getNickname()).isNull();
-        assertThat(savedUserWithNickname.getName()).isEqualTo("New Google Name");
-        assertThat(savedUserWithNickname.getNickname()).isEqualTo("별명");
+        assertThat(savedUser.getName()).isEqualTo("New Google Name");
+        assertThat(savedUser.getNickname()).isEqualTo("공개별명");
     }
 
     @DisplayName("로그인 사용자가 Summernote 이미지를 업로드하면 공개 URL을 반환한다")
@@ -154,7 +157,7 @@ class ArticleApiControllerTest {
 
         mockMvc.perform(multipart("/api/articles/images")
                         .file(image)
-                        .with(oauth2Login())
+                        .with(loginUser(member))
                         .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.url").value(
@@ -259,6 +262,149 @@ class ArticleApiControllerTest {
         assertThat(result.getResponse().getRedirectedUrl())
                 .startsWith("https://accounts.google.com/o/oauth2/v2/auth")
                 .contains("state=");
+    }
+
+    @DisplayName("Google 로그인 성공 후 기존 사용자는 목록, 신규 사용자는 닉네임 설정으로 이동한다")
+    @Test
+    void redirectOAuthLoginByRegistrationStatus() throws Exception {
+        MockHttpServletRequest registeredRequest = new MockHttpServletRequest();
+        MockHttpServletResponse registeredResponse = new MockHttpServletResponse();
+        oAuth2AuthenticationSuccessHandler.onAuthenticationSuccess(
+                registeredRequest,
+                registeredResponse,
+                oauthAuthentication(admin.getEmail(), admin.getName())
+        );
+
+        MockHttpServletRequest newUserRequest = new MockHttpServletRequest();
+        MockHttpServletResponse newUserResponse = new MockHttpServletResponse();
+        oAuth2AuthenticationSuccessHandler.onAuthenticationSuccess(
+                newUserRequest,
+                newUserResponse,
+                oauthAuthentication("new-user@example.com", "New Google User")
+        );
+
+        assertThat(registeredResponse.getRedirectedUrl()).isEqualTo("/articles");
+        assertThat(newUserResponse.getRedirectedUrl()).isEqualTo("/signup/nickname");
+        assertThat(userRepository.findByEmail("new-user@example.com")).isEmpty();
+    }
+
+    @DisplayName("최초 로그인 사용자는 닉네임 설정 화면과 로그아웃 외의 기능을 사용할 수 없다")
+    @Test
+    void requireNicknameBeforeUsingService() throws Exception {
+        RequestPostProcessor newUser = loginOAuthUser(
+                "new-user@example.com",
+                "New Google User"
+        );
+
+        mockMvc.perform(get("/signup/nickname").with(newUser))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(content().string(containsString("id=\"nickname-signup-form\"")))
+                .andExpect(content().string(containsString("minlength=\"3\"")))
+                .andExpect(content().string(containsString("maxlength=\"12\"")))
+                .andExpect(content().string(containsString("0/12")))
+                .andExpect(content().string(containsString(
+                        "src=\"/js/nicknameSignup.js\""
+                )));
+
+        mockMvc.perform(get("/articles").with(newUser))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/signup/nickname"));
+
+        mockMvc.perform(get("/api/articles/{articleId}/comments", article.getId())
+                        .with(newUser))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/logout").with(newUser).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @DisplayName("최초 로그인 사용자는 3~12자의 닉네임으로 가입을 완료한다")
+    @Test
+    void completeRegistrationWithNickname() throws Exception {
+        String email = "new-user@example.com";
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser(email, "New Google User"))
+                        .with(csrf())
+                        .param("nickname", "  새사용자닉  "))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/articles"));
+
+        User registeredUser = userRepository.findByEmail(email).orElseThrow();
+        assertThat(registeredUser.getName()).isEqualTo("New Google User");
+        assertThat(registeredUser.getNickname()).isEqualTo("새사용자닉");
+        assertThat(registeredUser.getRole()).isEqualTo(2);
+
+        mockMvc.perform(get("/articles").with(loginUser(registeredUser)))
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("닉네임은 공백을 제외한 3자 이상 12자 이하만 허용한다")
+    @Test
+    void rejectInvalidNicknameLength() throws Exception {
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser("short@example.com", "Short User"))
+                        .with(csrf())
+                        .param("nickname", "두자"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(model().attributeHasFieldErrors("nicknameForm", "nickname"));
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser("long@example.com", "Long User"))
+                        .with(csrf())
+                        .param("nickname", "가".repeat(13)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(model().attributeHasFieldErrors("nicknameForm", "nickname"));
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser("blank@example.com", "Blank User"))
+                        .with(csrf())
+                        .param("nickname", "     "))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(model().attributeHasFieldErrors("nicknameForm", "nickname"));
+
+        assertThat(userRepository.findByEmail("short@example.com")).isEmpty();
+        assertThat(userRepository.findByEmail("long@example.com")).isEmpty();
+        assertThat(userRepository.findByEmail("blank@example.com")).isEmpty();
+    }
+
+    @DisplayName("닉네임은 영문 대소문자를 구분하지 않고 중복을 거절한다")
+    @Test
+    void rejectDuplicateNickname() throws Exception {
+        userRepository.saveAndFlush(User.builder()
+                .email("nickname-owner@example.com")
+                .name("Nickname Owner")
+                .nickname("AlphaNick")
+                .build());
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser("duplicate@example.com", "Duplicate User"))
+                        .with(csrf())
+                        .param("nickname", "alphanick"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(model().attributeHasFieldErrors("nicknameForm", "nickname"))
+                .andExpect(content().string(containsString("이미 사용 중인 닉네임입니다.")));
+
+        assertThat(userRepository.findByEmail("duplicate@example.com")).isEmpty();
+    }
+
+    @DisplayName("닉네임 가입 요청에는 유효한 CSRF 토큰이 필요하다")
+    @Test
+    void requireCsrfForNicknameSignup() throws Exception {
+        String email = "no-csrf@example.com";
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser(email, "No Csrf User"))
+                        .param("nickname", "새사용자"))
+                .andExpect(status().isForbidden());
+
+        assertThat(userRepository.findByEmail(email)).isEmpty();
     }
 
     @DisplayName("H2 웹 콘솔은 애플리케이션에 노출하지 않는다")
@@ -414,7 +560,7 @@ class ArticleApiControllerTest {
         Element adminBadge = adminArticleLink.selectFirst(".author-admin-badge");
         assertThat(adminBadge).isNotNull();
         assertThat(adminBadge.classNames()).contains("bi", "bi-patch-check-fill");
-        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getName());
+        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getNickname());
         assertThat(memberArticleLink.select(".author-admin-badge")).isEmpty();
     }
 
@@ -450,7 +596,7 @@ class ArticleApiControllerTest {
                 adminArticleDocument.selectFirst(".article-meta .author-admin-badge");
         assertThat(adminBadge).isNotNull();
         assertThat(adminBadge.classNames()).contains("bi", "bi-patch-check-fill");
-        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getName());
+        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getNickname());
         assertThat(memberArticleDocument.select(".article-meta .author-admin-badge"))
                 .isEmpty();
     }
@@ -562,7 +708,7 @@ class ArticleApiControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.depth").value(1))
                 .andExpect(jsonPath("$.commenterId").value(member.getId()))
-                .andExpect(jsonPath("$.commenterName").value(member.getName()))
+                .andExpect(jsonPath("$.commenterNickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.commenterAdmin").value(false))
                 .andExpect(jsonPath("$.content").value("회원 댓글 !*$ 😀"))
                 .andExpect(jsonPath("$.editable").value(true))
@@ -581,6 +727,7 @@ class ArticleApiControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.parentId").value(commentId))
                 .andExpect(jsonPath("$.depth").value(2))
+                .andExpect(jsonPath("$.commenterNickname").value(admin.getNickname()))
                 .andExpect(jsonPath("$.commenterAdmin").value(true))
                 .andReturn();
         long replyId = responseId(createdReply);
@@ -671,11 +818,28 @@ class ArticleApiControllerTest {
     }
 
     private RequestPostProcessor loginUser(User user) {
+        return loginOAuthUser(user.getEmail(), user.getName());
+    }
+
+    private RequestPostProcessor loginOAuthUser(String email, String name) {
+        return oauth2Login().oauth2User(oAuth2User(email, name));
+    }
+
+    private OAuth2AuthenticationToken oauthAuthentication(String email, String name) {
+        DefaultOAuth2User oAuth2User = oAuth2User(email, name);
+        return new OAuth2AuthenticationToken(
+                oAuth2User,
+                oAuth2User.getAuthorities(),
+                "google"
+        );
+    }
+
+    private DefaultOAuth2User oAuth2User(String email, String name) {
         DefaultOAuth2User oauth2User = new DefaultOAuth2User(
                 List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                Map.of("email", user.getEmail(), "name", user.getName()),
+                Map.of("email", email, "name", name),
                 "email"
         );
-        return oauth2Login().oauth2User(oauth2User);
+        return oauth2User;
     }
 }

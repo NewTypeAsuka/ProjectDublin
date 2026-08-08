@@ -94,6 +94,7 @@ class BlogApiControllerTest {
         user = userRepository.save(User.builder()
                 .email(EMAIL)
                 .name("Writer")
+                .nickname("작성자닉")
                 .build());
     }
 
@@ -113,6 +114,7 @@ class BlogApiControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.authorId").value(user.getId()))
+                .andExpect(jsonPath("$.author").value(user.getNickname()))
                 .andExpect(jsonPath("$.content").value(
                         "<p>Hello <strong>Summernote</strong></p>\n<hr>"
                 ))
@@ -323,6 +325,7 @@ class BlogApiControllerTest {
         User replier = userRepository.save(User.builder()
                 .email("replier@example.com")
                 .name("Replier")
+                .nickname("답글작성자")
                 .build());
         Article article = blogRepository.save(Article.builder()
                 .author(user)
@@ -356,6 +359,7 @@ class BlogApiControllerTest {
         User admin = userRepository.save(User.builder()
                 .email("admin@example.com")
                 .name("Admin")
+                .nickname("관리자닉")
                 .role(1)
                 .build());
         Article article = blogRepository.save(Article.builder()

@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,8 +34,10 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    // 사용자가 별도로 설정할 닉네임이며, 미설정 상태에서는 null을 허용
-    @Column(name = "nickname")
+    // 게시글과 댓글에 공개되는 필수 닉네임
+    @NotBlank
+    @Size(min = 3, max = 12)
+    @Column(name = "nickname", nullable = false, unique = true, length = 12)
     private String nickname;
 
     @Column(name = "role", nullable = false)

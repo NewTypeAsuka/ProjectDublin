@@ -102,6 +102,7 @@ class ArticleImageServiceTest {
         user = User.builder()
                 .email(EMAIL)
                 .name("Writer")
+                .nickname("작성자닉")
                 .build();
         ReflectionTestUtils.setField(user, "id", USER_ID);
     }
@@ -185,6 +186,7 @@ class ArticleImageServiceTest {
         User admin = User.builder()
                 .email("admin@example.com")
                 .name("Admin")
+                .nickname("관리자닉")
                 .role(1)
                 .build();
         ReflectionTestUtils.setField(admin, "id", 7L);

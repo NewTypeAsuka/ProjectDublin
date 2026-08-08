@@ -111,7 +111,7 @@
 
         const author = document.createElement('span');
         author.className = 'comment-item__author';
-        author.appendChild(document.createTextNode(comment.commenterName));
+        author.appendChild(document.createTextNode(comment.commenterNickname));
 
         // 관리자 댓글 작성자의 이름 뒤에 관리자 아이콘을 추가
         if (comment.commenterAdmin) {

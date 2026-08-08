@@ -8,7 +8,7 @@ create table users (
     id bigint unsigned not null auto_increment,
     email varchar(320) not null,
     name varchar(255) not null,
-    nickname varchar(255),
+    nickname varchar(12) not null,
     password varchar(255),
     role tinyint unsigned not null default 2 comment '1: admin / 2: user / 3: other',
     auth_provider varchar(30) not null default 'GOOGLE',
@@ -16,6 +16,7 @@ create table users (
     updated_at datetime not null default current_timestamp on update current_timestamp,
     primary key (id),
     constraint uq_users_email unique (email),
+    constraint uq_users_nickname unique (nickname),
     constraint ck_users_role check (role in (1, 2, 3))
 );
 
