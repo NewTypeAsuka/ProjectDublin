@@ -18,9 +18,6 @@
             display: block;
             height: auto;
         }
-        .article-content img + img {
-            margin-top: 0.75rem;
-        }
         .article-content iframe {
             aspect-ratio: 16 / 9;
             width: 100%;
@@ -32,7 +29,7 @@
             line-height: 1.9;
             letter-spacing: -0.012em;
         }
-        .article-content > * + * {
+        .article-content > * + *:not(img) {
             margin-top: 1.25em;
         }
         .article-content h1,
