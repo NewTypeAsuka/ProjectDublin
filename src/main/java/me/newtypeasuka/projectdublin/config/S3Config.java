@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Utilities;
 
 import java.time.Duration;
+import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(S3Config.S3StorageProperties.class)
@@ -69,7 +70,9 @@ public class S3Config {
             String secretKey,
             @NotBlank String keyPrefix,
             String publicBaseUrl,
+            List<String> legacyImagePrefixUrls,
             @NotNull DataSize maxFileSize,
+            boolean orphanCleanupEnabled,
             @NotNull Duration orphanRetention
     ) {
     }

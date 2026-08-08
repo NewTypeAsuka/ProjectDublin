@@ -8,6 +8,7 @@ import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
+import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.jsoup.Jsoup;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,7 @@ public class ArticleImageService {
     private final S3StorageProperties properties;
     private final S3ObjectUrlResolver urlResolver;
     private final ArticleImageRepository articleImageRepository;
+    private final BlogRepository blogRepository;
     private final UserRepository userRepository;
 
     public ImageUploadResponse upload(MultipartFile image, String email) {
@@ -169,16 +171,7 @@ public class ArticleImageService {
         if (!newImages.isEmpty()) {
             articleImageRepository.saveAll(newImages);
         }
-
-        List<ArticleImage> removedImages = currentImages.stream()
-                .filter(image -> !requestedKeys.contains(image.getS3Key()))
-                .toList();
-        if (!removedImages.isEmpty()) {
-            articleImageRepository.deleteAllInBatch(removedImages);
-            deleteAfterCommit(removedImages.stream()
-                    .map(ArticleImage::getS3Key)
-                    .toList());
-        }
+        // 기존 연결은 본문에서 잠시 빠져도 제거하지 않고 게시글 자체가 삭제될 때까지 보존한다.
     }
 
     public void removeAllForArticle(Long articleId) {
@@ -190,14 +183,28 @@ public class ArticleImageService {
         articleImageRepository.deleteAllInBatch(images);
         deleteAfterCommit(images.stream()
                 .map(ArticleImage::getS3Key)
-                .toList());
+                .toList(), "article-delete");
     }
 
-    // 매일 새벽 4시에 신규 업로드 중 게시글과 연결되지 않은 오래된 S3 객체만 정리
+    // 정리 기능이 활성화된 경우 매일 새벽 4시에 게시글과 연결되지 않은 오래된 신규 업로드만 정리
     @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
     public void removeOrphanedUploads() {
+        if (!properties.orphanCleanupEnabled()) {
+            log.info("S3 미연결 이미지 자동 정리가 비활성화되어 있습니다");
+            return;
+        }
+
         Instant cutoff = Instant.now().minus(properties.orphanRetention());
         String continuationToken = null;
+        List<String> articleContents;
+
+        try {
+            articleContents = blogRepository.findAllArticleContents();
+        } catch (RuntimeException exception) {
+            // DB 참조를 확인할 수 없으면 데이터 보존을 위해 S3 정리 자체를 중단한다.
+            log.error("게시글 본문을 확인하지 못해 S3 이미지 정리를 중단했습니다", exception);
+            return;
+        }
 
         do {
             ListObjectsV2Request.Builder requestBuilder = ListObjectsV2Request.builder()
@@ -211,9 +218,13 @@ public class ArticleImageService {
             ListObjectsV2Response response;
             try {
                 response = s3Client.listObjectsV2(requestBuilder.build());
-                removeOrphanedUploads(response, cutoff);
+                removeOrphanedUploads(response, cutoff, articleContents);
             } catch (SdkException exception) {
                 log.error("연결되지 않은 S3 게시글 이미지 정리에 실패했습니다", exception);
+                return;
+            } catch (RuntimeException exception) {
+                // 연결 DB 조회에 실패한 경우에도 삭제하지 않는 방향으로 안전하게 종료한다.
+                log.error("게시글 이미지 연결을 확인하지 못해 S3 이미지 정리를 중단했습니다", exception);
                 return;
             }
 
@@ -224,7 +235,9 @@ public class ArticleImageService {
         } while (StringUtils.hasText(continuationToken));
     }
 
-    private void removeOrphanedUploads(ListObjectsV2Response response, Instant cutoff) {
+    private void removeOrphanedUploads(ListObjectsV2Response response,
+                                       Instant cutoff,
+                                       List<String> articleContents) {
         List<String> expiredKeys = response.contents().stream()
                 .filter(object -> StringUtils.hasText(object.key()))
                 .filter(object -> object.lastModified() != null)
@@ -240,9 +253,17 @@ public class ArticleImageService {
                 .collect(Collectors.toSet());
         List<String> orphanedKeys = expiredKeys.stream()
                 .filter(key -> !linkedKeys.contains(key))
+                .filter(key -> !isReferencedInArticleContent(key, articleContents))
                 .filter(this::isOrphanCleanupEligible)
                 .toList();
-        deleteObjects(orphanedKeys);
+        deleteObjects(orphanedKeys, "orphan-cleanup");
+    }
+
+    // article_images 연결이 누락되어도 실제 본문에 키가 남아 있으면 삭제하지 않는다.
+    private boolean isReferencedInArticleContent(String key, List<String> articleContents) {
+        return articleContents.stream()
+                .filter(StringUtils::hasText)
+                .anyMatch(content -> content.contains(key));
     }
 
     private boolean isOrphanCleanupEligible(String key) {
@@ -346,7 +367,7 @@ public class ArticleImageService {
         return keys;
     }
 
-    private void deleteAfterCommit(Collection<String> keys) {
+    private void deleteAfterCommit(Collection<String> keys, String reason) {
         List<String> keysToDelete = List.copyOf(keys);
         if (TransactionSynchronizationManager.isActualTransactionActive()
                 && TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -354,26 +375,32 @@ public class ArticleImageService {
                     new TransactionSynchronization() {
                         @Override
                         public void afterCommit() {
-                            deleteObjects(keysToDelete);
+                            deleteObjects(keysToDelete, reason);
                         }
                     }
             );
             return;
         }
 
-        deleteObjects(keysToDelete);
+        deleteObjects(keysToDelete, reason);
     }
 
-    private void deleteObjects(Collection<String> keys) {
+    private void deleteObjects(Collection<String> keys, String reason) {
         for (String key : keys) {
             try {
                 s3Client.deleteObject(DeleteObjectRequest.builder()
                         .bucket(properties.bucket())
                         .key(key)
                         .build());
+                log.info("S3 게시글 이미지를 삭제했습니다. reason={}, key={}", reason, key);
             } catch (SdkException exception) {
                 // DB 변경은 이미 커밋되었으므로 요청을 실패시키지 않고 운영 로그로 남긴다.
-                log.error("사용하지 않는 S3 게시글 이미지 삭제에 실패했습니다. key={}", key, exception);
+                log.error(
+                        "S3 게시글 이미지 삭제에 실패했습니다. reason={}, key={}",
+                        reason,
+                        key,
+                        exception
+                );
             }
         }
     }

@@ -29,5 +29,7 @@ aws:
     secret-key:
     key-prefix: articles
     public-base-url:
+    legacy-image-prefix-urls: []
     max-file-size: 10MB
+    orphan-cleanup-enabled: false
     orphan-retention: 24h

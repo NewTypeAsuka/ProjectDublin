@@ -23,7 +23,11 @@ class ArticleContentSanitizerTest {
                     "",
                     "articles",
                     "",
+                    java.util.List.of(
+                            "https://legacy-projectdublin-images.s3.ap-northeast-2.amazonaws.com/articles/"
+                    ),
                     DataSize.ofMegabytes(10),
+                    false,
                     Duration.ofHours(24)
             ),
             S3Utilities.builder().region(Region.AP_NORTHEAST_2).build()
@@ -167,6 +171,21 @@ class ArticleContentSanitizerTest {
                 .doesNotContain("https://example.com/image.png")
                 .doesNotContain("articles-evil")
                 .doesNotContain("onerror");
+    }
+
+    @DisplayName("과거 S3 저장소의 이미지는 게시글 수정 시 제거하지 않는다")
+    @Test
+    void preserveLegacyS3Image() {
+        String legacyImageUrl = "https://legacy-projectdublin-images."
+                + "s3.ap-northeast-2.amazonaws.com/articles/42/legacy.png";
+
+        String sanitizedHtml = sanitizer.sanitize(
+                "<p>기존 이미지</p><img src=\"" + legacyImageUrl + "\" alt=\"legacy\">"
+        );
+
+        assertThat(sanitizedHtml)
+                .contains(legacyImageUrl)
+                .contains("alt=\"legacy\"");
     }
 
     @DisplayName("내용이 없는 Summernote HTML은 거절한다")

@@ -37,6 +37,10 @@ public interface BlogRepository extends JpaRepository<Article, Long> {
             Pageable pageable
     );
 
+    // 고아 이미지 정리 전에 실제 게시글 HTML의 이미지 참조를 이중 확인하기 위한 본문 조회
+    @Query("SELECT article.content FROM Article article")
+    List<String> findAllArticleContents();
+
     // 제목 또는 검색용 평문 본문에 검색어가 포함된 글을 고정 여부와 최신순으로 조회
     @EntityGraph(attributePaths = "author")
     @Query("SELECT article FROM Article article "

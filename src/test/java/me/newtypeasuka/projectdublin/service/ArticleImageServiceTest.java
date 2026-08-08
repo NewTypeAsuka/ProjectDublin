@@ -6,6 +6,7 @@ import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
+import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +25,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Utilities;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
@@ -64,6 +64,9 @@ class ArticleImageServiceTest {
     ArticleImageRepository articleImageRepository;
 
     @Mock
+    BlogRepository blogRepository;
+
+    @Mock
     UserRepository userRepository;
 
     ArticleImageService articleImageService;
@@ -79,7 +82,9 @@ class ArticleImageServiceTest {
                 "",
                 "articles",
                 "",
+                List.of(),
                 DataSize.ofMegabytes(10),
+                true,
                 Duration.ofHours(24)
         );
         urlResolver = new S3ObjectUrlResolver(
@@ -91,6 +96,7 @@ class ArticleImageServiceTest {
                 properties,
                 urlResolver,
                 articleImageRepository,
+                blogRepository,
                 userRepository
         );
         user = User.builder()
@@ -232,9 +238,9 @@ class ArticleImageServiceTest {
         verify(articleImageRepository, never()).saveAll(any());
     }
 
-    @DisplayName("수정된 본문에서 빠진 이미지는 DB 연결과 S3 객체를 제거한다")
+    @DisplayName("수정 본문에서 이미지가 빠져도 기존 DB 연결과 S3 객체를 보존한다")
     @Test
-    void removeImageMissingFromUpdatedContent() {
+    void preserveImageMissingFromUpdatedContent() {
         Article article = articleWithContent(100L, "<p>이미지를 제거한 본문</p>");
         ArticleImage existingImage = ArticleImage.builder()
                 .article(article)
@@ -245,13 +251,11 @@ class ArticleImageServiceTest {
                 .build();
         when(articleImageRepository.findAllByArticleId(100L))
                 .thenReturn(List.of(existingImage));
-        when(s3Client.deleteObject(any(DeleteObjectRequest.class)))
-                .thenReturn(DeleteObjectResponse.builder().build());
 
         articleImageService.synchronize(article, user);
 
-        verify(articleImageRepository).deleteAllInBatch(List.of(existingImage));
-        verify(s3Client).deleteObject(any(DeleteObjectRequest.class));
+        verify(articleImageRepository, never()).deleteAllInBatch(any());
+        verify(s3Client, never()).deleteObject(any(DeleteObjectRequest.class));
     }
 
     @DisplayName("24시간이 지난 미연결 신규 업로드만 S3에서 정리한다")
@@ -259,6 +263,7 @@ class ArticleImageServiceTest {
     void removeOnlyEligibleOrphanedUploads() {
         Instant now = Instant.now();
         String linkedKey = "articles/42/2026/07/linked.png";
+        String contentLinkedKey = "articles/42/2026/07/content-linked.png";
         String orphanedKey = "articles/42/2026/07/orphaned.png";
         String recentKey = "articles/42/2026/07/recent.png";
         String legacyKey = "articles/42/2026/07/legacy.png";
@@ -274,6 +279,7 @@ class ArticleImageServiceTest {
                 ListObjectsV2Response.builder()
                         .contents(List.of(
                                 s3Object(linkedKey, now.minus(Duration.ofDays(2))),
+                                s3Object(contentLinkedKey, now.minus(Duration.ofDays(2))),
                                 s3Object(orphanedKey, now.minus(Duration.ofDays(2))),
                                 s3Object(recentKey, now.minus(Duration.ofHours(1))),
                                 s3Object(legacyKey, now.minus(Duration.ofDays(2)))
@@ -283,6 +289,10 @@ class ArticleImageServiceTest {
         );
         when(articleImageRepository.findAllByS3KeyIn(any()))
                 .thenReturn(List.of(linkedImage));
+        when(blogRepository.findAllArticleContents()).thenReturn(List.of(
+                "<p>DB 연결이 누락된 이미지</p><img src=\"https://example.com/"
+                        + contentLinkedKey + "\">"
+        ));
         when(s3Client.headObject(argThat(
                 (HeadObjectRequest request) -> request != null
                         && request.key().equals(orphanedKey)

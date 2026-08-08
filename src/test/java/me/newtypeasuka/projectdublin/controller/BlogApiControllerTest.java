@@ -40,6 +40,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -395,6 +396,23 @@ class BlogApiControllerTest {
         assertThat(articleImageRepository.findAllByArticleId(article.getId()))
                 .singleElement()
                 .satisfies(image -> assertThat(image.getS3Key()).isEqualTo(key));
+
+        // 후속 수정 HTML에서 이미지가 누락되어도 이미 연결된 S3 원본은 영구 삭제하지 않는다.
+        UpdateArticleRequest textOnlyRequest = new UpdateArticleRequest(
+                "Managed without image",
+                "<p>이미지가 누락된 수정 본문</p>"
+        );
+        mockMvc.perform(put("/api/articles/{id}", article.getId())
+                        .with(loginUser(admin))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(textOnlyRequest)))
+                .andExpect(status().isOk());
+
+        assertThat(articleImageRepository.findAllByArticleId(article.getId()))
+                .singleElement()
+                .satisfies(image -> assertThat(image.getS3Key()).isEqualTo(key));
+        verify(s3Client, never()).deleteObject(any(DeleteObjectRequest.class));
     }
 
     @DisplayName("존재하지 않는 게시글의 조회·수정·삭제 요청은 404를 반환한다")
