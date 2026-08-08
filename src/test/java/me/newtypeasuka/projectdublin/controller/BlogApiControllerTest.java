@@ -185,7 +185,7 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "id=\"article-modified\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "class=\"bi bi-brush\"")))
+                        "class=\"article-meta__modified-marker\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-meta__date\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
@@ -214,7 +214,7 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-card__author\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "class=\"bi bi-brush\"")))
+                        "class=\"article-card__modified-marker\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString(">수정됨<"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
@@ -231,7 +231,7 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "'article-card__author'")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "'bi bi-brush'")));
+                        "'article-card__modified-marker'")));
     }
 
     @DisplayName("게시글 제목은 40자까지 허용하고 작성 화면에 글자 수 표시를 제공한다")

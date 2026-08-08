@@ -810,7 +810,7 @@ class ArticleApiControllerTest {
         mockMvc.perform(get("/js/articleComment.js"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(
-                        "modifiedIcon.className = 'bi bi-brush'")))
+                        "modifiedMarker.className = 'comment-item__modified-marker'")))
                 .andExpect(content().string(not(containsString(" · 수정됨"))));
     }
 

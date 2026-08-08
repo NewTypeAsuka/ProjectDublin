@@ -162,12 +162,10 @@
         .article-meta__author {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
             white-space: nowrap;
         }
-        .article-meta__date > .bi-brush {
-            font-size: 0.78rem;
-            line-height: 1;
+        .article-meta__author {
+            gap: 0.25rem;
         }
         .article-meta__separator {
             color: rgba(173, 181, 189, 1);
@@ -390,14 +388,9 @@
         .comment-item__date {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
             color: rgba(134, 142, 150, 1);
             font-size: 0.82rem;
             white-space: nowrap;
-        }
-        .comment-item__date > .bi-brush {
-            font-size: 0.78rem;
-            line-height: 1;
         }
         .comment-item__content {
             margin-bottom: 0.65rem;
@@ -568,14 +561,14 @@
                                 <span class="article-meta__date">
                                     <time th:datetime="${article.createdAt}"
                                         th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></time>
-                                    <i id="article-modified"
+                                    <span id="article-modified"
                                         th:if="${article.updatedAt != null
                                                 and article.createdAt != null
                                                 and article.updatedAt.isAfter(article.createdAt)}"
-                                        class="bi bi-brush"
+                                        class="article-meta__modified-marker"
                                         role="img"
                                         aria-label="수정됨"
-                                        title="수정됨"></i>
+                                        title="수정됨">*</span>
                                 </span>
                                 <span class="article-meta__author">
                                     <span>by</span>

@@ -208,12 +208,10 @@
         .article-card__author {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
             white-space: nowrap;
         }
-        .article-card__date > .bi-brush {
-            font-size: 0.78rem;
-            line-height: 1;
+        .article-card__author {
+            gap: 0.25rem;
         }
         .article-card__separator {
             color: rgba(190, 198, 207, 1);
@@ -438,13 +436,13 @@
                                         <span class="article-card__date">
                                             <time th:datetime="${item.createdAt}"
                                                 th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}"></time>
-                                            <i th:if="${item.updatedAt != null
+                                            <span th:if="${item.updatedAt != null
                                                     and item.createdAt != null
                                                     and item.updatedAt.isAfter(item.createdAt)}"
-                                                class="bi bi-brush"
+                                                class="article-card__modified-marker"
                                                 role="img"
                                                 aria-label="수정됨"
-                                                title="수정됨"></i>
+                                                title="수정됨">*</span>
                                         </span>
                                         <span class="article-card__author">
                                             <span>by</span>

@@ -132,12 +132,13 @@
         dateMeta.appendChild(date);
 
         if (isEdited(comment)) {
-            const modifiedIcon = document.createElement('i');
-            modifiedIcon.className = 'bi bi-brush';
-            modifiedIcon.setAttribute('role', 'img');
-            modifiedIcon.setAttribute('aria-label', '수정됨');
-            modifiedIcon.title = '수정됨';
-            dateMeta.appendChild(modifiedIcon);
+            const modifiedMarker = document.createElement('span');
+            modifiedMarker.className = 'comment-item__modified-marker';
+            modifiedMarker.textContent = '*';
+            modifiedMarker.setAttribute('role', 'img');
+            modifiedMarker.setAttribute('aria-label', '수정됨');
+            modifiedMarker.title = '수정됨';
+            dateMeta.appendChild(modifiedMarker);
         }
 
         header.append(author, dateMeta);

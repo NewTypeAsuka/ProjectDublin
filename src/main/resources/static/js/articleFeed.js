@@ -98,11 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
         articleDate.append(createdAt);
 
         if (isModified(article)) {
-            const modifiedIcon = createElement('i', 'bi bi-brush');
-            modifiedIcon.setAttribute('role', 'img');
-            modifiedIcon.setAttribute('aria-label', '수정됨');
-            modifiedIcon.title = '수정됨';
-            articleDate.append(modifiedIcon);
+            const modifiedMarker = createElement(
+                'span',
+                'article-card__modified-marker',
+                '*'
+            );
+            modifiedMarker.setAttribute('role', 'img');
+            modifiedMarker.setAttribute('aria-label', '수정됨');
+            modifiedMarker.title = '수정됨';
+            articleDate.append(modifiedMarker);
         }
 
         const articleAuthor = createElement('span', 'article-card__author');
