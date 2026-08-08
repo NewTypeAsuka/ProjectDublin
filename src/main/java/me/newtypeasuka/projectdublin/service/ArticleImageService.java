@@ -8,11 +8,9 @@ import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
-import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.jsoup.Jsoup;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -25,17 +23,13 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -57,11 +51,8 @@ public class ArticleImageService {
 
     private static final String UPLOADER_ID_METADATA = "uploader-id";
     private static final String ORIGINAL_FILENAME_METADATA = "original-filename";
-    private static final String ORPHAN_CLEANUP_METADATA = "orphan-cleanup";
-    private static final String ORPHAN_CLEANUP_ELIGIBLE = "eligible";
     private static final int MAX_ORIGINAL_FILENAME_LENGTH = 255;
     private static final int MAX_IMAGE_SIGNATURE_LENGTH = 12;
-    private static final int S3_LIST_PAGE_SIZE = 1000;
     private static final Set<String> SUPPORTED_CONTENT_TYPES = Set.of(
             "image/png",
             "image/jpeg",
@@ -73,7 +64,6 @@ public class ArticleImageService {
     private final S3StorageProperties properties;
     private final S3ObjectUrlResolver urlResolver;
     private final ArticleImageRepository articleImageRepository;
-    private final BlogRepository blogRepository;
     private final UserRepository userRepository;
 
     public ImageUploadResponse upload(MultipartFile image, String email) {
@@ -105,8 +95,7 @@ public class ArticleImageService {
                 .cacheControl("public, max-age=31536000, immutable")
                 .metadata(Map.of(
                         UPLOADER_ID_METADATA, uploader.getId().toString(),
-                        ORIGINAL_FILENAME_METADATA, encodeFilename(originalFilename),
-                        ORPHAN_CLEANUP_METADATA, ORPHAN_CLEANUP_ELIGIBLE
+                        ORIGINAL_FILENAME_METADATA, encodeFilename(originalFilename)
                 ))
                 .build();
 
@@ -184,106 +173,6 @@ public class ArticleImageService {
         deleteAfterCommit(images.stream()
                 .map(ArticleImage::getS3Key)
                 .toList(), "article-delete");
-    }
-
-    // 정리 기능이 활성화된 경우 매일 새벽 4시에 게시글과 연결되지 않은 오래된 신규 업로드만 정리
-    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
-    public void removeOrphanedUploads() {
-        if (!properties.orphanCleanupEnabled()) {
-            log.info("S3 미연결 이미지 자동 정리가 비활성화되어 있습니다");
-            return;
-        }
-
-        Instant cutoff = Instant.now().minus(properties.orphanRetention());
-        String continuationToken = null;
-        List<String> articleContents;
-
-        try {
-            articleContents = blogRepository.findAllArticleContents();
-        } catch (RuntimeException exception) {
-            // DB 참조를 확인할 수 없으면 데이터 보존을 위해 S3 정리 자체를 중단한다.
-            log.error("게시글 본문을 확인하지 못해 S3 이미지 정리를 중단했습니다", exception);
-            return;
-        }
-
-        do {
-            ListObjectsV2Request.Builder requestBuilder = ListObjectsV2Request.builder()
-                    .bucket(properties.bucket())
-                    .prefix(urlResolver.normalizedKeyPrefix() + "/")
-                    .maxKeys(S3_LIST_PAGE_SIZE);
-            if (StringUtils.hasText(continuationToken)) {
-                requestBuilder.continuationToken(continuationToken);
-            }
-
-            ListObjectsV2Response response;
-            try {
-                response = s3Client.listObjectsV2(requestBuilder.build());
-                removeOrphanedUploads(response, cutoff, articleContents);
-            } catch (SdkException exception) {
-                log.error("연결되지 않은 S3 게시글 이미지 정리에 실패했습니다", exception);
-                return;
-            } catch (RuntimeException exception) {
-                // 연결 DB 조회에 실패한 경우에도 삭제하지 않는 방향으로 안전하게 종료한다.
-                log.error("게시글 이미지 연결을 확인하지 못해 S3 이미지 정리를 중단했습니다", exception);
-                return;
-            }
-
-            continuationToken = response.nextContinuationToken();
-            if (!Boolean.TRUE.equals(response.isTruncated())) {
-                return;
-            }
-        } while (StringUtils.hasText(continuationToken));
-    }
-
-    private void removeOrphanedUploads(ListObjectsV2Response response,
-                                       Instant cutoff,
-                                       List<String> articleContents) {
-        List<String> expiredKeys = response.contents().stream()
-                .filter(object -> StringUtils.hasText(object.key()))
-                .filter(object -> object.lastModified() != null)
-                .filter(object -> object.lastModified().isBefore(cutoff))
-                .map(S3Object::key)
-                .toList();
-        if (expiredKeys.isEmpty()) {
-            return;
-        }
-
-        Set<String> linkedKeys = articleImageRepository.findAllByS3KeyIn(expiredKeys).stream()
-                .map(ArticleImage::getS3Key)
-                .collect(Collectors.toSet());
-        List<String> orphanedKeys = expiredKeys.stream()
-                .filter(key -> !linkedKeys.contains(key))
-                .filter(key -> !isReferencedInArticleContent(key, articleContents))
-                .filter(this::isOrphanCleanupEligible)
-                .toList();
-        deleteObjects(orphanedKeys, "orphan-cleanup");
-    }
-
-    // article_images 연결이 누락되어도 실제 본문에 키가 남아 있으면 삭제하지 않는다.
-    private boolean isReferencedInArticleContent(String key, List<String> articleContents) {
-        return articleContents.stream()
-                .filter(StringUtils::hasText)
-                .anyMatch(content -> content.contains(key));
-    }
-
-    private boolean isOrphanCleanupEligible(String key) {
-        try {
-            HeadObjectResponse storedObject = s3Client.headObject(HeadObjectRequest.builder()
-                    .bucket(properties.bucket())
-                    .key(key)
-                    .build());
-            return ORPHAN_CLEANUP_ELIGIBLE.equals(
-                    storedObject.metadata().get(ORPHAN_CLEANUP_METADATA)
-            );
-        } catch (S3Exception exception) {
-            if (exception.statusCode() != HttpStatus.NOT_FOUND.value()) {
-                log.warn("정리 대상 S3 게시글 이미지 확인에 실패했습니다. key={}", key, exception);
-            }
-            return false;
-        } catch (SdkException exception) {
-            log.warn("정리 대상 S3 게시글 이미지 확인에 실패했습니다. key={}", key, exception);
-            return false;
-        }
     }
 
     private ArticleImage createArticleImage(Article article, User currentEditor, String key) {

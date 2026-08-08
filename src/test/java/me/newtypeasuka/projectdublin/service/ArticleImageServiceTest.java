@@ -6,7 +6,6 @@ import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ArticleApiDto.ImageUploadResponse;
 import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
-import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,16 +26,11 @@ import software.amazon.awssdk.services.s3.S3Utilities;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +39,6 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -64,9 +57,6 @@ class ArticleImageServiceTest {
     ArticleImageRepository articleImageRepository;
 
     @Mock
-    BlogRepository blogRepository;
-
-    @Mock
     UserRepository userRepository;
 
     ArticleImageService articleImageService;
@@ -83,9 +73,7 @@ class ArticleImageServiceTest {
                 "articles",
                 "",
                 List.of(),
-                DataSize.ofMegabytes(10),
-                true,
-                Duration.ofHours(24)
+                DataSize.ofMegabytes(10)
         );
         urlResolver = new S3ObjectUrlResolver(
                 properties,
@@ -96,7 +84,6 @@ class ArticleImageServiceTest {
                 properties,
                 urlResolver,
                 articleImageRepository,
-                blogRepository,
                 userRepository
         );
         user = User.builder()
@@ -136,7 +123,7 @@ class ArticleImageServiceTest {
                 .matches("articles/42/\\d{4}/\\d{2}/[0-9a-f-]+\\.png");
         assertThat(request.contentType()).isEqualTo("image/png");
         assertThat(request.metadata().get("uploader-id")).isEqualTo("42");
-        assertThat(request.metadata().get("orphan-cleanup")).isEqualTo("eligible");
+        assertThat(request.metadata()).doesNotContainKey("orphan-cleanup");
         assertThat(decodeFilename(request.metadata().get("original-filename")))
                 .isEqualTo("한글 이미지.png");
         assertThat(bodyCaptor.getValue().optionalContentLength()).contains((long) png.length);
@@ -260,66 +247,6 @@ class ArticleImageServiceTest {
         verify(s3Client, never()).deleteObject(any(DeleteObjectRequest.class));
     }
 
-    @DisplayName("24시간이 지난 미연결 신규 업로드만 S3에서 정리한다")
-    @Test
-    void removeOnlyEligibleOrphanedUploads() {
-        Instant now = Instant.now();
-        String linkedKey = "articles/42/2026/07/linked.png";
-        String contentLinkedKey = "articles/42/2026/07/content-linked.png";
-        String orphanedKey = "articles/42/2026/07/orphaned.png";
-        String recentKey = "articles/42/2026/07/recent.png";
-        String legacyKey = "articles/42/2026/07/legacy.png";
-        Article article = articleWithContent(100L, "<p>본문</p>");
-        ArticleImage linkedImage = ArticleImage.builder()
-                .article(article)
-                .s3Key(linkedKey)
-                .originalFilename("linked.png")
-                .contentType("image/png")
-                .fileSize(9L)
-                .build();
-        when(s3Client.listObjectsV2(any(ListObjectsV2Request.class))).thenReturn(
-                ListObjectsV2Response.builder()
-                        .contents(List.of(
-                                s3Object(linkedKey, now.minus(Duration.ofDays(2))),
-                                s3Object(contentLinkedKey, now.minus(Duration.ofDays(2))),
-                                s3Object(orphanedKey, now.minus(Duration.ofDays(2))),
-                                s3Object(recentKey, now.minus(Duration.ofHours(1))),
-                                s3Object(legacyKey, now.minus(Duration.ofDays(2)))
-                        ))
-                        .isTruncated(false)
-                        .build()
-        );
-        when(articleImageRepository.findAllByS3KeyIn(any()))
-                .thenReturn(List.of(linkedImage));
-        when(blogRepository.findAllArticleContents()).thenReturn(List.of(
-                "<p>DB 연결이 누락된 이미지</p><img src=\"https://example.com/"
-                        + contentLinkedKey + "\">"
-        ));
-        when(s3Client.headObject(argThat(
-                (HeadObjectRequest request) -> request != null
-                        && request.key().equals(orphanedKey)
-        ))).thenReturn(HeadObjectResponse.builder()
-                .metadata(Map.of("orphan-cleanup", "eligible"))
-                .build());
-        when(s3Client.headObject(argThat(
-                (HeadObjectRequest request) -> request != null
-                        && request.key().equals(legacyKey)
-        ))).thenReturn(HeadObjectResponse.builder()
-                .metadata(Map.of())
-                .build());
-
-        articleImageService.removeOrphanedUploads();
-
-        verify(s3Client).deleteObject(argThat(
-                (DeleteObjectRequest request) -> request != null
-                        && request.key().equals(orphanedKey)
-        ));
-        verify(s3Client, never()).deleteObject(argThat(
-                (DeleteObjectRequest request) -> request != null
-                        && !request.key().equals(orphanedKey)
-        ));
-    }
-
     @DisplayName("이미지로 위장한 파일은 S3에 업로드하지 않는다")
     @Test
     void rejectFileWithoutSupportedImageSignature() {
@@ -365,14 +292,6 @@ class ArticleImageServiceTest {
                         "uploader-id", uploaderId,
                         "original-filename", encodedFilename
                 ))
-                .build();
-    }
-
-    private S3Object s3Object(String key, Instant lastModified) {
-        return S3Object.builder()
-                .key(key)
-                .lastModified(lastModified)
-                .size(9L)
                 .build();
     }
 
