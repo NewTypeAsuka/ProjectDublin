@@ -31,3 +31,13 @@ aws:
     public-base-url:
     legacy-image-prefix-urls: []
     max-file-size: 10MB
+
+stock:
+  yahoo-base-url: https://query1.finance.yahoo.com
+  watchlist:
+    - VOO
+    - 8058.T
+  cache-duration: 30m
+  stale-duration: 24h
+  connect-timeout: 3s
+  read-timeout: 8s
