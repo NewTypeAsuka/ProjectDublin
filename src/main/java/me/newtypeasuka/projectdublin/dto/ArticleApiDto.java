@@ -29,7 +29,7 @@ public final class ArticleApiDto {
             Long parentId,
             int depth,
             Long commenterId,
-            String commenterNickname,
+            String commenterName,
             // 댓글 작성자가 관리자인지 화면에 전달
             boolean commenterAdmin,
             String content,

@@ -37,7 +37,7 @@ public class ArticleViewResponse {
         this.content = article.getContent();
         this.createdAt = article.getCreatedAt();
         this.updatedAt = article.getUpdatedAt();
-        this.author = article.getAuthor().getNickname();
+        this.author = article.getAuthor().getName();
         this.authorAdmin = article.getAuthor().isAdmin();
         this.viewCount = article.getViewCount();
         this.likeCount = likeCount;

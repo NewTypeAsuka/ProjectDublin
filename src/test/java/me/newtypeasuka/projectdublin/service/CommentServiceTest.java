@@ -69,7 +69,7 @@ class CommentServiceTest {
         assertThat(comments.get(0).replies()).extracting(CommentResponse::id)
                 .containsExactly(firstReply.id(), secondReply.id());
         assertThat(comments.get(0).commenterId()).isEqualTo(member.getId());
-        assertThat(comments.get(0).commenterNickname()).isEqualTo(member.getNickname());
+        assertThat(comments.get(0).commenterName()).isEqualTo(member.getName());
         assertThat(comments.get(0).commenterAdmin()).isFalse();
         assertThat(comments.get(0).replies()).allMatch(reply -> !reply.commenterAdmin());
         assertThat(comments.get(1).commenterAdmin()).isTrue();
@@ -266,10 +266,10 @@ class CommentServiceTest {
         return new CommentContentRequest(content);
     }
 
-    private User saveUser(String email, String nickname, int role) {
+    private User saveUser(String email, String name, int role) {
         return userRepository.save(User.builder()
                 .email(email)
-                .nickname(nickname)
+                .name(name)
                 .role(role)
                 .build());
     }

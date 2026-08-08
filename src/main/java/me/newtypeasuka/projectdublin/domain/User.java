@@ -28,21 +28,27 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "nickname", nullable = false)
+    // Google OAuth에서 받은 사용자 이름
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    // 사용자가 별도로 설정할 닉네임이며, 미설정 상태에서는 null을 허용
+    @Column(name = "nickname")
     private String nickname;
 
     @Column(name = "role", nullable = false)
     private int role;
 
     @Builder // 빌더 패턴으로 객체 생성
-    public User(String email, String nickname, Integer role) {
+    public User(String email, String name, String nickname, Integer role) {
         this.email = email;
+        this.name = name;
         this.nickname = nickname;
         this.role = role == null ? DEFAULT_ROLE : role;
     }
 
-    public User update(String nickname) {
-        this.nickname = nickname;
+    public User updateName(String name) {
+        this.name = name;
         return this;
     }
 

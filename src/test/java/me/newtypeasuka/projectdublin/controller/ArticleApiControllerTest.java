@@ -2,6 +2,7 @@ package me.newtypeasuka.projectdublin.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpSession;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.Comment;
@@ -81,6 +82,9 @@ class ArticleApiControllerTest {
     @Autowired
     CommentRepository commentRepository;
 
+    @Autowired
+    EntityManager entityManager;
+
     User admin;
     User member;
     Article article;
@@ -89,12 +93,12 @@ class ArticleApiControllerTest {
     void setUp() {
         admin = userRepository.save(User.builder()
                 .email("admin@example.com")
-                .nickname("Admin")
+                .name("Admin")
                 .role(1)
                 .build());
         member = userRepository.save(User.builder()
                 .email("member@example.com")
-                .nickname("Member")
+                .name("Member")
                 .build());
         article = blogRepository.save(Article.builder()
                 .author(admin)
@@ -102,6 +106,35 @@ class ArticleApiControllerTest {
                 .content("<p>Content</p>")
                 .searchContent("Content")
                 .build());
+    }
+
+    @DisplayName("사용자 이름과 nullable 닉네임을 서로 다른 컬럼에 저장한다")
+    @Test
+    void mapUserNameAndNullableNickname() {
+        User userWithoutNickname = userRepository.saveAndFlush(User.builder()
+                .email("without-nickname@example.com")
+                .name("Google Name")
+                .build());
+        User userWithNickname = userRepository.save(User.builder()
+                .email("with-nickname@example.com")
+                .name("Old Google Name")
+                .nickname("별명")
+                .build());
+        userWithNickname.updateName("New Google Name");
+        userRepository.flush();
+        Long userWithoutNicknameId = userWithoutNickname.getId();
+        Long userWithNicknameId = userWithNickname.getId();
+        entityManager.clear();
+
+        User savedUserWithoutNickname =
+                userRepository.findById(userWithoutNicknameId).orElseThrow();
+        User savedUserWithNickname =
+                userRepository.findById(userWithNicknameId).orElseThrow();
+
+        assertThat(savedUserWithoutNickname.getName()).isEqualTo("Google Name");
+        assertThat(savedUserWithoutNickname.getNickname()).isNull();
+        assertThat(savedUserWithNickname.getName()).isEqualTo("New Google Name");
+        assertThat(savedUserWithNickname.getNickname()).isEqualTo("별명");
     }
 
     @DisplayName("로그인 사용자가 Summernote 이미지를 업로드하면 공개 URL을 반환한다")
@@ -381,7 +414,7 @@ class ArticleApiControllerTest {
         Element adminBadge = adminArticleLink.selectFirst(".author-admin-badge");
         assertThat(adminBadge).isNotNull();
         assertThat(adminBadge.classNames()).contains("bi", "bi-patch-check-fill");
-        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getNickname());
+        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getName());
         assertThat(memberArticleLink.select(".author-admin-badge")).isEmpty();
     }
 
@@ -417,7 +450,7 @@ class ArticleApiControllerTest {
                 adminArticleDocument.selectFirst(".article-meta .author-admin-badge");
         assertThat(adminBadge).isNotNull();
         assertThat(adminBadge.classNames()).contains("bi", "bi-patch-check-fill");
-        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getNickname());
+        assertThat(adminBadge.previousElementSibling().text()).isEqualTo(admin.getName());
         assertThat(memberArticleDocument.select(".article-meta .author-admin-badge"))
                 .isEmpty();
     }
@@ -529,7 +562,7 @@ class ArticleApiControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.depth").value(1))
                 .andExpect(jsonPath("$.commenterId").value(member.getId()))
-                .andExpect(jsonPath("$.commenterNickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.commenterName").value(member.getName()))
                 .andExpect(jsonPath("$.commenterAdmin").value(false))
                 .andExpect(jsonPath("$.content").value("회원 댓글 !*$ 😀"))
                 .andExpect(jsonPath("$.editable").value(true))
@@ -640,7 +673,7 @@ class ArticleApiControllerTest {
     private RequestPostProcessor loginUser(User user) {
         DefaultOAuth2User oauth2User = new DefaultOAuth2User(
                 List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                Map.of("email", user.getEmail(), "name", user.getNickname()),
+                Map.of("email", user.getEmail(), "name", user.getName()),
                 "email"
         );
         return oauth2Login().oauth2User(oauth2User);

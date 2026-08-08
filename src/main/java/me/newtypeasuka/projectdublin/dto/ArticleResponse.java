@@ -19,7 +19,7 @@ public class ArticleResponse {
         this.title = article.getTitle();
         this.content = article.getContent();
         this.authorId = article.getAuthor().getId();
-        this.author = article.getAuthor().getNickname();
+        this.author = article.getAuthor().getName();
         this.viewCount = article.getViewCount();
         this.pinned = article.isPinned();
     }

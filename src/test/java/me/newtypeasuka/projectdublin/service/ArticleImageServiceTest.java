@@ -101,7 +101,7 @@ class ArticleImageServiceTest {
         );
         user = User.builder()
                 .email(EMAIL)
-                .nickname("Writer")
+                .name("Writer")
                 .build();
         ReflectionTestUtils.setField(user, "id", USER_ID);
     }
@@ -184,7 +184,7 @@ class ArticleImageServiceTest {
     void synchronizeAdminImageWithAnotherAuthorsArticle() {
         User admin = User.builder()
                 .email("admin@example.com")
-                .nickname("Admin")
+                .name("Admin")
                 .role(1)
                 .build();
         ReflectionTestUtils.setField(admin, "id", 7L);

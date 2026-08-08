@@ -186,7 +186,7 @@ public class CommentService {
                 comment.getParent() == null ? null : comment.getParent().getId(),
                 comment.getDepth(),
                 comment.getCommenter().getId(),
-                comment.getCommenter().getNickname(),
+                comment.getCommenter().getName(),
                 comment.getCommenter().isAdmin(),
                 deleted ? Comment.DELETED_CONTENT : comment.getContent(),
                 comment.getCreatedAt(),

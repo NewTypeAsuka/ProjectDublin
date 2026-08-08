@@ -7,7 +7,8 @@ use ProjectDublin;
 create table users (
     id bigint unsigned not null auto_increment,
     email varchar(320) not null,
-    nickname varchar(255) not null,
+    name varchar(255) not null,
+    nickname varchar(255),
     password varchar(255),
     role tinyint unsigned not null default 2 comment '1: admin / 2: user / 3: other',
     auth_provider varchar(30) not null default 'GOOGLE',
@@ -111,4 +112,4 @@ select * from article_likes;
 select * from article_images;
 select * from comments;
 
-update users set role = 1 where email = 'sangzoon0102@gmail.com' and nickname = '상준';
+update users set role = 1 where email = 'sangzoon0102@gmail.com' and name = '상준';

@@ -93,7 +93,7 @@ class BlogApiControllerTest {
         userRepository.deleteAll();
         user = userRepository.save(User.builder()
                 .email(EMAIL)
-                .nickname("Writer")
+                .name("Writer")
                 .build());
     }
 
@@ -322,7 +322,7 @@ class BlogApiControllerTest {
     void deleteArticleWithCommentsAndReplies() throws Exception {
         User replier = userRepository.save(User.builder()
                 .email("replier@example.com")
-                .nickname("Replier")
+                .name("Replier")
                 .build());
         Article article = blogRepository.save(Article.builder()
                 .author(user)
@@ -355,7 +355,7 @@ class BlogApiControllerTest {
     void allowAdminToAddOwnImageToAnotherAuthorsArticle() throws Exception {
         User admin = userRepository.save(User.builder()
                 .email("admin@example.com")
-                .nickname("Admin")
+                .name("Admin")
                 .role(1)
                 .build());
         Article article = blogRepository.save(Article.builder()
@@ -847,7 +847,7 @@ class BlogApiControllerTest {
                 List.of(new SimpleGrantedAuthority("ROLE_USER")),
                 Map.of(
                         "email", currentUser.getEmail(),
-                        "name", currentUser.getNickname()
+                        "name", currentUser.getName()
                 ),
                 "email"
         );
