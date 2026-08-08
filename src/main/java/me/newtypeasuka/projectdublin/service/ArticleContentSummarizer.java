@@ -3,6 +3,8 @@ package me.newtypeasuka.projectdublin.service;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.safety.Safelist;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,7 @@ public class ArticleContentSummarizer {
         }
 
         Document document = Jsoup.parseBodyFragment(rawHtml);
+        document.select("p").forEach(this::removeTrailingMediaPlaceholder);
         document.select("a").forEach(this::sanitizeLinkTarget);
         document.select("font[color]").forEach(this::normalizeLegacyFontColor);
         document.select("span[style]").forEach(this::sanitizeInlineStyle);
@@ -100,6 +103,57 @@ public class ArticleContentSummarizer {
         }
 
         return sanitizedHtml;
+    }
+
+    // Summernote가 이미지·동영상 뒤의 커서 위치를 위해 붙인 빈 span과 br은 저장하지 않는다.
+    private void removeTrailingMediaPlaceholder(Element paragraph) {
+        List<Node> childNodes = new ArrayList<>(paragraph.childNodes());
+        int lastMediaIndex = -1;
+        for (int index = 0; index < childNodes.size(); index++) {
+            if (isMediaNode(childNodes.get(index))) {
+                lastMediaIndex = index;
+            }
+        }
+        if (lastMediaIndex < 0 || lastMediaIndex == childNodes.size() - 1) {
+            return;
+        }
+
+        List<Node> trailingNodes = childNodes.subList(lastMediaIndex + 1, childNodes.size());
+        boolean hasPlaceholder = trailingNodes.stream().anyMatch(this::isMediaPlaceholder);
+        boolean containsOnlyPlaceholder = trailingNodes.stream()
+                .allMatch(node -> isBlankText(node) || isMediaPlaceholder(node));
+        if (!hasPlaceholder || !containsOnlyPlaceholder) {
+            return;
+        }
+
+        trailingNodes.forEach(Node::remove);
+    }
+
+    private boolean isMediaNode(Node node) {
+        return node instanceof Element element
+                && ("img".equals(element.normalName())
+                || "iframe".equals(element.normalName()));
+    }
+
+    private boolean isMediaPlaceholder(Node node) {
+        if (!(node instanceof Element element)) {
+            return false;
+        }
+        if ("br".equals(element.normalName())) {
+            return true;
+        }
+        if (!"span".equals(element.normalName())) {
+            return false;
+        }
+
+        List<Node> spanNodes = element.childNodes();
+        return spanNodes.stream().anyMatch(this::isMediaPlaceholder)
+                && spanNodes.stream()
+                .allMatch(child -> isBlankText(child) || isMediaPlaceholder(child));
+    }
+
+    private boolean isBlankText(Node node) {
+        return node instanceof TextNode textNode && textNode.text().isBlank();
     }
 
     // 검색 시 HTML 태그나 속성이 일치하지 않도록 화면에 보이는 평문만 추출한다.

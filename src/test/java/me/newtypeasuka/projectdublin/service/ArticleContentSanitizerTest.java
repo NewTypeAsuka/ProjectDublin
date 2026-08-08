@@ -1,6 +1,8 @@
 package me.newtypeasuka.projectdublin.service;
 
 import me.newtypeasuka.projectdublin.config.S3Config.S3StorageProperties;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.unit.DataSize;
@@ -186,6 +188,27 @@ class ArticleContentSanitizerTest {
         assertThat(sanitizedHtml)
                 .contains(legacyImageUrl)
                 .contains("alt=\"legacy\"");
+    }
+
+    @DisplayName("이미지와 동영상 뒤에 Summernote가 붙인 빈 줄은 저장하지 않는다")
+    @Test
+    void removeTrailingMediaPlaceholder() {
+        String managedImageUrl = urlResolver.resolve("articles/2026/08/image.png");
+
+        String sanitizedHtml = sanitizer.sanitize("""
+                <p><img src="%s"><span style="color: rgb(0, 0, 0)"><br></span></p>
+                <p><iframe src="https://www.youtube.com/embed/video-id"></iframe><br></p>
+                <p>일반 문장의<br>의도적인 줄바꿈</p>
+                """.formatted(managedImageUrl));
+        Document document = Jsoup.parseBodyFragment(sanitizedHtml);
+
+        assertThat(document.select("p").get(0).children())
+                .extracting(element -> element.normalName())
+                .containsExactly("img");
+        assertThat(document.select("p").get(1).children())
+                .extracting(element -> element.normalName())
+                .containsExactly("iframe");
+        assertThat(document.select("p").get(2).select("br")).hasSize(1);
     }
 
     @DisplayName("내용이 없는 Summernote HTML은 거절한다")
