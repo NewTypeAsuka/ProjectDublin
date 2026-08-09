@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNicknameIgnoreCase(String nickname); // 공개 닉네임 중복 확인
 
+    boolean existsByNicknameIgnoreCaseAndIdNot(String nickname, Long id); // 현재 사용자를 제외한 공개 닉네임 중복 확인
+
 }

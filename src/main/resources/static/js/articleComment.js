@@ -111,7 +111,11 @@
 
         const author = document.createElement('span');
         author.className = 'comment-item__author';
-        author.appendChild(document.createTextNode(comment.commenterNickname));
+        const nickname = document.createElement('span');
+        nickname.className = 'user-nickname';
+        nickname.dataset.userId = String(comment.commenterId);
+        nickname.textContent = comment.commenterNickname;
+        author.appendChild(nickname);
 
         // 관리자 댓글 작성자의 이름 뒤에 관리자 아이콘을 추가
         if (comment.commenterAdmin) {

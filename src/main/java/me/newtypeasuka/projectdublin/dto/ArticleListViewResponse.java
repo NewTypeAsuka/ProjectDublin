@@ -15,6 +15,7 @@ public class ArticleListViewResponse {
     private final String content;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
+    private final Long authorId;
     private final String author;
     // 게시글 작성자가 관리자인지 화면에 전달
     private final boolean authorAdmin;
@@ -37,6 +38,7 @@ public class ArticleListViewResponse {
         this.content = createPreview(article.getContent());
         this.createdAt = article.getCreatedAt();
         this.updatedAt = article.getUpdatedAt();
+        this.authorId = article.getAuthor().getId();
         this.author = article.getAuthor().getNickname();
         this.authorAdmin = article.getAuthor().isAdmin();
         this.viewCount = article.getViewCount();

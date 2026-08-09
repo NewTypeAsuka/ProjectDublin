@@ -1,7 +1,6 @@
 package me.newtypeasuka.projectdublin.config.oauth;
 
 import lombok.RequiredArgsConstructor;
-import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -37,54 +36,6 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
 
         userRepository.findByEmail(email)
                 .ifPresent(entity -> entity.updateName(name));
-    }
-
-    // Google 이메일에 대응하는 내부 가입 사용자가 있는지 확인
-    @Transactional(readOnly = true)
-    public boolean isRegistered(String email) {
-        return email != null && userRepository.existsByEmail(email);
-    }
-
-    // MySQL 정렬 규칙과 동일하게 영문 대소문자를 구분하지 않고 닉네임 중복 확인
-    @Transactional(readOnly = true)
-    public boolean isNicknameTaken(String nickname) {
-        return nickname != null && userRepository.existsByNicknameIgnoreCase(nickname);
-    }
-
-    // Google 인증을 마친 신규 사용자에게 필수 닉네임을 받아 가입을 완료
-    @Transactional
-    public User completeRegistration(String email, String name, String nickname) {
-        User registeredUser = userRepository.findByEmail(email).orElse(null);
-        if (registeredUser != null) {
-            return registeredUser;
-        }
-
-        validateNickname(nickname);
-        if (userRepository.existsByNicknameIgnoreCase(nickname)) {
-            throw new NicknameAlreadyExistsException();
-        }
-
-        return userRepository.saveAndFlush(User.builder()
-                .email(email)
-                .name(name)
-                .nickname(nickname)
-                .build());
-    }
-
-    private void validateNickname(String nickname) {
-        if (nickname == null
-                || !nickname.equals(nickname.strip())
-                || nickname.length() < 3
-                || nickname.length() > 12) {
-            throw new IllegalArgumentException("닉네임은 앞뒤 공백 없이 3자 이상 12자 이하여야 합니다.");
-        }
-    }
-
-    public static class NicknameAlreadyExistsException extends RuntimeException {
-
-        public NicknameAlreadyExistsException() {
-            super("이미 사용 중인 닉네임입니다.");
-        }
     }
 
 }

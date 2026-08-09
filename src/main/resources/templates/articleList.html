@@ -446,7 +446,9 @@
                                         </span>
                                         <span class="article-card__author">
                                             <span>by</span>
-                                            <span th:text="${item.author}"></span><i
+                                            <span class="user-nickname"
+                                                th:attr="data-user-id=${item.authorId}"
+                                                th:text="${item.author}"></span><i
                                                 th:if="${item.authorAdmin}"
                                                 class="bi bi-patch-check-fill author-admin-badge"
                                                 role="img"

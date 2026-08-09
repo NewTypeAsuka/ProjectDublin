@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import me.newtypeasuka.projectdublin.config.oauth.OAuth2UserCustomService;
+import me.newtypeasuka.projectdublin.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,7 @@ public class WebOAuthSecurityConfig {
             WebOAuthSecurityConfig.class.getName() + ".REGISTRATION_COMPLETE";
 
     private final OAuth2UserCustomService oAuth2UserCustomService;
+    private final UserService userService;
 
     // 정적 리소스는 인증 없이 제공할 수 있도록 보안 필터에서 제외
     @Bean
@@ -92,7 +94,7 @@ public class WebOAuthSecurityConfig {
     public AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
         return (request, response, authentication) -> {
             String email = getEmail(authentication);
-            boolean registered = oAuth2UserCustomService.isRegistered(email);
+            boolean registered = userService.isRegistered(email);
 
             if (registered) {
                 request.getSession().setAttribute(
@@ -140,7 +142,7 @@ public class WebOAuthSecurityConfig {
                     return;
                 }
 
-                if (oAuth2UserCustomService.isRegistered(getEmail(authentication))) {
+                if (userService.isRegistered(getEmail(authentication))) {
                     request.getSession().setAttribute(
                             REGISTRATION_COMPLETE_SESSION_ATTRIBUTE,
                             true

@@ -355,6 +355,237 @@
             background-color: var(--project-surface-soft);
         }
 
+        /* layout: 링크와 버튼으로 구성된 내비게이션 항목의 동일한 너비와 정렬 */
+        .site-nav-dropdown__item--button {
+            width: 100%;
+            border: 0;
+            text-align: left;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        /* layout: 마이페이지 모달의 프로필 정보와 닉네임 수정 폼 */
+        body.user-profile-open {
+            overflow: hidden;
+        }
+        .site-profile-dialog {
+            width: min(34rem, calc(100% - 2rem));
+            max-width: none;
+            max-height: calc(100dvh - 2rem);
+            margin: auto;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--project-line);
+            border-radius: 1.5rem;
+            color: var(--project-ink);
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 28px 90px rgba(15, 23, 42, 0.24);
+        }
+        .site-profile-dialog::backdrop {
+            background-color: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .site-profile-dialog__surface {
+            max-height: calc(100dvh - 2rem);
+            overflow-y: auto;
+        }
+        .site-profile-dialog__header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) max-content;
+            align-items: start;
+            gap: 1rem;
+            padding: 1.5rem 1.5rem 1rem;
+        }
+        .site-profile-dialog__eyebrow {
+            margin-bottom: 0.35rem;
+            color: var(--project-brand-strong);
+            font-size: 0.68rem;
+            font-weight: 750;
+            letter-spacing: 0.14em;
+        }
+        .site-profile-dialog__title {
+            margin-bottom: 0.35rem;
+            font-size: 1.4rem;
+            font-weight: 750;
+            letter-spacing: -0.035em;
+        }
+        .site-profile-dialog__description {
+            margin: 0;
+            color: var(--project-muted);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+        .site-profile-dialog__close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+            border: 1px solid var(--project-line);
+            border-radius: 999px;
+            color: var(--project-muted);
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .site-profile-dialog__body {
+            padding: 0 1.5rem 1.5rem;
+        }
+        .site-profile-dialog__loading,
+        .site-profile-dialog__load-error {
+            min-height: 14rem;
+            padding: 3rem 1rem;
+            color: var(--project-muted);
+            text-align: center;
+        }
+        .site-profile-dialog__load-error i {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: rgba(225, 45, 63, 1);
+            font-size: 1.6rem;
+        }
+        .site-profile-dialog__identity {
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+            align-items: center;
+            gap: 0.85rem;
+            padding: 1rem;
+            border-radius: 1.15rem;
+            background-color: var(--project-surface-soft);
+        }
+        .site-profile-dialog__avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.85rem;
+            height: 2.85rem;
+            border-radius: 1rem;
+            color: rgba(255, 255, 255, 1);
+            background-color: var(--project-brand);
+            box-shadow: 0 8px 20px rgba(49, 130, 246, 0.22);
+        }
+        .site-profile-dialog__nickname {
+            display: block;
+            overflow: hidden;
+            color: var(--project-ink);
+            font-size: 1rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .site-profile-dialog__email {
+            display: block;
+            margin-top: 0.15rem;
+            color: var(--project-muted);
+            font-size: 0.8rem;
+            overflow-wrap: anywhere;
+        }
+        .site-profile-dialog__stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.85rem;
+        }
+        .site-profile-dialog__stat {
+            margin: 0;
+            padding: 1rem;
+            border: 1px solid var(--project-line);
+            border-radius: 1rem;
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .site-profile-dialog__stat dt {
+            margin-bottom: 0.35rem;
+            color: var(--project-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .site-profile-dialog__stat dd {
+            margin: 0;
+            color: var(--project-ink);
+            font-size: 1.35rem;
+            font-weight: 750;
+        }
+        .site-profile-dialog__form {
+            margin-top: 1.15rem;
+            padding-top: 1.15rem;
+            border-top: 1px solid var(--project-line);
+        }
+        .site-profile-dialog__label {
+            margin-bottom: 0.45rem;
+            color: var(--project-body);
+            font-size: 0.86rem;
+            font-weight: 650;
+        }
+        .site-profile-dialog__input-wrap {
+            position: relative;
+        }
+        .site-profile-dialog__input {
+            min-height: 3rem;
+            padding-right: 3.8rem;
+            border-color: rgba(15, 23, 42, 0.12);
+            border-radius: 0.9rem;
+            color: var(--project-ink);
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .site-profile-dialog__counter {
+            position: absolute;
+            top: 50%;
+            right: 0.9rem;
+            color: var(--project-muted);
+            font-size: 0.76rem;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .site-profile-dialog__guide {
+            min-height: 1.3rem;
+            margin: 0.45rem 0 0;
+            color: var(--project-muted);
+            font-size: 0.77rem;
+        }
+        .site-profile-dialog__message {
+            margin: 0.85rem 0 0;
+            border: 0;
+            border-radius: 0.85rem;
+            font-size: 0.82rem;
+        }
+        .site-profile-dialog__actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.65rem;
+            margin-top: 1rem;
+        }
+        .site-profile-dialog__action {
+            min-height: 2.8rem;
+            border-radius: 0.9rem !important;
+        }
+
+        /* interaction: 마이페이지 모달의 입력·버튼 상태 피드백 */
+        .site-profile-dialog__close:hover,
+        .site-profile-dialog__close:focus {
+            color: var(--project-ink);
+            background-color: var(--project-surface-soft);
+        }
+        .site-profile-dialog__input:focus {
+            border-color: rgba(49, 130, 246, 0.7);
+            box-shadow: 0 0 0 0.2rem rgba(49, 130, 246, 0.14);
+        }
+        .site-profile-dialog__input[aria-invalid="true"] {
+            border-color: rgba(225, 45, 63, 0.7);
+        }
+        .site-profile-dialog__guide.is-valid {
+            color: rgba(0, 145, 100, 1);
+        }
+        .site-profile-dialog__guide.is-invalid {
+            color: rgba(225, 45, 63, 1);
+        }
+
+        /* 접근성: 마이페이지 모달 버튼의 키보드 포커스 표시 */
+        .site-profile-dialog button:focus-visible,
+        .site-profile-dialog input:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.3);
+            outline-offset: 2px;
+        }
+
         /* layout: 화면 내 일반 액션과 내비게이션 버튼 공통 형태 */
         .app-button {
             display: inline-flex;
@@ -429,7 +660,7 @@
             color: var(--project-brand-strong);
         }
 
-        /* 반응형layout: 모바일 내비게이션과 헤더 밀도 조정 */
+        /* 반응형layout: 모바일 내비게이션·헤더·마이페이지 모달 밀도 조정 */
         @media (max-width: 575.98px) {
             .site-nav {
                 padding-right: 0;
@@ -455,6 +686,23 @@
             }
             .intro-header__subtitle {
                 font-size: 0.86rem;
+            }
+            .site-profile-dialog {
+                width: calc(100% - 1rem);
+                max-height: calc(100dvh - 1rem);
+                border-radius: 1.15rem;
+            }
+            .site-profile-dialog__surface {
+                max-height: calc(100dvh - 1rem);
+            }
+            .site-profile-dialog__header {
+                padding: 1.2rem 1rem 0.85rem;
+            }
+            .site-profile-dialog__body {
+                padding: 0 1rem 1rem;
+            }
+            .site-profile-dialog__stat {
+                padding: 0.85rem;
             }
         }
 
@@ -488,56 +736,184 @@
         </div>
     </header>
 
-    <!-- 공통 내비게이션 섹션 -->
-    <nav th:fragment="siteNavbar(showCreateButton)"
-        class="navbar py-2 site-nav"
-        id="site-nav">
-        <div class="container site-nav__inner">
+    <th:block th:fragment="siteNavbar(showCreateButton)">
+        <!-- 공통 내비게이션 섹션 -->
+        <nav class="navbar py-2 site-nav" id="site-nav">
+            <div class="container site-nav__inner">
 
-            <!-- 네비게이션 메뉴 영역 -->
-            <div class="navbar-nav flex-row site-nav__menu">
-                <details class="site-nav-dropdown">
-                    <summary aria-label="둘러보기 메뉴 열기">
-                        <i class="bi bi-compass" aria-hidden="true"></i>
-                        <span>메뉴</span>
-                        <i class="bi bi-chevron-down site-nav-dropdown__icon"
-                            aria-hidden="true"></i>
-                    </summary>
-                    <div class="site-nav-dropdown__menu">
-                        <a class="site-nav-dropdown__item" href="/">
-                            <i class="bi bi-house-door-fill" aria-hidden="true"></i>
-                            <span>홈</span>
-                        </a>
-                        <a class="site-nav-dropdown__item" href="/menu/stocks">
-                            <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
-                            <span>주식</span>
-                        </a>
+                <!-- 네비게이션 메뉴 영역 -->
+                <div class="navbar-nav flex-row site-nav__menu">
+                    <details class="site-nav-dropdown">
+                        <summary aria-label="둘러보기 메뉴 열기">
+                            <i class="bi bi-compass" aria-hidden="true"></i>
+                            <span>메뉴</span>
+                            <i class="bi bi-chevron-down site-nav-dropdown__icon"
+                                aria-hidden="true"></i>
+                        </summary>
+                        <div class="site-nav-dropdown__menu">
+                            <a class="site-nav-dropdown__item" href="/">
+                                <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+                                <span>홈</span>
+                            </a>
+                            <button id="user-profile-open"
+                                    class="site-nav-dropdown__item site-nav-dropdown__item--button"
+                                    type="button"
+                                    aria-haspopup="dialog"
+                                    aria-controls="user-profile-dialog">
+                                <i class="bi bi-person-circle" aria-hidden="true"></i>
+                                <span>마이페이지</span>
+                            </button>
+                            <a class="site-nav-dropdown__item" href="/menu/stocks">
+                                <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+                                <span>주식</span>
+                            </a>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- 네비게이션 버튼 영역 -->
+                <div class="site-nav__actions">
+                    <a th:if="${showCreateButton}"
+                        th:href="@{/new-article}"
+                        id="create-btn"
+                        class="btn btn-sm app-button site-nav__write">
+                        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                        <span>글쓰기</span>
+                    </a> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
+                    <form action="/logout" method="post" class="site-nav__logout-form">
+                        <input type="hidden"
+                                th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}"> <!-- 로그아웃도 토큰을 검증할 수 있도록 POST 폼으로 전송(csrf) -->
+                        <button type="submit" class="btn btn-sm app-button site-nav__logout">
+                            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                            <span>로그아웃</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </nav>
+
+        <!-- 마이페이지 모달 영역 -->
+        <dialog id="user-profile-dialog"
+                class="site-profile-dialog"
+                aria-labelledby="user-profile-title"
+                aria-describedby="user-profile-description">
+            <div class="site-profile-dialog__surface">
+                <!-- 마이페이지 모달 헤더 영역 -->
+                <header class="site-profile-dialog__header">
+                    <div>
+                        <p class="site-profile-dialog__eyebrow">MY PAGE</p>
+                        <h2 id="user-profile-title" class="site-profile-dialog__title">마이페이지</h2>
+                        <p id="user-profile-description"
+                            class="site-profile-dialog__description">
+                            내 활동을 확인하고 공개 닉네임을 변경할 수 있습니다
+                        </p>
                     </div>
-                </details>
-            </div>
-
-            <!-- 네비게이션 버튼 영역 -->
-            <div class="site-nav__actions">
-                <a th:if="${showCreateButton}"
-                    th:href="@{/new-article}"
-                    id="create-btn"
-                    class="btn btn-sm app-button site-nav__write">
-                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                    <span>글쓰기</span>
-                </a> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
-                <form action="/logout" method="post" class="site-nav__logout-form">
-                    <input type="hidden"
-                            th:name="${_csrf.parameterName}"
-                            th:value="${_csrf.token}"> <!-- 로그아웃도 토큰을 검증할 수 있도록 POST 폼으로 전송(csrf) -->
-                    <button type="submit" class="btn btn-sm app-button site-nav__logout">
-                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-                        <span>로그아웃</span>
+                    <button id="user-profile-close"
+                            class="site-profile-dialog__close"
+                            type="button"
+                            aria-label="마이페이지 닫기">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
                     </button>
-                </form>
+                </header>
+
+                <!-- 마이페이지 정보 영역 -->
+                <div class="site-profile-dialog__body">
+                    <div id="user-profile-loading"
+                        class="site-profile-dialog__loading"
+                        role="status">
+                        <span class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>
+                        내 정보를 불러오는 중입니다
+                    </div>
+                    <div id="user-profile-load-error"
+                        class="site-profile-dialog__load-error d-none"
+                        role="alert">
+                        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                        <p id="user-profile-load-error-message">내 정보를 불러오지 못했습니다.</p>
+                        <button id="user-profile-retry"
+                                class="btn btn-sm app-button btn-outline-secondary"
+                                type="button">
+                            <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                            <span>다시 시도</span>
+                        </button>
+                    </div>
+                    <div id="user-profile-content" class="d-none">
+                        <div class="site-profile-dialog__identity">
+                            <span class="site-profile-dialog__avatar" aria-hidden="true">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <div class="tw:min-w-0">
+                                <strong id="user-profile-current-nickname"
+                                    class="site-profile-dialog__nickname"></strong>
+                                <span id="user-profile-email"
+                                    class="site-profile-dialog__email"></span>
+                            </div>
+                        </div>
+
+                        <!-- 사용자 활동 요약 영역 -->
+                        <dl class="site-profile-dialog__stats" aria-label="내 활동 요약">
+                            <div class="site-profile-dialog__stat">
+                                <dt>작성한 글</dt>
+                                <dd id="user-profile-article-count">0</dd>
+                            </div>
+                            <div class="site-profile-dialog__stat">
+                                <dt>댓글·답글</dt>
+                                <dd id="user-profile-comment-count">0</dd>
+                            </div>
+                        </dl>
+
+                        <!-- 닉네임 수정 영역 -->
+                        <form id="user-profile-nickname-form"
+                            class="site-profile-dialog__form"
+                            novalidate>
+                            <label for="user-profile-nickname"
+                                class="site-profile-dialog__label">닉네임</label>
+                            <div class="site-profile-dialog__input-wrap">
+                                <input id="user-profile-nickname"
+                                        class="form-control site-profile-dialog__input"
+                                        type="text"
+                                        minlength="3"
+                                        maxlength="12"
+                                        autocomplete="nickname"
+                                        aria-describedby="user-profile-nickname-guide user-profile-message"
+                                        required>
+                                <span id="user-profile-nickname-counter"
+                                    class="site-profile-dialog__counter"
+                                    aria-hidden="true">0/12</span>
+                            </div>
+                            <p id="user-profile-nickname-guide"
+                                class="site-profile-dialog__guide">
+                                3자 이상 12자 이하로 입력해주세요
+                            </p>
+                            <p id="user-profile-message"
+                                class="alert d-none site-profile-dialog__message"
+                                role="status"
+                                aria-live="polite"></p>
+                            <div class="site-profile-dialog__actions">
+                                <button id="user-profile-cancel"
+                                        class="btn btn-outline-secondary app-button site-profile-dialog__action"
+                                        type="button">
+                                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                                    <span>취소</span>
+                                </button>
+                                <button id="user-profile-submit"
+                                        class="btn btn-primary app-button site-profile-dialog__action"
+                                        type="submit"
+                                        disabled>
+                                    <i id="user-profile-submit-icon"
+                                        class="bi bi-check2-circle"
+                                        aria-hidden="true"></i>
+                                    <span>수정</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            
-        </div>
-    </nav>
+        </dialog>
+        <script src="/js/userProfile.js"></script> <!-- 마이페이지 정보 조회와 닉네임 변경·화면 반영 -->
+    </th:block>
 
     <!-- 공통 푸터 섹션 -->
     <footer th:fragment="siteFooter" class="mt-auto bg-white border-top site-footer">

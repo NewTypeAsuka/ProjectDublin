@@ -19,6 +19,10 @@ import lombok.NoArgsConstructor;
 @Entity // 엔티티로 지정
 public class User {
 
+    public static final int NICKNAME_COLUMN_LENGTH = 255;
+    public static final int MIN_NICKNAME_LENGTH = 3;
+    public static final int MAX_NICKNAME_LENGTH = 12;
+
     private static final int ADMIN_ROLE = 1;
     private static final int DEFAULT_ROLE = 2;
 
@@ -36,8 +40,13 @@ public class User {
 
     // 게시글과 댓글에 공개되는 필수 닉네임
     @NotBlank
-    @Size(min = 3, max = 12)
-    @Column(name = "nickname", nullable = false, unique = true, length = 12)
+    @Size(min = MIN_NICKNAME_LENGTH, max = MAX_NICKNAME_LENGTH)
+    @Column(
+            name = "nickname",
+            nullable = false,
+            unique = true,
+            length = NICKNAME_COLUMN_LENGTH
+    )
     private String nickname;
 
     @Column(name = "role", nullable = false)
@@ -54,6 +63,11 @@ public class User {
     public User updateName(String name) {
         this.name = name;
         return this;
+    }
+
+    // 공개 작성자 이름으로 사용하는 닉네임을 변경
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public boolean isAdmin() {

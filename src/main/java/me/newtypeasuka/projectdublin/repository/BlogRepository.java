@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public interface BlogRepository extends JpaRepository<Article, Long> {
 
+    long countByAuthorId(Long authorId); // 마이페이지에 표시할 작성 글 수 조회
+
     @EntityGraph(attributePaths = "author")
     @Query("SELECT article FROM Article article "
             + "ORDER BY article.pinned DESC, article.createdAt DESC, article.id DESC")

@@ -572,7 +572,9 @@
                                 </span>
                                 <span class="article-meta__author">
                                     <span>by</span>
-                                    <span th:text="${article.author}"></span><i
+                                    <span class="user-nickname"
+                                        th:attr="data-user-id=${article.authorId}"
+                                        th:text="${article.author}"></span><i
                                         th:if="${article.authorAdmin}"
                                         class="bi bi-patch-check-fill author-admin-badge"
                                         role="img"

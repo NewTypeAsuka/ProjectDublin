@@ -1,12 +1,10 @@
 package me.newtypeasuka.projectdublin.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import me.newtypeasuka.projectdublin.config.oauth.OAuth2UserCustomService;
-import me.newtypeasuka.projectdublin.config.oauth.OAuth2UserCustomService.NicknameAlreadyExistsException;
+import me.newtypeasuka.projectdublin.dto.UserDto.NicknameRequest;
+import me.newtypeasuka.projectdublin.service.UserService;
+import me.newtypeasuka.projectdublin.service.UserService.NicknameAlreadyExistsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class UserViewController {
 
-    private final OAuth2UserCustomService oAuth2UserCustomService;
+    private final UserService userService;
 
     // Google OAuth 로그인 화면 조회 API
     @GetMapping("/login")
@@ -31,7 +29,7 @@ public class UserViewController {
                 && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken)) { // 로그인했는지 검증
             String email = getAttribute(authentication, "email");
-            return oAuth2UserCustomService.isRegistered(email)
+            return userService.isRegistered(email)
                     ? "redirect:/articles"
                     : "redirect:/signup/nickname";
         }
@@ -43,12 +41,12 @@ public class UserViewController {
     @GetMapping("/signup/nickname")
     public String nicknameSignup(Authentication authentication, Model model) {
         String email = getAttribute(authentication, "email");
-        if (oAuth2UserCustomService.isRegistered(email)) {
+        if (userService.isRegistered(email)) {
             return "redirect:/articles";
         }
 
         if (!model.containsAttribute("nicknameForm")) {
-            model.addAttribute("nicknameForm", new NicknameSignupRequest(""));
+            model.addAttribute("nicknameForm", new NicknameRequest(""));
         }
         model.addAttribute("googleName", getAttribute(authentication, "name"));
         return "nicknameSignup";
@@ -57,19 +55,19 @@ public class UserViewController {
     // 최초 Google 로그인 사용자의 필수 닉네임 등록 API
     @PostMapping("/signup/nickname")
     public String completeNicknameSignup(
-            @Valid @ModelAttribute("nicknameForm") NicknameSignupRequest request,
+            @Valid @ModelAttribute("nicknameForm") NicknameRequest request,
             BindingResult bindingResult,
             Authentication authentication,
             Model model) {
         String email = getAttribute(authentication, "email");
         String name = getAttribute(authentication, "name");
 
-        if (oAuth2UserCustomService.isRegistered(email)) {
+        if (userService.isRegistered(email)) {
             return "redirect:/articles";
         }
 
         if (!bindingResult.hasErrors()
-                && oAuth2UserCustomService.isNicknameTaken(request.nickname())) {
+                && userService.isNicknameTaken(request.nickname())) {
             bindingResult.rejectValue(
                     "nickname",
                     "duplicate",
@@ -83,7 +81,7 @@ public class UserViewController {
         }
 
         try {
-            oAuth2UserCustomService.completeRegistration(
+            userService.completeRegistration(
                     email,
                     name,
                     request.nickname()
@@ -98,7 +96,7 @@ public class UserViewController {
             return "nicknameSignup";
         } catch (DataIntegrityViolationException exception) {
             // 동시 가입 요청으로 고유 제약조건이 충돌한 경우 가입 여부를 다시 확인
-            if (oAuth2UserCustomService.isRegistered(email)) {
+            if (userService.isRegistered(email)) {
                 return "redirect:/articles";
             }
             bindingResult.rejectValue(
@@ -119,18 +117,6 @@ public class UserViewController {
             return oAuth2User.getAttribute(attributeName);
         }
         return null;
-    }
-
-    public record NicknameSignupRequest(
-            @NotBlank(message = "닉네임을 입력해주세요.")
-            @Size(min = 3, max = 12, message = "닉네임은 3자 이상 12자 이하로 입력해주세요.")
-            @Pattern(regexp = "^[^\\r\\n\\t]+$", message = "닉네임에는 줄바꿈을 사용할 수 없습니다.")
-            String nickname
-    ) {
-
-        public NicknameSignupRequest {
-            nickname = nickname == null ? null : nickname.strip();
-        }
     }
 
 }

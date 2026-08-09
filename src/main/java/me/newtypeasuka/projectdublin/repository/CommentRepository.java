@@ -35,6 +35,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     long countByArticleIdAndDeletedAtIsNull(Long articleId);
 
+    long countByCommenterIdAndDeletedAtIsNull(Long commenterId); // 답글을 포함한 사용자의 활성 댓글 수 조회
+
     @Query("SELECT comment.article.id AS articleId, COUNT(comment) AS commentCount "
             + "FROM Comment comment "
             + "WHERE comment.article.id IN :articleIds "
