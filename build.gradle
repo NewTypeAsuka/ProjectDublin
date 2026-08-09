@@ -21,9 +21,11 @@ dependencies {
     implementation('software.amazon.awssdk:s3') // Summernote 이미지 S3 업로드
     implementation('software.amazon.awssdk:url-connection-client') // S3 동기 요청용 경량 HTTP 클라이언트
     implementation('org.springframework.boot:spring-boot-starter-web') // 스프링부트 웹 개발
+    implementation('org.springframework.boot:spring-boot-starter-websocket') // STOMP 기반 실시간 채팅
     implementation('org.springframework.boot:spring-boot-starter-data-jpa') // 스프링부트 JPA
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf') // 타임리프
     implementation('org.springframework.boot:spring-boot-starter-security') // 스프링 시큐리티
+    implementation('org.springframework.security:spring-security-messaging') // WebSocket 메시지 인증과 CSRF 검증
     implementation('org.springframework.boot:spring-boot-starter-validation') // API 요청값 검증
     implementation('org.thymeleaf.extras:thymeleaf-extras-springsecurity6') // 타임리프에서 스프링 시큐리티 사용
     implementation('org.springframework.boot:spring-boot-starter-oauth2-client') // 구글 로그인을 위한 OAuth2 클라이언트

@@ -41,16 +41,16 @@ stock:
   yahoo-base-url: https://query1.finance.yahoo.com
   watchlist: # 종목을 추가하거나 순서를 바꾸려면 Yahoo 티커 기준으로 이 목록만 수정
     - VOO
-    - SGOL
-    - VFS
-    - GOOGL
     - QQQM
     - TLT
     - SHY
     - SGOV
+    - SGOL
+    - GOOGL
     - OXY
     - UNH
     - 8058.T
+    - VFS
   cache-duration: 30m # 동일 시세는 30분 동안 재호출하지 않음
   stale-duration: 24h # 외부 장애 시 24시간 이내의 마지막 정상 시세 사용
   connect-timeout: 3s

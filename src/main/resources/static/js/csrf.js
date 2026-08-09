@@ -1,5 +1,5 @@
 // 동일 출처의 상태 변경 요청에 Spring Security CSRF 토큰을 추가하는 스크립트
-// 사용처: common.html (articleList.html, article.html, newArticle.html, stocks.html, oauthLogin.html, nicknameSignup.html에 공통 적용)
+// 사용처: common.html (articleList.html, article.html, newArticle.html, stocks.html, chat.html, oauthLogin.html, nicknameSignup.html에 공통 적용)
 
 (function () {
     const safeMethods = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);

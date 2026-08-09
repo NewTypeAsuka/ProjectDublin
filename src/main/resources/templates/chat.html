@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
+    <title>채팅 · NewTypeBlog</title>
+    <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
+    <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
+    <style>
+        /* layout: 공개 채팅 도입부와 연결 상태 */
+        .chat-toolbar {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .chat-toolbar__heading {
+            min-width: 0;
+        }
+        .chat-toolbar__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0.75rem;
+            color: rgba(27, 100, 218, 1);
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 0.14em;
+        }
+        .chat-toolbar__title {
+            margin: 0;
+            color: rgba(25, 31, 40, 1);
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            font-weight: 780;
+            letter-spacing: -0.055em;
+            line-height: 1.08;
+        }
+        .chat-toolbar__description {
+            max-width: 34rem;
+            margin: 0.75rem 0 0;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+        .chat-connection {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 2.6rem;
+            padding: 0.55rem 0.9rem;
+            border: 1px solid rgba(15, 23, 42, 0.07);
+            border-radius: 999px;
+            color: rgba(107, 118, 132, 1);
+            background-color: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+            font-size: 0.78rem;
+            font-weight: 650;
+            white-space: nowrap;
+        }
+        .chat-connection__dot {
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 50%;
+            background-color: rgba(139, 149, 161, 1);
+            box-shadow: 0 0 0 0.25rem rgba(139, 149, 161, 0.12);
+        }
+
+        /* interaction: WebSocket 연결 상태별 색상 */
+        .chat-connection.is-connected {
+            color: rgba(0, 125, 87, 1);
+            background-color: rgba(236, 253, 245, 0.92);
+        }
+        .chat-connection.is-connected .chat-connection__dot {
+            background-color: rgba(0, 145, 100, 1);
+            box-shadow: 0 0 0 0.25rem rgba(0, 145, 100, 0.13);
+        }
+        .chat-connection.is-disconnected {
+            color: rgba(185, 28, 28, 1);
+            background-color: rgba(254, 242, 242, 0.94);
+        }
+        .chat-connection.is-disconnected .chat-connection__dot {
+            background-color: rgba(225, 45, 63, 1);
+            box-shadow: 0 0 0 0.25rem rgba(225, 45, 63, 0.12);
+        }
+
+        /* layout: 채팅 메시지와 전송창을 담는 메인 카드 */
+        .chat-panel {
+            overflow: hidden;
+            border: 1px solid rgba(15, 23, 42, 0.07);
+            border-radius: 1.75rem;
+            background-color: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.075);
+        }
+        .chat-panel__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            min-height: 4.2rem;
+            padding: 1rem 1.35rem;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.065);
+            background-color: rgba(255, 255, 255, 0.86);
+        }
+        .chat-panel__identity {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+        .chat-panel__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 2.55rem;
+            height: 2.55rem;
+            border-radius: 0.9rem;
+            color: rgba(49, 130, 246, 1);
+            background-color: rgba(235, 244, 255, 1);
+            font-size: 1rem;
+        }
+        .chat-panel__name {
+            display: block;
+            margin-bottom: 0.1rem;
+            color: rgba(25, 31, 40, 1);
+            font-size: 0.98rem;
+            font-weight: 750;
+        }
+        .chat-panel__guide {
+            display: block;
+            overflow: hidden;
+            color: rgba(139, 149, 161, 1);
+            font-size: 0.72rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .chat-panel__limit {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex: 0 0 auto;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
+
+        /* layout: 이전 이력과 실시간 메시지를 표시하는 스크롤 영역 */
+        .chat-viewport {
+            position: relative;
+            height: min(58vh, 38rem);
+            min-height: 28rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 1rem clamp(0.85rem, 3vw, 1.5rem) 1.4rem;
+            background:
+                linear-gradient(rgba(247, 249, 252, 0.72), rgba(247, 249, 252, 0.72)),
+                radial-gradient(circle at 15% 0%, rgba(235, 244, 255, 0.8), transparent 22rem);
+            scroll-behavior: smooth;
+            overscroll-behavior: contain;
+        }
+        .chat-history {
+            display: flex;
+            justify-content: center;
+            min-height: 2.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .chat-history__button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            min-height: 2.15rem;
+            padding: 0.35rem 0.8rem;
+            border: 1px solid rgba(49, 130, 246, 0.12);
+            border-radius: 999px;
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(255, 255, 255, 0.9);
+            font-size: 0.72rem;
+            font-weight: 650;
+            box-shadow: 0 7px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        /* interaction: 이전 메시지 버튼 상태 */
+        .chat-history__button:hover,
+        .chat-history__button:focus {
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(49, 130, 246, 1);
+        }
+        .chat-history__button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        /* layout: 로딩·빈 채팅·오류 상태 */
+        .chat-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.55rem;
+            min-height: 20rem;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.82rem;
+            text-align: center;
+        }
+        .chat-state__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 1.2rem;
+            color: rgba(49, 130, 246, 1);
+            background-color: rgba(235, 244, 255, 1);
+            font-size: 1.25rem;
+        }
+        .chat-state__title {
+            color: rgba(25, 31, 40, 1);
+            font-size: 0.95rem;
+        }
+
+        /* layout: 다른 사용자와 현재 사용자의 메시지 묶음 */
+        .chat-message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .chat-message {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.55rem;
+            max-width: min(80%, 38rem);
+            animation: chat-message-enter 0.18s ease-out;
+        }
+        .chat-message.is-own {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .chat-message__avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid rgba(15, 23, 42, 0.05);
+            border-radius: 0.75rem;
+            color: rgba(91, 103, 117, 1);
+            background-color: rgba(255, 255, 255, 0.92);
+            font-size: 0.78rem;
+        }
+        .chat-message__main {
+            min-width: 0;
+        }
+        .chat-message__sender {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin: 0 0.4rem 0.3rem;
+            color: rgba(91, 103, 117, 1);
+            font-size: 0.73rem;
+            font-weight: 650;
+        }
+        .chat-message.is-own .chat-message__sender {
+            justify-content: flex-end;
+        }
+        .chat-message__bubble {
+            padding: 0.72rem 0.9rem;
+            border: 1px solid rgba(15, 23, 42, 0.055);
+            border-radius: 0.35rem 1rem 1rem 1rem;
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.045);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+        .chat-message.is-own .chat-message__bubble {
+            border-color: rgba(49, 130, 246, 0.18);
+            border-radius: 1rem 0.35rem 1rem 1rem;
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(49, 130, 246, 1);
+            box-shadow: 0 10px 26px rgba(49, 130, 246, 0.17);
+        }
+        .chat-message__meta {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-height: 1.5rem;
+            margin-top: 0.25rem;
+            padding: 0 0.35rem;
+            color: rgba(139, 149, 161, 1);
+            font-size: 0.66rem;
+        }
+        .chat-message.is-own .chat-message__meta {
+            justify-content: flex-end;
+        }
+        .chat-message__delete {
+            padding: 0.1rem 0.15rem;
+            border: 0;
+            color: rgba(139, 149, 161, 1);
+            background-color: transparent;
+            font-size: 0.68rem;
+            text-decoration: underline;
+            text-underline-offset: 0.15rem;
+        }
+        .chat-message__delete:hover,
+        .chat-message__delete:focus {
+            color: rgba(225, 45, 63, 1);
+        }
+        .chat-message__delete:disabled {
+            opacity: 0.55;
+            cursor: wait;
+        }
+        .chat-admin-badge {
+            color: rgba(29, 155, 240, 1);
+            font-size: 0.72rem;
+        }
+
+        /* layout: 메시지 입력과 글자 수 및 전송 버튼 */
+        .chat-composer {
+            padding: 1rem 1.15rem 1.1rem;
+            border-top: 1px solid rgba(15, 23, 42, 0.065);
+            background-color: rgba(255, 255, 255, 0.96);
+        }
+        .chat-composer__row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: end;
+            gap: 0.65rem;
+        }
+        .chat-composer__field {
+            position: relative;
+            min-width: 0;
+        }
+        .chat-composer__input {
+            display: block;
+            width: 100%;
+            min-height: 3rem;
+            max-height: 8rem;
+            padding: 0.72rem 4rem 0.72rem 0.9rem;
+            overflow-y: auto;
+            border: 1px solid rgba(15, 23, 42, 0.11);
+            border-radius: 1rem;
+            color: rgba(25, 31, 40, 1);
+            background-color: rgba(247, 249, 252, 0.9);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: none;
+        }
+        .chat-composer__counter {
+            position: absolute;
+            right: 0.85rem;
+            bottom: 0.78rem;
+            color: rgba(139, 149, 161, 1);
+            font-size: 0.68rem;
+            pointer-events: none;
+        }
+        .chat-composer__submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            min-width: 5.2rem;
+            min-height: 3rem;
+            padding: 0.65rem 1rem;
+            border: 1px solid rgba(49, 130, 246, 1);
+            border-radius: 1rem;
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(49, 130, 246, 1);
+            box-shadow: 0 9px 22px rgba(49, 130, 246, 0.2);
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+        .chat-composer__message {
+            min-height: 1.2rem;
+            margin: 0.45rem 0 0;
+            color: rgba(107, 118, 132, 1);
+            font-size: 0.72rem;
+        }
+
+        /* interaction: 메시지 입력과 전송 버튼 상태 */
+        .chat-composer__input:focus {
+            border-color: rgba(49, 130, 246, 0.7);
+            outline: 0;
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 0.2rem rgba(49, 130, 246, 0.13);
+        }
+        .chat-composer__submit:hover,
+        .chat-composer__submit:focus {
+            border-color: rgba(27, 100, 218, 1);
+            background-color: rgba(27, 100, 218, 1);
+            transform: translateY(-1px);
+        }
+        .chat-composer__submit:disabled,
+        .chat-composer__input:disabled {
+            opacity: 0.58;
+            cursor: not-allowed;
+        }
+        .chat-composer__message.is-error {
+            color: rgba(225, 45, 63, 1);
+        }
+        .chat-composer__message.is-success {
+            color: rgba(0, 145, 100, 1);
+        }
+
+        /* 접근성: 채팅 동작 요소의 키보드 포커스 표시 */
+        .chat-history__button:focus-visible,
+        .chat-message__delete:focus-visible,
+        .chat-composer__input:focus-visible,
+        .chat-composer__submit:focus-visible {
+            outline: 3px solid rgba(49, 130, 246, 0.28);
+            outline-offset: 2px;
+        }
+
+        /* animation: 새 메시지의 짧은 등장 효과 */
+        @keyframes chat-message-enter {
+            from {
+                opacity: 0;
+                transform: translateY(0.35rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 반응형layout: 태블릿 이하에서 채팅 도입부를 세로 정렬 */
+        @media (max-width: 767.98px) {
+            .chat-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 1rem;
+                margin-bottom: 1.2rem;
+            }
+            .chat-viewport {
+                height: min(60vh, 35rem);
+            }
+        }
+
+        /* 반응형layout: 모바일 화면에서 메시지 카드와 전송창 밀도 조정 */
+        @media (max-width: 575.98px) {
+            .chat-toolbar__description {
+                font-size: 0.84rem;
+            }
+            .chat-panel {
+                border-radius: 1.3rem;
+            }
+            .chat-panel__header {
+                min-height: 3.8rem;
+                padding: 0.8rem 0.9rem;
+            }
+            .chat-panel__icon {
+                width: 2.25rem;
+                height: 2.25rem;
+            }
+            .chat-panel__limit span {
+                display: none;
+            }
+            .chat-viewport {
+                height: min(58vh, 32rem);
+                min-height: 23rem;
+                padding-right: 0.65rem;
+                padding-left: 0.65rem;
+            }
+            .chat-message {
+                max-width: 88%;
+            }
+            .chat-message__avatar {
+                width: 1.8rem;
+                height: 1.8rem;
+            }
+            .chat-message__bubble {
+                padding: 0.65rem 0.78rem;
+                font-size: 0.86rem;
+            }
+            .chat-composer {
+                padding: 0.75rem;
+            }
+            .chat-composer__row {
+                gap: 0.45rem;
+            }
+            .chat-composer__submit {
+                min-width: 3rem;
+                width: 3rem;
+                padding: 0;
+            }
+            .chat-composer__submit-label {
+                display: none;
+            }
+        }
+
+        /* 접근성: 동작 줄이기 설정에서 메시지 애니메이션 제거 */
+        @media (prefers-reduced-motion: reduce) {
+            .chat-message {
+                animation: none;
+            }
+            .chat-viewport {
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
+    <!-- 공통 헤더 섹션 -->
+    <th:block th:replace="~{common :: siteHeader}"></th:block>
+
+    <!-- 공통 네비게이션 섹션 -->
+    <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
+
+    <main id="main-content"
+        class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
+
+                <!-- 공개 채팅 상단 섹션 -->
+                <section class="chat-toolbar" aria-labelledby="chat-page-title">
+                    <div class="chat-toolbar__heading">
+                        <span class="chat-toolbar__eyebrow">
+                            <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+                            CHAT
+                        </span>
+                        <h2 id="chat-page-title" class="chat-toolbar__title">채팅</h2>
+                        <p class="chat-toolbar__description">
+                            NewTypeBlog 사용자들과<br>
+                            하나의 공개 채팅방에서 실시간으로 대화합니다
+                        </p>
+                    </div>
+                    <div id="chat-connection"
+                        class="chat-connection"
+                        role="status"
+                        aria-live="polite">
+                        <span class="chat-connection__dot" aria-hidden="true"></span>
+                        <span id="chat-connection-label">연결 준비 중</span>
+                    </div>
+                </section>
+
+                <!-- 공개 채팅방 섹션 -->
+                <section class="chat-panel" aria-labelledby="chat-room-name">
+                    <!-- 채팅방 정보 영역 -->
+                    <header class="chat-panel__header">
+                        <div class="chat-panel__identity">
+                            <span class="chat-panel__icon" aria-hidden="true">
+                                <i class="bi bi-people-fill"></i>
+                            </span>
+                            <div class="tw:min-w-0">
+                                <strong id="chat-room-name" class="chat-panel__name">공개 채팅방</strong>
+                                <span class="chat-panel__guide">모든 로그인 사용자가 함께 대화할 수 있습니다</span>
+                            </div>
+                        </div>
+                        <span class="chat-panel__limit">
+                            <i class="bi bi-chat-text" aria-hidden="true"></i>
+                            <span>메시지</span> 300자
+                        </span>
+                    </header>
+
+                    <!-- 채팅 메시지 이력 영역 -->
+                    <div id="chat-viewport" class="chat-viewport">
+                        <div id="chat-history" class="chat-history" hidden>
+                            <button id="chat-history-button"
+                                class="chat-history__button"
+                                type="button">
+                                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                                이전 메시지
+                            </button>
+                        </div>
+
+                        <div id="chat-loading" class="chat-state" role="status">
+                            <span class="chat-state__icon" aria-hidden="true">
+                                <span class="spinner-border spinner-border-sm" role="presentation"></span>
+                            </span>
+                            <strong class="chat-state__title">대화를 불러오는 중입니다</strong>
+                            <span>잠시만 기다려주세요</span>
+                        </div>
+
+                        <div id="chat-empty" class="chat-state" hidden>
+                            <span class="chat-state__icon" aria-hidden="true">
+                                <i class="bi bi-chat-heart"></i>
+                            </span>
+                            <strong class="chat-state__title">아직 작성된 메시지가 없습니다</strong>
+                            <span>첫 번째 대화를 시작해보세요</span>
+                        </div>
+
+                        <div id="chat-load-error" class="chat-state" role="alert" hidden>
+                            <span class="chat-state__icon" aria-hidden="true">
+                                <i class="bi bi-cloud-slash"></i>
+                            </span>
+                            <strong class="chat-state__title">대화를 불러오지 못했습니다</strong>
+                            <button id="chat-retry-button"
+                                class="btn btn-sm chat-history__button"
+                                type="button">
+                                <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                                다시 시도
+                            </button>
+                        </div>
+
+                        <ol id="chat-message-list"
+                            class="chat-message-list"
+                            aria-live="polite"
+                            aria-relevant="additions removals"></ol>
+                    </div>
+
+                    <!-- 채팅 메시지 작성 영역 -->
+                    <form id="chat-form" class="chat-composer" novalidate>
+                        <div class="chat-composer__row">
+                            <div class="chat-composer__field">
+                                <label class="sr-only" for="chat-message-input">채팅 메시지</label>
+                                <textarea id="chat-message-input"
+                                    class="chat-composer__input"
+                                    rows="1"
+                                    maxlength="300"
+                                    placeholder="메시지를 입력해주세요"
+                                    enterkeyhint="send"
+                                    aria-describedby="chat-message-counter chat-form-message"
+                                    disabled></textarea>
+                                <span id="chat-message-counter"
+                                    class="chat-composer__counter"
+                                    aria-hidden="true">0/300</span>
+                            </div>
+                            <button id="chat-submit-button"
+                                class="chat-composer__submit"
+                                type="submit"
+                                disabled>
+                                <i id="chat-submit-icon" class="bi bi-send-fill" aria-hidden="true"></i>
+                                <span class="chat-composer__submit-label">전송</span>
+                            </button>
+                        </div>
+                        <p id="chat-form-message"
+                            class="chat-composer__message"
+                            role="status"
+                            aria-live="polite"></p>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 공통 푸터 섹션 -->
+    <th:block th:replace="~{common :: siteFooter}"></th:block>
+
+    <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
+    <!-- STOMP WebSocket 연결과 공개 채팅 동작 -->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.2.0/bundles/stomp.umd.min.js"></script> <!-- 브라우저의 STOMP WebSocket 통신 지원 -->
+    <script src="/js/chat.js"></script> <!-- 채팅 이력 조회·실시간 송수신·메시지 삭제 -->
+</body>
+</html>

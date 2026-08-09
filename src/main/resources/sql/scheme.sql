@@ -107,10 +107,27 @@ create table comments (
     index idx_comments_parent_id (parent_id)
 );
 
+create table chat_messages (
+    id bigint unsigned not null auto_increment,
+    sender_id bigint unsigned not null,
+    client_message_id char(36) character set ascii collate ascii_bin not null,
+    content varchar(300) not null,
+    created_at datetime not null default current_timestamp,
+    primary key (id),
+    constraint uq_chat_messages_sender_client
+            unique (sender_id, client_message_id),
+    constraint fk_chat_messages_sender_id
+            foreign key (sender_id) references users (id)
+            on update restrict  -- 채팅 메시지가 있으면 해당 작성자의 id 수정 불가능
+            on delete restrict, -- 채팅 메시지가 있으면 해당 작성자 삭제 불가능
+    index idx_chat_messages_sender_id (sender_id)
+);
+
 select * from users;
 select * from articles;
 select * from article_likes;
 select * from article_images;
 select * from comments;
+select * from chat_messages;
 
 update users set role = 1 where email = 'sangzoon0102@gmail.com' and name = '상준';

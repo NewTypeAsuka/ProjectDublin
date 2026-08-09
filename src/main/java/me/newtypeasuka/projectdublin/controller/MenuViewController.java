@@ -14,4 +14,10 @@ public class MenuViewController {
         return "stocks";
     }
 
+    // 하나의 공개 채팅방에서 실시간 대화를 제공하는 채팅 화면 조회
+    @GetMapping("/menu/chat")
+    public String getChat() {
+        return "chat";
+    }
+
 }
