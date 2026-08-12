@@ -180,7 +180,13 @@ class UserApiControllerTest {
         assertThat(profileButton).isNotNull();
         assertThat(profileButton.attr("aria-controls")).isEqualTo("user-profile-dialog");
         assertThat(dialog).isNotNull();
+        assertThat(dialog.select("#user-profile-description")).isEmpty();
+        assertThat(dialog.select(".site-profile-dialog__avatar")).isEmpty();
         assertThat(dialog.select("#user-profile-nickname-form")).hasSize(1);
+        assertThat(dialog.selectFirst("#user-profile-cancel i").classNames())
+                .containsExactly("bi", "bi-x-lg");
+        assertThat(dialog.selectFirst("#user-profile-submit-icon").classNames())
+                .containsExactly("bi", "bi-check2");
         assertThat(nickname).isNotNull();
         assertThat(nickname.text()).isEqualTo(member.getNickname());
     }

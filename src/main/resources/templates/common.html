@@ -405,16 +405,10 @@
             letter-spacing: 0.14em;
         }
         .site-profile-dialog__title {
-            margin-bottom: 0.35rem;
+            margin: 0;
             font-size: 1.4rem;
             font-weight: 750;
             letter-spacing: -0.035em;
-        }
-        .site-profile-dialog__description {
-            margin: 0;
-            color: var(--project-muted);
-            font-size: 0.88rem;
-            line-height: 1.55;
         }
         .site-profile-dialog__close {
             display: inline-flex;
@@ -445,24 +439,9 @@
             font-size: 1.6rem;
         }
         .site-profile-dialog__identity {
-            display: grid;
-            grid-template-columns: max-content minmax(0, 1fr);
-            align-items: center;
-            gap: 0.85rem;
             padding: 1rem;
             border-radius: 1.15rem;
             background-color: var(--project-surface-soft);
-        }
-        .site-profile-dialog__avatar {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 2.85rem;
-            height: 2.85rem;
-            border-radius: 1rem;
-            color: rgba(255, 255, 255, 1);
-            background-color: var(--project-brand);
-            box-shadow: 0 8px 20px rgba(49, 130, 246, 0.22);
         }
         .site-profile-dialog__nickname {
             display: block;
@@ -801,18 +780,13 @@
         <!-- 마이페이지 모달 영역 -->
         <dialog id="user-profile-dialog"
                 class="site-profile-dialog"
-                aria-labelledby="user-profile-title"
-                aria-describedby="user-profile-description">
+                aria-labelledby="user-profile-title">
             <div class="site-profile-dialog__surface">
                 <!-- 마이페이지 모달 헤더 영역 -->
                 <header class="site-profile-dialog__header">
                     <div>
                         <p class="site-profile-dialog__eyebrow">MY PAGE</p>
                         <h2 id="user-profile-title" class="site-profile-dialog__title">마이페이지</h2>
-                        <p id="user-profile-description"
-                            class="site-profile-dialog__description">
-                            내 활동을 확인하고 공개 닉네임을 변경할 수 있습니다
-                        </p>
                     </div>
                     <button id="user-profile-close"
                             class="site-profile-dialog__close"
@@ -844,15 +818,10 @@
                     </div>
                     <div id="user-profile-content" class="d-none">
                         <div class="site-profile-dialog__identity">
-                            <span class="site-profile-dialog__avatar" aria-hidden="true">
-                                <i class="bi bi-person-fill"></i>
-                            </span>
-                            <div class="tw:min-w-0">
-                                <strong id="user-profile-current-nickname"
-                                    class="site-profile-dialog__nickname"></strong>
-                                <span id="user-profile-email"
-                                    class="site-profile-dialog__email"></span>
-                            </div>
+                            <strong id="user-profile-current-nickname"
+                                class="site-profile-dialog__nickname"></strong>
+                            <span id="user-profile-email"
+                                class="site-profile-dialog__email"></span>
                         </div>
 
                         <!-- 사용자 활동 요약 영역 -->
@@ -898,7 +867,7 @@
                                 <button id="user-profile-cancel"
                                         class="btn btn-outline-secondary app-button site-profile-dialog__action"
                                         type="button">
-                                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                                    <i class="bi bi-x-lg" aria-hidden="true"></i>
                                     <span>취소</span>
                                 </button>
                                 <button id="user-profile-submit"
@@ -906,7 +875,7 @@
                                         type="submit"
                                         disabled>
                                     <i id="user-profile-submit-icon"
-                                        class="bi bi-check2-circle"
+                                        class="bi bi-check2"
                                         aria-hidden="true"></i>
                                     <span>수정</span>
                                 </button>

@@ -116,8 +116,8 @@
             const responseBody = await readJson(response);
             if (!response.ok) {
                 const fallbackMessage = response.status === 409
-                        ? '이미 사용 중인 닉네임입니다.'
-                        : '닉네임을 확인해주세요.';
+                        ? '이미 사용 중인 닉네임입니다'
+                        : '닉네임을 확인해주세요';
                 serverInvalid = true;
                 showMessage(responseBody.message || fallbackMessage, 'error');
                 return;
@@ -131,9 +131,9 @@
             nicknameInput.value = responseBody.nickname;
             updateVisibleNicknames(responseBody.userId, responseBody.nickname);
             updateNicknameState();
-            showMessage('닉네임을 변경했습니다.', 'success');
+            showMessage('닉네임을 변경했습니다', 'success');
         } catch (error) {
-            showMessage('닉네임을 변경하지 못했습니다. 잠시 후 다시 시도해주세요.', 'error');
+            showMessage('닉네임을 변경하지 못했습니다. 잠시 후 다시 시도해주세요', 'error');
         } finally {
             setSubmitting(false);
         }
@@ -176,7 +176,7 @@
             if (requestSequence !== loadSequence) {
                 return;
             }
-            showLoadError('내 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+            showLoadError('내 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요');
         }
     }
 
