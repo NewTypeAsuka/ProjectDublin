@@ -1,10 +1,10 @@
-// 관심 종목 조회와 티커 검색 및 일별 주가 그래프 표시
+// 관심 종목 조회와 전체 시장 티커 검색 및 일별 주가 그래프 표시
 // 사용처: stocks.html
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('stock-search-form');
-    const marketSelect = document.getElementById('stock-market-select');
     const searchInput = document.getElementById('stock-search-input');
+    const searchToggle = searchForm?.querySelector('.stock-search__toggle');
     const resetButton = document.getElementById('stock-search-reset');
     const retryButton = document.getElementById('stock-retry-button');
     const list = document.getElementById('stock-list');
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewLabel = document.getElementById('stock-view-label');
     const stockCount = document.getElementById('stock-count');
 
-    if (!searchForm || !marketSelect || !searchInput || !resetButton
+    if (!searchForm || !searchInput || !searchToggle || !resetButton
             || !retryButton || !list || !loading || !errorState
             || !errorMessage || !emptyState || !status || !viewLabel
             || !stockCount) {
@@ -32,6 +32,26 @@ document.addEventListener('DOMContentLoaded', () => {
         query: ''
     };
     let requestController = null;
+
+    // 검색창의 표시 상태와 키보드 접근성을 게시글 검색창과 동일하게 관리합니다.
+    function setSearchOpen(open, focusInput) {
+        searchForm.classList.toggle('is-open', open);
+        searchToggle.setAttribute('aria-expanded', String(open));
+        searchToggle.setAttribute('aria-label', open ? '티커 검색' : '검색창 열기');
+        searchToggle.title = open ? '티커 검색' : '검색창 열기';
+        searchInput.tabIndex = open ? 0 : -1;
+        searchInput.setAttribute('aria-hidden', String(!open));
+
+        if (open && focusInput) {
+            window.requestAnimationFrame(() => searchInput.focus());
+        }
+    }
+
+    function setSearchMode(request) {
+        const searching = request.mode === 'search';
+        resetButton.hidden = !searching;
+        searchForm.classList.toggle('has-search-results', searching);
+    }
 
     function createElement(tagName, className, text) {
         const element = document.createElement(tagName);
@@ -338,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
         viewLabel.textContent = request.mode === 'search'
             ? `검색: ${request.query}`
             : '관심 종목';
-        resetButton.hidden = request.mode !== 'search';
+        setSearchMode(request);
 
         if (stocks.length === 0) {
             emptyState.hidden = false;
@@ -379,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         viewLabel.textContent = request.mode === 'search'
             ? `검색: ${request.query}`
             : '관심 종목';
-        resetButton.hidden = request.mode !== 'search';
+        setSearchMode(request);
 
         try {
             const response = await fetch(request.endpoint, {
@@ -413,6 +433,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchForm.addEventListener('submit', event => {
         event.preventDefault();
+        if (searchToggle.getAttribute('aria-expanded') !== 'true') {
+            setSearchOpen(true, true);
+            return;
+        }
+
         const query = searchInput.value.trim();
         if (!query || query.length > 15 || !tickerPattern.test(query)) {
             setStatus(
@@ -425,10 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const normalizedQuery = query.toUpperCase();
         searchInput.value = normalizedQuery;
-        const parameters = new URLSearchParams({
-            query: normalizedQuery,
-            market: marketSelect.value
-        });
+        const parameters = new URLSearchParams({query: normalizedQuery});
         loadCollection({
             endpoint: `/api/stocks/search?${parameters.toString()}`,
             mode: 'search',
@@ -444,7 +466,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resetButton.addEventListener('click', () => {
         searchInput.value = '';
-        marketSelect.value = 'ALL';
         const watchlistRequest = {
             endpoint: '/api/stocks',
             mode: 'watchlist',
@@ -456,9 +477,29 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             loadCollection(watchlistRequest);
         }
+        setSearchOpen(false, false);
+        searchToggle.focus();
+    });
+
+    document.addEventListener('click', event => {
+        if (searchToggle.getAttribute('aria-expanded') === 'true'
+                && !searchForm.contains(event.target)) {
+            setSearchOpen(false, false);
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape'
+                || searchToggle.getAttribute('aria-expanded') !== 'true') {
+            return;
+        }
+
+        setSearchOpen(false, false);
+        searchToggle.focus();
     });
 
     retryButton.addEventListener('click', () => loadCollection(activeRequest));
 
+    setSearchOpen(false, false);
     loadCollection(activeRequest);
 });

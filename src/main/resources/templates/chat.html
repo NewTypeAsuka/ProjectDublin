@@ -7,15 +7,17 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
-        /* layout: 공개 채팅 도입부와 연결 상태 */
+        /* layout: 공개 채팅 상단 제목과 연결 상태 */
         .chat-toolbar {
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
             gap: 1.5rem;
+            flex-wrap: wrap;
             margin-bottom: 1.5rem;
         }
         .chat-toolbar__heading {
+            width: 100%;
             min-width: 0;
         }
         .chat-toolbar__eyebrow {
@@ -36,12 +38,13 @@
             letter-spacing: -0.055em;
             line-height: 1.08;
         }
-        .chat-toolbar__description {
-            max-width: 34rem;
-            margin: 0.75rem 0 0;
-            color: rgba(107, 118, 132, 1);
-            font-size: 0.92rem;
-            line-height: 1.65;
+        .chat-toolbar__title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            min-width: 0;
+            padding-bottom: 0.7rem;
         }
         .chat-connection {
             display: inline-flex;
@@ -431,12 +434,9 @@
             }
         }
 
-        /* 반응형layout: 태블릿 이하에서 채팅 도입부를 세로 정렬 */
+        /* 반응형layout: 태블릿 이하에서 채팅 높이 조정 */
         @media (max-width: 767.98px) {
             .chat-toolbar {
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 1rem;
                 margin-bottom: 1.2rem;
             }
             .chat-viewport {
@@ -446,8 +446,19 @@
 
         /* 반응형layout: 모바일 화면에서 메시지 카드와 전송창 밀도 조정 */
         @media (max-width: 575.98px) {
-            .chat-toolbar__description {
-                font-size: 0.84rem;
+            .chat-toolbar__title-row {
+                gap: 0.35rem;
+                padding-bottom: 0;
+            }
+            .chat-connection {
+                gap: 0.4rem;
+                min-height: 2.5rem;
+                padding: 0.5rem 0.7rem;
+                font-size: 0.72rem;
+            }
+            .chat-connection__dot {
+                width: 0.45rem;
+                height: 0.45rem;
             }
             .chat-panel {
                 border-radius: 1.3rem;
@@ -526,18 +537,16 @@
                             <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
                             CHAT
                         </span>
-                        <h2 id="chat-page-title" class="chat-toolbar__title">채팅</h2>
-                        <p class="chat-toolbar__description">
-                            NewTypeBlog 사용자들과<br>
-                            하나의 공개 채팅방에서 실시간으로 대화합니다
-                        </p>
-                    </div>
-                    <div id="chat-connection"
-                        class="chat-connection"
-                        role="status"
-                        aria-live="polite">
-                        <span class="chat-connection__dot" aria-hidden="true"></span>
-                        <span id="chat-connection-label">연결 준비 중</span>
+                        <div class="chat-toolbar__title-row">
+                            <h2 id="chat-page-title" class="chat-toolbar__title">채팅</h2>
+                            <div id="chat-connection"
+                                class="chat-connection"
+                                role="status"
+                                aria-live="polite">
+                                <span class="chat-connection__dot" aria-hidden="true"></span>
+                                <span id="chat-connection-label">연결 준비 중</span>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

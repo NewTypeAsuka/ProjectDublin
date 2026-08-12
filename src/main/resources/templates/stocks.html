@@ -7,15 +7,17 @@
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
-        /* layout: 주식 목록 도입부와 상단 제목 */
+        /* layout: 주식 목록 상단 제목과 검색 */
         .stock-toolbar {
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
             gap: 1.5rem;
+            flex-wrap: wrap;
             margin-bottom: 2rem;
         }
         .stock-toolbar__heading {
+            width: 100%;
             min-width: 0;
         }
         .stock-toolbar__eyebrow {
@@ -37,94 +39,98 @@
             letter-spacing: -0.055em;
             line-height: 1.08;
         }
-        .stock-toolbar__description {
-            max-width: 34rem;
-            margin: 0.75rem 0 0;
-            color: rgba(107, 118, 132, 1);
-            font-size: 0.92rem;
-            line-height: 1.65;
+        .stock-toolbar__title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            min-width: 0;
+            padding-bottom: 0.7rem;
         }
 
-        /* layout: 주식 티커 검색 입력창과 시장 선택 */
+        /* layout: 주식 티커 검색 입력창과 아이콘 버튼 */
         .stock-search {
-            display: grid;
-            grid-template-columns: auto minmax(8rem, 13rem) auto auto;
+            display: flex;
             align-items: center;
+            justify-content: flex-end;
             gap: 0.45rem;
             flex: 0 1 auto;
-        }
-        .stock-search__market,
-        .stock-search__input {
-            height: 2.75rem;
-            border: 1px solid rgba(49, 130, 246, 0.18);
-            color: rgba(51, 61, 75, 1);
-            background-color: rgba(255, 255, 255, 0.94);
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-        }
-        .stock-search__market {
-            min-width: 5.8rem;
-            padding: 0.45rem 1.8rem 0.45rem 0.8rem;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            font-weight: 650;
+            min-width: 2.75rem;
         }
         .stock-search__input {
+            box-sizing: border-box;
+            width: 0;
             min-width: 0;
-            padding: 0.55rem 1rem;
+            height: 2.75rem;
+            padding: 0;
+            border: 1px solid transparent;
             border-radius: 999px;
+            opacity: 0;
+            color: rgba(51, 61, 75, 1);
+            background-color: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            pointer-events: none;
             text-transform: uppercase;
+            transition: width 0.22s ease, padding 0.22s ease,
+                border-color 0.18s ease, opacity 0.16s ease;
+        }
+        .stock-search.is-open .stock-search__input {
+            width: clamp(10rem, 24vw, 17rem);
+            padding: 0.55rem 1rem;
+            border-color: rgba(49, 130, 246, 0.2);
+            opacity: 1;
+            pointer-events: auto;
         }
         .stock-search__input::placeholder {
             color: rgba(139, 149, 161, 1);
             text-transform: none;
         }
-        .stock-search__submit,
+        .stock-search__toggle,
         .stock-search__reset {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            flex: 0 0 2.75rem;
             width: 2.75rem;
             height: 2.75rem;
             padding: 0;
-            border: 1px solid rgba(49, 130, 246, 0.12);
+            border: 1px solid transparent;
             border-radius: 999px;
             color: rgba(49, 130, 246, 1);
-            background-color: rgba(235, 244, 255, 0.92);
-            transition: color 0.18s ease, background-color 0.18s ease,
-                transform 0.18s ease;
+            background-color: transparent;
+            font-size: 1.05rem;
+            transition: border-color 0.18s ease, color 0.18s ease,
+                background-color 0.18s ease, transform 0.18s ease;
         }
         .stock-search__reset {
-            gap: 0.35rem;
             color: rgba(107, 118, 132, 1);
-            background-color: rgba(242, 244, 246, 0.94);
-        }
-        .stock-search__reset-label {
-            display: none;
         }
         .stock-search__reset[hidden] {
             display: none;
         }
 
-        /* interaction: 주식 검색 컨트롤의 hover·focus 상태 */
-        .stock-search__submit:hover,
-        .stock-search__submit:focus {
-            color: rgba(255, 255, 255, 1);
-            background-color: rgba(49, 130, 246, 1);
+        /* interaction: 주식 검색 컨트롤의 hover·focus·열림 상태 */
+        .stock-search__toggle:hover,
+        .stock-search__toggle:focus,
+        .stock-search.is-open .stock-search__toggle {
+            border-color: rgba(49, 130, 246, 0.14);
+            color: rgba(27, 100, 218, 1);
+            background-color: rgba(235, 244, 255, 1);
         }
         .stock-search__reset:hover,
         .stock-search__reset:focus {
+            border-color: rgba(15, 23, 42, 0.08);
             color: rgba(51, 61, 75, 1);
-            background-color: rgba(226, 232, 240, 1);
+            background-color: rgba(242, 244, 246, 1);
         }
-        .stock-search__submit:active,
+        .stock-search__toggle:active,
         .stock-search__reset:active {
             transform: scale(0.96);
         }
 
         /* 접근성: 주식 검색 컨트롤의 키보드 포커스 표시 */
-        .stock-search__market:focus-visible,
         .stock-search__input:focus-visible,
-        .stock-search__submit:focus-visible,
+        .stock-search__toggle:focus-visible,
         .stock-search__reset:focus-visible {
             outline: 3px solid rgba(49, 130, 246, 0.25);
             outline-offset: 3px;
@@ -149,6 +155,15 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
+        }
+        .stock-summary__source {
+            min-width: 0;
+            justify-content: flex-end;
+            line-height: 1.5;
+            text-align: right;
+        }
+        .stock-summary__source i {
+            flex: 0 0 auto;
         }
         .stock-summary__count {
             color: rgba(27, 100, 218, 1);
@@ -405,16 +420,10 @@
             text-align: center;
         }
 
-        /* 반응형layout: 태블릿 이하에서 검색창과 주식 카드를 세로 정렬 */
+        /* 반응형layout: 태블릿 이하에서 주식 카드를 세로 정렬 */
         @media (max-width: 767.98px) {
             .stock-toolbar {
-                align-items: stretch;
-                flex-direction: column;
                 margin-bottom: 1.35rem;
-            }
-            .stock-search {
-                grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.45fr) auto auto;
-                width: 100%;
             }
             .stock-card__body {
                 grid-template-columns: minmax(0, 1fr);
@@ -424,36 +433,36 @@
 
         /* 반응형layout: 모바일 화면에서 검색창과 메타데이터 밀도 조정 */
         @media (max-width: 575.98px) {
-            .stock-toolbar__description {
-                font-size: 0.84rem;
+            .stock-toolbar__title-row {
+                gap: 0.35rem;
+                padding-bottom: 0;
             }
             .stock-search {
-                grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr) auto;
+                gap: 0.25rem;
+                min-width: 2.5rem;
             }
+            .stock-search__toggle,
             .stock-search__reset {
-                grid-column: 1 / -1;
-                width: 100%;
-                height: 2.4rem;
+                flex-basis: 2.5rem;
+                width: 2.5rem;
+                height: 2.5rem;
             }
-            .stock-search__market {
-                min-width: 0;
-                padding-right: 1.35rem;
-                padding-left: 0.65rem;
-                font-size: 0.75rem;
-            }
-            .stock-search__input {
+            .stock-search.is-open .stock-search__input {
+                width: min(12rem, calc(100vw - 11rem));
                 padding-right: 0.7rem;
                 padding-left: 0.7rem;
             }
-            .stock-search__reset-label {
-                display: inline;
-                font-size: 0.78rem;
-                font-weight: 650;
+            .stock-search.is-open.has-search-results .stock-search__input {
+                width: min(8rem, calc(100vw - 14rem));
             }
             .stock-summary {
-                align-items: flex-start;
-                flex-direction: column;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
                 gap: 0.45rem;
+            }
+            .stock-summary__source {
+                justify-content: flex-start;
+                text-align: left;
             }
             .stock-card__header {
                 align-items: flex-start;
@@ -476,7 +485,8 @@
         /* 접근성: 동작 줄이기 설정에서 카드 애니메이션 제거 */
         @media (prefers-reduced-motion: reduce) {
             .stock-card,
-            .stock-search__submit,
+            .stock-search__input,
+            .stock-search__toggle,
             .stock-search__reset {
                 transition: none;
             }
@@ -502,61 +512,47 @@
                             <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
                             STOCKS
                         </span>
-                        <h2 id="stock-page-title" class="stock-toolbar__title">주식</h2>
-                        <p class="stock-toolbar__description">
-                            최근 가격과 지난 영업일 대비 주가 변동,<br>
-                            최근 1개월의 일별 흐름을 확인합니다
-                        </p>
+                        <div class="stock-toolbar__title-row">
+                            <h2 id="stock-page-title" class="stock-toolbar__title">주식</h2>
+                            <form id="stock-search-form"
+                                class="stock-search"
+                                role="search"
+                                novalidate>
+                                <label class="sr-only" for="stock-search-input">주식 티커 검색</label>
+                                <input id="stock-search-input"
+                                    class="stock-search__input"
+                                    type="search"
+                                    name="query"
+                                    placeholder="티커 검색"
+                                    maxlength="15"
+                                    pattern="[A-Za-z0-9.\-]+"
+                                    autocomplete="off"
+                                    autocapitalize="characters"
+                                    spellcheck="false"
+                                    enterkeyhint="search"
+                                    tabindex="-1"
+                                    aria-hidden="true">
+
+                                <button class="stock-search__toggle"
+                                    type="submit"
+                                    aria-controls="stock-search-input"
+                                    aria-expanded="false"
+                                    aria-label="검색창 열기"
+                                    title="검색창 열기">
+                                    <i class="bi bi-search" aria-hidden="true"></i>
+                                </button>
+
+                                <button id="stock-search-reset"
+                                    class="stock-search__reset"
+                                    type="button"
+                                    aria-label="관심 종목으로 돌아가기"
+                                    title="관심 종목으로 돌아가기"
+                                    hidden>
+                                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
-
-                    <form id="stock-search-form"
-                        class="stock-search"
-                        role="search"
-                        novalidate>
-                        <label class="sr-only" for="stock-market-select">주식 시장</label>
-                        <select id="stock-market-select"
-                            class="stock-search__market"
-                            name="market"
-                            title="검색할 주식 시장">
-                            <option value="ALL">전체 시장</option>
-                            <option value="US">미국</option>
-                            <option value="KR">한국</option>
-                            <option value="JP">일본</option>
-                            <option value="HK">홍콩</option>
-                            <option value="CN">중국</option>
-                        </select>
-
-                        <label class="sr-only" for="stock-search-input">주식 티커 검색</label>
-                        <input id="stock-search-input"
-                            class="stock-search__input"
-                            type="search"
-                            name="query"
-                            placeholder="티커 검색"
-                            maxlength="15"
-                            pattern="[A-Za-z0-9.\-]+"
-                            autocomplete="off"
-                            autocapitalize="characters"
-                            spellcheck="false"
-                            enterkeyhint="search">
-
-                        <button class="stock-search__submit"
-                            type="submit"
-                            aria-label="티커 검색"
-                            title="티커 검색">
-                            <i class="bi bi-search" aria-hidden="true"></i>
-                        </button>
-
-                        <button id="stock-search-reset"
-                            class="stock-search__reset"
-                            type="button"
-                            aria-label="관심 종목으로 돌아가기"
-                            title="관심 종목으로 돌아가기"
-                            hidden>
-                            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-                            <span class="stock-search__reset-label">관심 종목</span>
-                            <span class="sr-only">목록으로 돌아가기</span>
-                        </button>
-                    </form>
                 </section>
 
                 <!-- 현재 주식 목록과 갱신 기준 안내 섹션 -->
@@ -568,7 +564,7 @@
                     </span>
                     <span class="stock-summary__source">
                         <i class="bi bi-clock-history" aria-hidden="true"></i>
-                        Yahoo Finance 기준 최근 시세 · 30분 캐시
+                        <span>미국·한국·일본·홍콩·중국 주식 시장 지원 · 30분 캐시</span>
                     </span>
                 </section>
 
@@ -622,7 +618,7 @@
                         <i class="bi bi-search"></i>
                     </span>
                     <strong class="stock-state__title">검색된 티커가 없습니다</strong>
-                    <span>시장과 티커를 확인한 뒤 다시 검색해주세요</span>
+                    <span>티커를 확인한 뒤 다시 검색해주세요</span>
                 </section>
 
                 <!-- 주식 카드 목록 섹션 -->

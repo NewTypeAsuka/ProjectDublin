@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
@@ -103,9 +104,16 @@ class StockApiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("stocks"))
                 .andExpect(content().string(containsString("id=\"stock-search-form\"")))
+                .andExpect(content().string(containsString("aria-expanded=\"false\"")))
+                .andExpect(content().string(not(containsString("id=\"stock-market-select\""))))
+                .andExpect(content().string(not(containsString(
+                        "최근 가격과 지난 영업일 대비 주가 변동"
+                ))))
                 .andExpect(content().string(containsString("id=\"stock-list\"")))
                 .andExpect(content().string(containsString("src=\"/js/stocks.js\"")))
-                .andExpect(content().string(containsString("Yahoo Finance 기준 최근 시세")));
+                .andExpect(content().string(containsString(
+                        "미국·한국·일본·홍콩·중국 주식 시장 지원 · 30분 캐시"
+                )));
 
         mockMvc.perform(get("/js/stocks.js"))
                 .andExpect(status().isOk())

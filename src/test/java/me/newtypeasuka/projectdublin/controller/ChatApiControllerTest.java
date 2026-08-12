@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
@@ -72,6 +73,13 @@ class ChatApiControllerTest {
         mockMvc.perform(get("/menu/chat").with(loginUser(member)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("chat"))
+                .andExpect(content().string(containsString(
+                        "class=\"chat-toolbar__title-row\""
+                )))
+                .andExpect(content().string(containsString("id=\"chat-connection\"")))
+                .andExpect(content().string(not(containsString(
+                        "하나의 공개 채팅방에서 실시간으로 대화합니다"
+                ))))
                 .andExpect(content().string(containsString("id=\"chat-message-list\"")))
                 .andExpect(content().string(containsString("id=\"chat-form\"")))
                 .andExpect(content().string(containsString("@stomp/stompjs@7.2.0")))
