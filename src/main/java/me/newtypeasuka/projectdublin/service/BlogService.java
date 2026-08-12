@@ -33,7 +33,7 @@ public class BlogService {
 
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
-    private final ArticleContentSummarizer articleContentSanitizer;
+    private final ArticleContentService articleContentService;
     private final ArticleImageService articleImageService;
 
     // 블로그 글 작성
@@ -41,8 +41,8 @@ public class BlogService {
     public Article save(AddArticleRequest request, String userName) {
         User author = findUserByEmail(userName);
         String sanitizedTitle = sanitizeTitle(request.getTitle());
-        String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
-        String searchContent = articleContentSanitizer.extractSearchContent(sanitizedContent);
+        String sanitizedContent = articleContentService.sanitize(request.getContent());
+        String searchContent = articleContentService.extractSearchContent(sanitizedContent);
         Article article = blogRepository.save(
                 request.toEntity(author, sanitizedTitle, sanitizedContent, searchContent)
         );
@@ -165,8 +165,8 @@ public class BlogService {
 
         authorizeArticleManager(article, currentUser);
         String sanitizedTitle = sanitizeTitle(request.getTitle());
-        String sanitizedContent = articleContentSanitizer.sanitize(request.getContent());
-        String searchContent = articleContentSanitizer.extractSearchContent(sanitizedContent);
+        String sanitizedContent = articleContentService.sanitize(request.getContent());
+        String searchContent = articleContentService.extractSearchContent(sanitizedContent);
         article.update(sanitizedTitle, sanitizedContent, searchContent);
         articleImageService.synchronize(article, currentUser);
 

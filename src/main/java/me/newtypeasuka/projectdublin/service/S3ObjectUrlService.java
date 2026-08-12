@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
-public class S3ObjectUrlResolver {
+public class S3ObjectUrlService {
 
     private final S3StorageProperties properties;
     private final S3Utilities s3Utilities;

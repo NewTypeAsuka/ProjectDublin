@@ -1,4 +1,4 @@
-// 공개 채팅 이력 조회와 STOMP WebSocket 실시간 송수신 및 메시지 삭제
+// 공개 채팅 이력 조회와 STOMP WebSocket 실시간 송수신 및 48시간 만료·메시지 삭제
 // 사용처: chat.html
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const topicDestination = '/topic/chat';
     const sendDestination = '/app/chat/messages';
     const errorDestination = '/user/queue/chat/errors';
+    const messageRetentionMillis = 48 * 60 * 60 * 1000;
+    const expirationCheckIntervalMillis = 60 * 1000;
     const messageElements = new Map();
     const queuedEvents = [];
 
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingContent = null;
     let retryClientMessageId = null;
     let pendingTimer = null;
+    let expirationTimer = null;
 
     function createElement(tagName, className, text) {
         const element = document.createElement(tagName);
@@ -125,6 +128,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return currentUserAdmin || Number(message.senderId) === Number(currentUserId);
     }
 
+    function getExpirationTime(message) {
+        if (message && message.expiresAtEpochMillis !== null
+                && message.expiresAtEpochMillis !== undefined
+                && Number.isFinite(Number(message.expiresAtEpochMillis))) {
+            return Number(message.expiresAtEpochMillis);
+        }
+        const createdTime = new Date(message && message.createdAt).getTime();
+        return Number.isFinite(createdTime)
+            ? createdTime + messageRetentionMillis
+            : null;
+    }
+
+    function isExpiredMessage(message) {
+        const expirationTime = getExpirationTime(message);
+        return expirationTime !== null && expirationTime <= Date.now();
+    }
+
     function createMessageElement(message) {
         const ownMessage = Number(message.senderId) === Number(currentUserId);
         const item = createElement(
@@ -132,6 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
             `chat-message${ownMessage ? ' is-own' : ''}`
         );
         item.dataset.messageId = String(message.id);
+        const expirationTime = getExpirationTime(message);
+        if (expirationTime !== null) {
+            item.dataset.expiresAt = String(expirationTime);
+        }
 
         const avatar = createElement('span', 'chat-message__avatar');
         const avatarIcon = createElement('i', 'bi bi-person-fill');
@@ -191,7 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addMessage(message, placement = 'append') {
         const messageId = Number(message && message.id);
-        if (!Number.isSafeInteger(messageId) || messageElements.has(messageId)) {
+        if (!Number.isSafeInteger(messageId)
+                || messageElements.has(messageId)
+                || isExpiredMessage(message)) {
             return false;
         }
 
@@ -212,7 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         messages.forEach(message => {
             const messageId = Number(message && message.id);
-            if (!Number.isSafeInteger(messageId) || messageElements.has(messageId)) {
+            if (!Number.isSafeInteger(messageId)
+                    || messageElements.has(messageId)
+                    || isExpiredMessage(message)) {
                 return;
             }
             const element = createMessageElement(message);
@@ -232,6 +260,17 @@ document.addEventListener('DOMContentLoaded', () => {
         element.remove();
         messageElements.delete(normalizedId);
         empty.hidden = messageElements.size !== 0;
+    }
+
+    // 브라우저를 계속 열어둔 경우에도 48시간이 지난 메시지를 화면에서 제거
+    function removeExpiredMessages() {
+        const currentTime = Date.now();
+        messageElements.forEach((element, messageId) => {
+            const expirationTime = Number(element.dataset.expiresAt);
+            if (Number.isFinite(expirationTime) && expirationTime <= currentTime) {
+                removeMessage(messageId);
+            }
+        });
     }
 
     function finishPendingMessage(clientMessageId) {
@@ -324,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loading.hidden = true;
                 empty.hidden = messageElements.size !== 0;
                 queuedEvents.splice(0).forEach(applyChatEvent);
+                removeExpiredMessages();
                 scrollToBottom();
             } else {
                 prependMessages(messages);
@@ -531,8 +571,14 @@ document.addEventListener('DOMContentLoaded', () => {
             loadMessages(nextBeforeId);
         }
     });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            removeExpiredMessages();
+        }
+    });
     retryButton.addEventListener('click', () => loadMessages());
     window.addEventListener('beforeunload', () => {
+        window.clearInterval(expirationTimer);
         if (stompClient) {
             stompClient.deactivate();
         }
@@ -542,4 +588,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeInput();
     loadMessages();
     connectWebSocket();
+    expirationTimer = window.setInterval(
+        removeExpiredMessages,
+        expirationCheckIntervalMillis
+    );
 });

@@ -26,10 +26,16 @@ import java.time.LocalDateTime;
                 name = "uq_chat_messages_sender_client",
                 columnNames = {"sender_id", "client_message_id"}
         ),
-        indexes = @Index(
-                name = "idx_chat_messages_sender_id",
-                columnList = "sender_id"
-        )
+        indexes = {
+                @Index(
+                        name = "idx_chat_messages_sender_id",
+                        columnList = "sender_id"
+                ),
+                @Index(
+                        name = "idx_chat_messages_created_at",
+                        columnList = "created_at"
+                )
+        }
 )
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

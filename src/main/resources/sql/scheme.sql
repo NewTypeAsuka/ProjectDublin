@@ -120,7 +120,8 @@ create table chat_messages (
             foreign key (sender_id) references users (id)
             on update restrict  -- 채팅 메시지가 있으면 해당 작성자의 id 수정 불가능
             on delete restrict, -- 채팅 메시지가 있으면 해당 작성자 삭제 불가능
-    index idx_chat_messages_sender_id (sender_id)
+    index idx_chat_messages_sender_id (sender_id),
+    index idx_chat_messages_created_at (created_at)
 );
 
 select * from users;

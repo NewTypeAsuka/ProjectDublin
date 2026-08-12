@@ -1,9 +1,9 @@
 package me.newtypeasuka.projectdublin.controller;
 
 import me.newtypeasuka.projectdublin.domain.User;
-import me.newtypeasuka.projectdublin.dto.StockApiDto.PricePointResponse;
-import me.newtypeasuka.projectdublin.dto.StockApiDto.StockListResponse;
-import me.newtypeasuka.projectdublin.dto.StockApiDto.StockResponse;
+import me.newtypeasuka.projectdublin.dto.StockApiResponse.PricePointResponse;
+import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockListResponse;
+import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockResponse;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.StockService;
 import org.junit.jupiter.api.BeforeEach;

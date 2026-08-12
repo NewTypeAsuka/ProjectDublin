@@ -13,9 +13,9 @@ import software.amazon.awssdk.services.s3.S3Utilities;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ArticleContentSanitizerTest {
+class ArticleContentServiceTest {
 
-    private final S3ObjectUrlResolver urlResolver = new S3ObjectUrlResolver(
+    private final S3ObjectUrlService s3ObjectUrlService = new S3ObjectUrlService(
             new S3StorageProperties(
                     "projectdublin-test-images",
                     "ap-northeast-2",
@@ -30,8 +30,8 @@ class ArticleContentSanitizerTest {
             ),
             S3Utilities.builder().region(Region.AP_NORTHEAST_2).build()
     );
-    private final ArticleContentSummarizer sanitizer =
-            new ArticleContentSummarizer(urlResolver);
+    private final ArticleContentService articleContentService =
+            new ArticleContentService(s3ObjectUrlService);
 
     @DisplayName("Summernote 서식과 YouTube 영상은 보존하고 위험한 코드는 제거한다")
     @Test
@@ -43,7 +43,7 @@ class ArticleContentSanitizerTest {
                 <iframe src="https://example.com/unsafe"></iframe>
                 """;
 
-        String sanitizedHtml = sanitizer.sanitize(rawHtml);
+        String sanitizedHtml = articleContentService.sanitize(rawHtml);
 
         assertThat(sanitizedHtml)
                 .contains("<strong>Summernote</strong>")
@@ -56,7 +56,7 @@ class ArticleContentSanitizerTest {
     @DisplayName("Summernote 구분선은 보존하고 위험한 속성은 제거한다")
     @Test
     void preserveHorizontalRule() {
-        String sanitizedHtml = sanitizer.sanitize("""
+        String sanitizedHtml = articleContentService.sanitize("""
                 <p>구분선 위</p>
                 <hr class="note-hr" onclick="alert('xss')">
                 <p>구분선 아래</p>
@@ -71,14 +71,14 @@ class ArticleContentSanitizerTest {
     @DisplayName("검색용 본문은 HTML 태그와 속성을 제외한 평문만 추출한다")
     @Test
     void extractPlainTextForSearch() {
-        String sanitizedHtml = sanitizer.sanitize("""
+        String sanitizedHtml = articleContentService.sanitize("""
                 <p>구분선 위</p>
                 <hr>
                 <a href="https://example.com/path">표시되는 링크</a>
                 <p>구분선 아래</p>
                 """);
 
-        String searchContent = sanitizer.extractSearchContent(sanitizedHtml);
+        String searchContent = articleContentService.extractSearchContent(sanitizedHtml);
 
         assertThat(searchContent)
                 .isEqualTo("구분선 위 표시되는 링크 구분선 아래")
@@ -88,7 +88,7 @@ class ArticleContentSanitizerTest {
     @DisplayName("Summernote 글자 도구의 서식은 보존하고 위험한 CSS는 제거한다")
     @Test
     void preserveSummernoteFontToolbarStyles() {
-        String sanitizedHtml = sanitizer.sanitize("""
+        String sanitizedHtml = articleContentService.sanitize("""
                 <p>
                     <b>굵게</b>
                     <strike>취소선</strike>
@@ -118,7 +118,7 @@ class ArticleContentSanitizerTest {
     @DisplayName("Summernote가 font 태그로 생성한 글자색은 안전한 span 스타일로 변환한다")
     @Test
     void normalizeSummernoteLegacyFontColor() {
-        String sanitizedHtml = sanitizer.sanitize("""
+        String sanitizedHtml = articleContentService.sanitize("""
                 <p>
                     <font color="#ff0000">빨간 글자</font>
                     <font color="rgb(0, 128, 255)" style="position: fixed">파란 글자</font>
@@ -138,7 +138,7 @@ class ArticleContentSanitizerTest {
     @DisplayName("새 창 링크는 안전 속성과 함께 보존하고 다른 target은 제거한다")
     @Test
     void preserveSafeNewWindowLink() {
-        String sanitizedHtml = sanitizer.sanitize("""
+        String sanitizedHtml = articleContentService.sanitize("""
                 <a href="https://example.com/new" target="_blank">새 창 링크</a>
                 <a href="https://example.com/same" target="_self" rel="opener">현재 창 링크</a>
                 """);
@@ -154,8 +154,8 @@ class ArticleContentSanitizerTest {
     @DisplayName("S3 게시글 이미지는 보존하고 외부 이미지는 제거한다")
     @Test
     void allowOnlyManagedS3Image() {
-        String managedImageUrl = urlResolver.resolve("articles/2026/07/image.png");
-        String sanitizedHtml = sanitizer.sanitize(
+        String managedImageUrl = s3ObjectUrlService.resolve("articles/2026/07/image.png");
+        String sanitizedHtml = articleContentService.sanitize(
                 """
                 <img src="%s" alt="S3 image" loading="lazy" onerror="alert('xss')">
                 <img src="https://example.com/image.png" alt="external image">
@@ -177,7 +177,7 @@ class ArticleContentSanitizerTest {
         String legacyImageUrl = "https://legacy-projectdublin-images."
                 + "s3.ap-northeast-2.amazonaws.com/articles/42/legacy.png";
 
-        String sanitizedHtml = sanitizer.sanitize(
+        String sanitizedHtml = articleContentService.sanitize(
                 "<p>기존 이미지</p><img src=\"" + legacyImageUrl + "\" alt=\"legacy\">"
         );
 
@@ -189,9 +189,9 @@ class ArticleContentSanitizerTest {
     @DisplayName("이미지와 동영상 뒤에 Summernote가 붙인 빈 줄은 저장하지 않는다")
     @Test
     void removeTrailingMediaPlaceholder() {
-        String managedImageUrl = urlResolver.resolve("articles/2026/08/image.png");
+        String managedImageUrl = s3ObjectUrlService.resolve("articles/2026/08/image.png");
 
-        String sanitizedHtml = sanitizer.sanitize("""
+        String sanitizedHtml = articleContentService.sanitize("""
                 <p><img src="%s"><span style="color: rgb(0, 0, 0)"><br></span></p>
                 <p><iframe src="https://www.youtube.com/embed/video-id"></iframe><br></p>
                 <p>일반 문장의<br>의도적인 줄바꿈</p>
@@ -210,7 +210,7 @@ class ArticleContentSanitizerTest {
     @DisplayName("내용이 없는 Summernote HTML은 거절한다")
     @Test
     void rejectEmptyContent() {
-        assertThatThrownBy(() -> sanitizer.sanitize("<p><br></p>"))
+        assertThatThrownBy(() -> articleContentService.sanitize("<p><br></p>"))
                 .isInstanceOf(ResponseStatusException.class);
     }
 }

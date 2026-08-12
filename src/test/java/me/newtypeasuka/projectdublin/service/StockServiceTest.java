@@ -1,7 +1,7 @@
 package me.newtypeasuka.projectdublin.service;
 
 import me.newtypeasuka.projectdublin.config.StockConfig.StockProperties;
-import me.newtypeasuka.projectdublin.dto.StockApiDto.StockListResponse;
+import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockListResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

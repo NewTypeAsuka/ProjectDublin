@@ -59,6 +59,16 @@ public class ChatWebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return scheduler;
     }
 
+    // WebSocket heartbeat와 분리된 스레드에서 채팅 정리 작업 실행
+    @Bean(name = "taskScheduler")
+    public TaskScheduler chatCleanupTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("chat-cleanup-");
+        scheduler.setRemoveOnCancelPolicy(true);
+        return scheduler;
+    }
+
     // 연결과 허용된 발행·구독만 인증 사용자에게 열고 나머지 메시지 경로는 거절
     @Bean
     public AuthorizationManager<Message<?>> messageAuthorizationManager(

@@ -91,6 +91,7 @@ class ChatApiControllerTest {
                 .andExpect(jsonPath("$.messages[0].id").value(message.id()))
                 .andExpect(jsonPath("$.messages[0].senderNickname")
                         .value(member.getNickname()))
+                .andExpect(jsonPath("$.messages[0].expiresAtEpochMillis").isNumber())
                 .andExpect(jsonPath("$.currentUserId").value(member.getId()))
                 .andExpect(jsonPath("$.currentUserAdmin").value(false));
     }

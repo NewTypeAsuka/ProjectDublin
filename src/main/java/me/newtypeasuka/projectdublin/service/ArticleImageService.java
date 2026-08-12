@@ -62,7 +62,7 @@ public class ArticleImageService {
 
     private final S3Client s3Client;
     private final S3StorageProperties properties;
-    private final S3ObjectUrlResolver urlResolver;
+    private final S3ObjectUrlService s3ObjectUrlService;
     private final ArticleImageRepository articleImageRepository;
     private final UserRepository userRepository;
 
@@ -118,7 +118,7 @@ public class ArticleImageService {
             );
         }
 
-        return new ImageUploadResponse(urlResolver.resolve(key));
+        return new ImageUploadResponse(s3ObjectUrlService.resolve(key));
     }
 
     public void synchronize(Article article, User currentEditor) {
@@ -177,7 +177,7 @@ public class ArticleImageService {
 
     private ArticleImage createArticleImage(Article article, User currentEditor, String key) {
         String expectedUserPrefix = "%s/%d/".formatted(
-                urlResolver.normalizedKeyPrefix(),
+                s3ObjectUrlService.normalizedKeyPrefix(),
                 currentEditor.getId()
         );
         if (!key.startsWith(expectedUserPrefix)) {
@@ -251,7 +251,7 @@ public class ArticleImageService {
         Set<String> keys = new LinkedHashSet<>();
         Jsoup.parseBodyFragment(content)
                 .select("img[src]")
-                .forEach(image -> urlResolver.extractArticleImageKey(image.attr("src"))
+                .forEach(image -> s3ObjectUrlService.extractArticleImageKey(image.attr("src"))
                         .ifPresent(keys::add));
         return keys;
     }
@@ -328,7 +328,7 @@ public class ArticleImageService {
     private String createObjectKey(Long userId, String extension) {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         return "%s/%d/%d/%02d/%s.%s".formatted(
-                urlResolver.normalizedKeyPrefix(),
+                s3ObjectUrlService.normalizedKeyPrefix(),
                 userId,
                 today.getYear(),
                 today.getMonthValue(),

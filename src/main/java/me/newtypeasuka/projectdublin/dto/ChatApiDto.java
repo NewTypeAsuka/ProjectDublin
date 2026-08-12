@@ -32,7 +32,8 @@ public final class ChatApiDto {
             String senderNickname,
             boolean senderAdmin,
             String content,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            long expiresAtEpochMillis
     ) {
     }
 

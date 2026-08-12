@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class ArticleContentSummarizer {
+public class ArticleContentService {
 
     private static final Set<String> YOUTUBE_HOSTS = Set.of(
             "youtube.com",
@@ -52,7 +52,7 @@ public class ArticleContentSummarizer {
             "none", "underline", "line-through"
     );
 
-    private final S3ObjectUrlResolver s3ObjectUrlResolver;
+    private final S3ObjectUrlService s3ObjectUrlService;
 
     private final Safelist safelist = Safelist.relaxed()
             .addAttributes("a", "target", "rel")
@@ -66,8 +66,8 @@ public class ArticleContentSummarizer {
             .addAttributes("span", "style")
             .preserveRelativeLinks(true);
 
-    public ArticleContentSummarizer(S3ObjectUrlResolver s3ObjectUrlResolver) {
-        this.s3ObjectUrlResolver = s3ObjectUrlResolver;
+    public ArticleContentService(S3ObjectUrlService s3ObjectUrlService) {
+        this.s3ObjectUrlService = s3ObjectUrlService;
     }
 
     public String sanitize(String rawHtml) {
@@ -84,7 +84,7 @@ public class ArticleContentSummarizer {
                 .filter(iframe -> !isAllowedYoutubeEmbed(iframe))
                 .forEach(Element::remove);
         document.select("img").stream()
-                .filter(image -> !s3ObjectUrlResolver.isArticleImageUrl(image.attr("src")))
+                .filter(image -> !s3ObjectUrlService.isArticleImageUrl(image.attr("src")))
                 .forEach(Element::remove);
 
         Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);

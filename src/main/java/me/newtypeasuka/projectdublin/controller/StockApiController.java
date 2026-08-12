@@ -1,7 +1,7 @@
 package me.newtypeasuka.projectdublin.controller;
 
 import lombok.RequiredArgsConstructor;
-import me.newtypeasuka.projectdublin.dto.StockApiDto.StockListResponse;
+import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockListResponse;
 import me.newtypeasuka.projectdublin.service.StockService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

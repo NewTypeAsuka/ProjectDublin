@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-public final class StockApiDto {
+public final class StockApiResponse {
 
-    private StockApiDto() {
+    private StockApiResponse() {
     }
 
     public record StockListResponse(

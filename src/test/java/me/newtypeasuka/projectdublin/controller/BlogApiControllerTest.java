@@ -12,7 +12,7 @@ import me.newtypeasuka.projectdublin.repository.ArticleImageRepository;
 import me.newtypeasuka.projectdublin.repository.BlogRepository;
 import me.newtypeasuka.projectdublin.repository.CommentRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
-import me.newtypeasuka.projectdublin.service.S3ObjectUrlResolver;
+import me.newtypeasuka.projectdublin.service.S3ObjectUrlService;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,7 +79,7 @@ class BlogApiControllerTest {
     CommentRepository commentRepository;
 
     @Autowired
-    S3ObjectUrlResolver urlResolver;
+    S3ObjectUrlService s3ObjectUrlService;
 
     @MockBean
     S3Client s3Client;
@@ -308,7 +308,7 @@ class BlogApiControllerTest {
         );
         AddArticleRequest createRequest = new AddArticleRequest(
                 "Image title",
-                "<p>Image content</p><img src=\"" + urlResolver.resolve(key) + "\">"
+                "<p>Image content</p><img src=\"" + s3ObjectUrlService.resolve(key) + "\">"
         );
 
         String createResponse = mockMvc.perform(post("/api/articles")
@@ -407,7 +407,7 @@ class BlogApiControllerTest {
         );
         UpdateArticleRequest updateRequest = new UpdateArticleRequest(
                 "Managed by admin",
-                "<p>Updated content</p><img src=\"" + urlResolver.resolve(key) + "\">"
+                "<p>Updated content</p><img src=\"" + s3ObjectUrlService.resolve(key) + "\">"
         );
 
         mockMvc.perform(put("/api/articles/{id}", article.getId())

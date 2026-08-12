@@ -13,9 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,12 +39,23 @@ class ChatServiceTest {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     User admin;
     User member;
     User other;
+    LocalDateTime fixedNow;
 
     @BeforeEach
     void setUp() {
+        ZoneId chatZoneId = ZoneId.of("Asia/Seoul");
+        fixedNow = LocalDateTime.of(2026, 8, 12, 12, 0);
+        chatService = new ChatService(
+                chatRepository,
+                userRepository,
+                Clock.fixed(fixedNow.atZone(chatZoneId).toInstant(), chatZoneId)
+        );
         admin = saveUser("chat-admin@example.com", "채팅관리자", 1);
         member = saveUser("chat-member@example.com", "채팅회원", 2);
         other = saveUser("chat-other@example.com", "다른회원", 2);
@@ -61,6 +77,13 @@ class ChatServiceTest {
         assertThat(first.senderNickname()).isEqualTo(member.getNickname());
         assertThat(first.senderAdmin()).isFalse();
         assertThat(first.createdAt()).isNotNull();
+        assertThat(first.expiresAtEpochMillis()).isEqualTo(
+                first.createdAt()
+                        .atZone(ZoneId.of("Asia/Seoul"))
+                        .plusHours(ChatService.MESSAGE_RETENTION_HOURS)
+                        .toInstant()
+                        .toEpochMilli()
+        );
     }
 
     @DisplayName("최신 메시지를 30개씩 조회하고 각 묶음은 오래된 순서로 반환한다")
@@ -72,6 +95,8 @@ class ChatServiceTest {
                     member.getEmail()
             );
         }
+        MessageResponse expiredLatest = createMessage(other, "만료된 최신 ID 메시지");
+        updateCreatedAt(expiredLatest.id(), fixedNow.minusHours(49));
 
         MessageHistoryResponse latest = chatService.getMessages(
                 null,
@@ -102,6 +127,41 @@ class ChatServiceTest {
                 );
         assertThat(previous.hasMore()).isFalse();
         assertThat(previous.nextBeforeId()).isNull();
+    }
+
+    @DisplayName("최근 48시간 이내의 채팅 메시지만 이력에 표시한다")
+    @Test
+    void showOnlyMessagesWithinRetentionPeriod() {
+        MessageResponse recent = createMessage(member, "47시간 전 메시지");
+        MessageResponse expired = createMessage(member, "49시간 전 메시지");
+        updateCreatedAt(recent.id(), fixedNow.minusHours(47));
+        updateCreatedAt(expired.id(), fixedNow.minusHours(49));
+
+        MessageHistoryResponse history = chatService.getMessages(
+                null,
+                ChatService.DEFAULT_HISTORY_SIZE,
+                member.getEmail()
+        );
+
+        assertThat(history.messages()).extracting(MessageResponse::id)
+                .containsExactly(recent.id());
+        assertThat(history.hasMore()).isFalse();
+        assertThat(chatRepository.existsById(expired.id())).isTrue();
+    }
+
+    @DisplayName("매시간 정리 작업은 48시간이 지난 메시지만 실제 삭제한다")
+    @Test
+    void deleteOnlyExpiredMessages() {
+        MessageResponse recent = createMessage(member, "보존할 메시지");
+        MessageResponse expired = createMessage(other, "삭제할 메시지");
+        updateCreatedAt(recent.id(), fixedNow.minusHours(48));
+        updateCreatedAt(expired.id(), fixedNow.minusHours(48).minusSeconds(1));
+
+        chatService.deleteExpiredMessages();
+        chatService.deleteExpiredMessages(); // 여러 인스턴스의 반복 실행과 같은 멱등성 확인
+
+        assertThat(chatRepository.existsById(recent.id())).isTrue();
+        assertThat(chatRepository.existsById(expired.id())).isFalse();
     }
 
     @DisplayName("채팅 메시지는 공백일 수 없고 최대 300자까지만 저장한다")
@@ -177,6 +237,15 @@ class ChatServiceTest {
 
     private SendMessageRequest request(String clientMessageId, String content) {
         return new SendMessageRequest(clientMessageId, content);
+    }
+
+    private void updateCreatedAt(long messageId, LocalDateTime createdAt) {
+        chatRepository.flush();
+        jdbcTemplate.update(
+                "update chat_messages set created_at = ? where id = ?",
+                Timestamp.valueOf(createdAt),
+                messageId
+        );
     }
 
     private User saveUser(String email, String nickname, int role) {

@@ -60,7 +60,7 @@ class ArticleImageServiceTest {
     UserRepository userRepository;
 
     ArticleImageService articleImageService;
-    S3ObjectUrlResolver urlResolver;
+    S3ObjectUrlService s3ObjectUrlService;
     User user;
 
     @BeforeEach
@@ -75,14 +75,14 @@ class ArticleImageServiceTest {
                 List.of(),
                 DataSize.ofMegabytes(10)
         );
-        urlResolver = new S3ObjectUrlResolver(
+        s3ObjectUrlService = new S3ObjectUrlService(
                 properties,
                 S3Utilities.builder().region(Region.AP_NORTHEAST_2).build()
         );
         articleImageService = new ArticleImageService(
                 s3Client,
                 properties,
-                urlResolver,
+                s3ObjectUrlService,
                 articleImageRepository,
                 userRepository
         );
@@ -139,7 +139,7 @@ class ArticleImageServiceTest {
         String key = "articles/42/2026/07/image.png";
         Article article = articleWithContent(
                 100L,
-                "<p>본문</p><img src=\"" + urlResolver.resolve(key) + "\" alt=\"image.png\">"
+                "<p>본문</p><img src=\"" + s3ObjectUrlService.resolve(key) + "\" alt=\"image.png\">"
         );
         when(articleImageRepository.findAllByArticleId(100L)).thenReturn(List.of());
         when(articleImageRepository.findAllByS3KeyIn(any())).thenReturn(List.of());
@@ -180,7 +180,7 @@ class ArticleImageServiceTest {
         String key = "articles/7/2026/07/admin-image.png";
         Article article = articleWithContent(
                 100L,
-                "<img src=\"" + urlResolver.resolve(key) + "\">"
+                "<img src=\"" + s3ObjectUrlService.resolve(key) + "\">"
         );
         when(articleImageRepository.findAllByArticleId(100L)).thenReturn(List.of());
         when(articleImageRepository.findAllByS3KeyIn(any())).thenReturn(List.of());
@@ -210,7 +210,7 @@ class ArticleImageServiceTest {
         String key = "articles/42/2026/07/image.png";
         Article article = articleWithContent(
                 100L,
-                "<img src=\"" + urlResolver.resolve(key) + "\">"
+                "<img src=\"" + s3ObjectUrlService.resolve(key) + "\">"
         );
         when(articleImageRepository.findAllByArticleId(100L)).thenReturn(List.of());
         when(articleImageRepository.findAllByS3KeyIn(any())).thenReturn(List.of());
