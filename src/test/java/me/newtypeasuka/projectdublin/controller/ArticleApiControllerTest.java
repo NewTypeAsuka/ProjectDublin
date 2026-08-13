@@ -264,6 +264,30 @@ class ArticleApiControllerTest {
                 .contains("state=");
     }
 
+    @DisplayName("Google 로그인 화면에 향후 한국어와 일본어 전환을 위한 토글을 렌더링한다")
+    @Test
+    void renderLanguageToggleOnLoginPage() throws Exception {
+        MvcResult result = mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("oauthLogin"))
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element languageToggle = document.selectFirst("[data-language-toggle]");
+
+        assertThat(languageToggle).isNotNull();
+        assertThat(languageToggle.hasAttr("disabled")).isTrue();
+        assertThat(languageToggle.select(".language-toggle__option"))
+                .extracting(Element::text)
+                .containsExactly("한국어", "日本語");
+        assertThat(languageToggle.select(".language-toggle__option.is-active").text())
+                .isEqualTo("한국어");
+        assertThat(languageToggle.selectFirst("[data-language=ko] img").attr("src"))
+                .isEqualTo("/img/koreaFlag.svg");
+        assertThat(languageToggle.selectFirst("[data-language=ja] img").attr("src"))
+                .isEqualTo("/img/japanFlag.svg");
+    }
+
     @DisplayName("Google 로그인 성공 후 기존 사용자는 목록, 신규 사용자는 닉네임 설정으로 이동한다")
     @Test
     void redirectOAuthLoginByRegistrationStatus() throws Exception {
@@ -303,6 +327,9 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(containsString("minlength=\"3\"")))
                 .andExpect(content().string(containsString("maxlength=\"12\"")))
                 .andExpect(content().string(containsString("0/12")))
+                .andExpect(content().string(containsString("data-language-toggle")))
+                .andExpect(content().string(containsString("src=\"/img/koreaFlag.svg\"")))
+                .andExpect(content().string(containsString("src=\"/img/japanFlag.svg\"")))
                 .andExpect(content().string(containsString(
                         "src=\"/js/nicknameSignup.js\""
                 )));

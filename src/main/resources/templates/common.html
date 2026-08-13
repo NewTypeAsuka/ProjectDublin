@@ -42,6 +42,75 @@
                 --shadow-float: 0 24px 72px rgba(15, 23, 42, 0.14);
             }
         </style>
+
+        <style>
+            /* layout: 인증 화면과 공통 메뉴에서 재사용하는 언어 선택 토글 */
+            .language-selector {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.32rem;
+                max-width: 100%;
+            }
+            .language-selector__label {
+                color: rgba(107, 118, 132, 0.72);
+                font-size: 0.58rem;
+                font-weight: 720;
+                line-height: 1;
+                letter-spacing: 0.13em;
+                text-transform: uppercase;
+            }
+            .language-toggle {
+                display: inline-grid;
+                grid-template-columns: repeat(2, max-content);
+                align-items: center;
+                gap: 0.12rem;
+                max-width: 100%;
+                min-height: 2rem;
+                padding: 0.16rem;
+                border: 1px solid rgba(15, 23, 42, 0.09);
+                border-radius: 999px;
+                color: rgba(107, 118, 132, 1);
+                background-color: rgba(242, 244, 246, 0.78);
+                box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.035);
+                font-family: inherit;
+                cursor: default;
+                opacity: 1;
+            }
+            .language-toggle:disabled {
+                color: rgba(107, 118, 132, 1);
+                opacity: 1;
+            }
+            .language-toggle__option {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.3rem;
+                min-height: 1.58rem;
+                padding: 0 0.48rem;
+                border-radius: 999px;
+                font-size: 0.68rem;
+                font-weight: 650;
+                line-height: 1;
+                white-space: nowrap;
+            }
+            .language-toggle__option.is-active {
+                color: rgba(51, 61, 75, 1);
+                background-color: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 2px 7px rgba(15, 23, 42, 0.08);
+            }
+            .language-toggle__mark {
+                display: block;
+                flex: 0 0 auto;
+                width: 1.18rem;
+                height: 0.885rem;
+                border: 1px solid rgba(15, 23, 42, 0.1);
+                border-radius: 0.16rem;
+                background-color: rgba(255, 255, 255, 1);
+                object-fit: cover;
+                box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+            }
+        </style>
     </th:block>
     <style th:fragment="styles">
         /* layout: 공통 헤더 브랜드 링크 */
@@ -362,6 +431,15 @@
             text-align: left;
             font-family: inherit;
             cursor: pointer;
+        }
+
+        /* layout: 내비게이션 드롭다운 하단의 언어 선택 영역 */
+        .site-nav-language {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.35rem;
+            padding: 0.72rem 0.35rem 0.22rem;
+            border-top: 1px solid var(--project-line);
         }
 
         /* layout: 마이페이지 모달의 프로필 정보와 닉네임 수정 폼 */
@@ -750,6 +828,11 @@
                                 <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
                                 <span>채팅</span>
                             </a>
+
+                            <!-- 향후 한국어·일본어 전환을 위한 언어 선택 영역 -->
+                            <div class="site-nav-language">
+                                <th:block th:replace="~{common :: languageToggle}"></th:block>
+                            </div>
                         </div>
                     </details>
                 </div>
@@ -887,6 +970,38 @@
         </dialog>
         <script src="/js/userProfile.js"></script> <!-- 마이페이지 정보 조회와 닉네임 변경·화면 반영 -->
     </th:block>
+
+    <!-- 한국어·일본어 언어 선택 토글 영역 -->
+    <div th:fragment="languageToggle" class="language-selector">
+        <span class="language-selector__label" aria-hidden="true">Language</span>
+        <button class="language-toggle"
+                type="button"
+                data-language-toggle
+                aria-label="현재 한국어가 선택되어 있습니다. 일본어 전환 기능은 준비 중입니다."
+                title="일본어 전환 준비 중"
+                disabled>
+            <span class="language-toggle__option is-active" data-language="ko">
+                <img class="language-toggle__mark"
+                    th:src="@{/img/koreaFlag.svg}"
+                    src="/img/koreaFlag.svg"
+                    width="19"
+                    height="14"
+                    alt=""
+                    aria-hidden="true">
+                <span>한국어</span>
+            </span>
+            <span class="language-toggle__option" data-language="ja">
+                <img class="language-toggle__mark"
+                    th:src="@{/img/japanFlag.svg}"
+                    src="/img/japanFlag.svg"
+                    width="19"
+                    height="14"
+                    alt=""
+                    aria-hidden="true">
+                <span lang="ja">日本語</span>
+            </span>
+        </button>
+    </div>
 
     <!-- 공통 푸터 섹션 -->
     <footer th:fragment="siteFooter" class="mt-auto bg-white border-top site-footer">

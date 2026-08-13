@@ -168,6 +168,9 @@ class UserApiControllerTest {
 
         Document document = Jsoup.parse(result.getResponse().getContentAsString());
         Element menu = document.selectFirst(".site-nav-dropdown__menu");
+        Element languageToggle = document.selectFirst(
+                ".site-nav-dropdown__menu [data-language-toggle]"
+        );
         Element profileButton = document.selectFirst("#user-profile-open");
         Element dialog = document.selectFirst("dialog#user-profile-dialog");
         Element nickname = document.selectFirst(
@@ -175,10 +178,18 @@ class UserApiControllerTest {
         );
 
         assertThat(menu).isNotNull();
-        assertThat(menu.children()).extracting(Element::text)
+        assertThat(menu.select(".site-nav-dropdown__item")).extracting(Element::text)
                 .containsExactly("포스트", "마이페이지", "주식", "채팅");
         assertThat(menu.child(0).selectFirst("i").classNames())
                 .containsExactly("bi", "bi-journal-richtext");
+        assertThat(languageToggle).isNotNull();
+        assertThat(languageToggle.hasAttr("disabled")).isTrue();
+        assertThat(languageToggle.select("[data-language=ko]").text()).isEqualTo("한국어");
+        assertThat(languageToggle.select("[data-language=ja]").text()).isEqualTo("日本語");
+        assertThat(languageToggle.selectFirst("[data-language=ko] img").attr("src"))
+                .isEqualTo("/img/koreaFlag.svg");
+        assertThat(languageToggle.selectFirst("[data-language=ja] img").attr("src"))
+                .isEqualTo("/img/japanFlag.svg");
         assertThat(profileButton).isNotNull();
         assertThat(profileButton.attr("aria-controls")).isEqualTo("user-profile-dialog");
         assertThat(dialog).isNotNull();

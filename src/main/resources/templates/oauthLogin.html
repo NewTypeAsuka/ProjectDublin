@@ -310,6 +310,12 @@
             line-height: 1.55;
         }
 
+        /* layout: 로그인 카드 하단의 언어 선택 토글 */
+        .login-panel > .language-selector {
+            align-self: center;
+            margin-top: 1.35rem;
+        }
+
         /* 반응형layout: 태블릿·모바일에서 로그인 카드를 단일 열로 전환 */
         @media (max-width: 767.98px) {
             .login-card {
@@ -407,6 +413,9 @@
                     <i class="bi bi-shield-check" aria-hidden="true"></i>
                     <span>비밀번호는 NewTypeBlog에 저장되지 않으며<br>Google OAuth2를 통한 안전한 액세스를 보장합니다.</span>
                 </p>
+
+                <!-- 향후 한국어·일본어 전환을 위한 언어 선택 영역 -->
+                <th:block th:replace="~{common :: languageToggle}"></th:block>
             </div>
 
         </section>
