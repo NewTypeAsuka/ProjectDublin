@@ -47,7 +47,7 @@ import java.util.Objects;
 public class Comment {
 
     public static final int MAX_CONTENT_LENGTH = 1000;
-    public static final String DELETED_CONTENT = "삭제된 댓글입니다";
+    public static final String DELETED_CONTENT = "삭제된 댓글입니다.";
 
     private static final int ROOT_DEPTH = 1;
     private static final int REPLY_DEPTH = 2;

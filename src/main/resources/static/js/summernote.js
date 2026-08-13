@@ -24,7 +24,7 @@
     // textarea를 Summernote 에디터로 초기화한다.
     $content.summernote({
         lang: 'ko-KR',
-        placeholder: '내용을 입력하세요',
+        placeholder: '내용을 입력하세요.',
         tabsize: 2,
         height: 360,
         dialogsInBody: true, // 이미지·링크 창이 편집기 카드의 overflow에 잘리지 않게 한다.
@@ -164,7 +164,7 @@
             uploadFailures = 0;
         }
         activeUploads += 1;
-        setUploadStatus('이미지를 업로드하고 있습니다', false);
+        setUploadStatus('이미지를 업로드하고 있습니다.', false);
 
         try {
             const response = await window.csrfFetch('/api/articles/images', {
@@ -193,14 +193,14 @@
         } finally {
             activeUploads -= 1;
             if (activeUploads > 0) {
-                setUploadStatus(`이미지를 업로드하고 있습니다 (${activeUploads}개 남음)`, false);
+                setUploadStatus(`이미지를 업로드하고 있습니다 (${activeUploads}개 남음).`, false);
             } else if (uploadFailures > 0) {
                 setUploadStatus(
-                    `${uploadFailures}개 이미지 업로드에 실패했습니다. 파일 형식과 크기를 확인해주세요`,
+                    `${uploadFailures}개 이미지 업로드에 실패했습니다. 파일 형식과 크기를 확인해주세요.`,
                     true
                 );
             } else {
-                setUploadStatus('이미지 업로드가 완료되었습니다', false);
+                setUploadStatus('이미지 업로드가 완료되었습니다.', false);
                 window.setTimeout(function () {
                     setUploadStatus('', false);
                 }, 2000);

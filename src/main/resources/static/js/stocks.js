@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             figure.append(createElement(
                 'div',
                 'stock-chart__empty',
-                '표시할 가격 흐름이 부족합니다'
+                '표시할 가격 흐름이 부족합니다.'
             ));
             return figure;
         }
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         } else if (unavailable.length > 0) {
             setStatus(
-                `일부 종목의 시세를 불러오지 못했습니다: ${unavailable.join(', ')}`,
+                `일부 종목의 시세를 불러오지 못했습니다: ${unavailable.join(', ')}.`,
                 'warning'
             );
         } else {
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             if (!data || !Array.isArray(data.stocks)) {
-                throw new Error('주식 API 응답 형식이 올바르지 않습니다');
+                throw new Error('주식 API 응답 형식이 올바르지 않습니다.');
             }
             if (request.mode === 'watchlist') {
                 watchlistSnapshot = data;

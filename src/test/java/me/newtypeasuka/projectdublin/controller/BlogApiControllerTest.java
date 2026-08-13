@@ -280,7 +280,7 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "id=\"title-error\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "제목은 40자 이내로 작성해주세요")))
+                        "제목은 40자 이내로 작성해주세요.")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"editor-actions\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(

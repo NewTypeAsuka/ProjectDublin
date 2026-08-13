@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 credentials: 'same-origin'
             });
             if (!response.ok) {
-                throw new Error(await parseError(response, '대화를 불러오지 못했습니다'));
+                throw new Error(await parseError(response, '대화를 불러오지 못했습니다.'));
             }
 
             const data = await response.json();
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loading.hidden = true;
                 loadError.hidden = false;
             }
-            setFormMessage(error.message || '대화를 불러오지 못했습니다', 'error');
+            setFormMessage(error.message || '대화를 불러오지 못했습니다.', 'error');
         } finally {
             historyLoading = false;
             historyButton.disabled = false;
@@ -400,13 +400,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             );
             if (!response.ok) {
-                throw new Error(await parseError(response, '메시지를 삭제하지 못했습니다'));
+                throw new Error(await parseError(response, '메시지를 삭제하지 못했습니다.'));
             }
             const event = await response.json();
             applyChatEvent(event);
         } catch (error) {
             button.disabled = false;
-            setFormMessage(error.message || '메시지를 삭제하지 못했습니다', 'error');
+            setFormMessage(error.message || '메시지를 삭제하지 못했습니다.', 'error');
         }
     }
 
@@ -425,11 +425,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = input.value.trim();
         const length = contentLength(content);
         if (!connected || !stompClient || !stompClient.connected) {
-            setFormMessage('실시간 연결을 확인한 뒤 다시 시도해주세요', 'error');
+            setFormMessage('실시간 연결을 확인한 뒤 다시 시도해주세요.', 'error');
             return;
         }
         if (length < 1 || length > 300) {
-            setFormMessage('채팅 메시지는 1자 이상 300자 이하로 입력해주세요', 'error');
+            setFormMessage('채팅 메시지는 1자 이상 300자 이하로 입력해주세요.', 'error');
             return;
         }
 
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
             : createClientMessageId();
         pendingContent = content;
         retryClientMessageId = null;
-        setFormMessage('메시지를 전송하는 중입니다');
+        setFormMessage('메시지를 전송하는 중입니다.');
         updateFormAvailability();
 
         stompClient.publish({
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pendingClientMessageId = null;
             pendingTimer = null;
             setFormMessage(
-                '전송 확인이 지연되고 있습니다. 같은 내용으로 다시 전송할 수 있습니다',
+                '전송 확인이 지연되고 있습니다. 같은 내용으로 다시 전송할 수 있습니다.',
                 'error'
             );
             updateFormAvailability();
@@ -463,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleWebSocketError(payload) {
-        let message = '채팅 메시지를 처리하지 못했습니다';
+        let message = '채팅 메시지를 처리하지 못했습니다.';
         try {
             const error = JSON.parse(payload);
             message = error.message || message;
@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function connectWebSocket() {
         if (!window.StompJs || typeof window.StompJs.Client !== 'function') {
             setConnectionState('disconnected', '연결 모듈 오류');
-            setFormMessage('실시간 채팅 모듈을 불러오지 못했습니다', 'error');
+            setFormMessage('실시간 채팅 모듈을 불러오지 못했습니다.', 'error');
             return;
         }
 
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
         if (!csrfToken || !csrfHeader) {
             setConnectionState('disconnected', '보안 토큰 오류');
-            setFormMessage('보안 토큰을 확인하지 못했습니다', 'error');
+            setFormMessage('보안 토큰을 확인하지 못했습니다.', 'error');
             return;
         }
 
@@ -513,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     applyChatEvent(JSON.parse(frame.body));
                 } catch (error) {
-                    setFormMessage('새 메시지를 표시하지 못했습니다', 'error');
+                    setFormMessage('새 메시지를 표시하지 못했습니다.', 'error');
                 }
             });
             stompClient.subscribe(errorDestination, frame => {

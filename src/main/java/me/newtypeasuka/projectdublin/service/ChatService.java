@@ -162,7 +162,7 @@ public class ChatService {
         if (clientMessageId == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "메시지 식별자가 올바르지 않습니다"
+                    "메시지 식별자가 올바르지 않습니다."
             );
         }
 
@@ -173,7 +173,7 @@ public class ChatService {
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "메시지 식별자가 올바르지 않습니다"
+                    "메시지 식별자가 올바르지 않습니다."
             );
         }
     }
@@ -182,7 +182,7 @@ public class ChatService {
         if (content == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "채팅 메시지를 입력해주세요"
+                    "채팅 메시지를 입력해주세요."
             );
         }
 
@@ -191,13 +191,13 @@ public class ChatService {
         if (normalized.isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "채팅 메시지를 입력해주세요"
+                    "채팅 메시지를 입력해주세요."
             );
         }
         if (length > ChatMessage.MAX_CONTENT_LENGTH) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "채팅 메시지는 300자 이하로 작성해주세요"
+                    "채팅 메시지는 300자 이하로 작성해주세요."
             );
         }
         return normalized;

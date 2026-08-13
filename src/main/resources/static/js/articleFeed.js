@@ -187,8 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (feed.children.length > 0) {
             setMessage(keyword
-                ? '모든 검색 결과를 불러왔습니다'
-                : '모든 게시글을 불러왔습니다');
+                ? '모든 검색 결과를 불러왔습니다.'
+                : '모든 게시글을 불러왔습니다.');
         }
     }
 
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const page = await response.json();
             if (!page || !Array.isArray(page.articles)) {
-                throw new Error('게시글 응답 형식이 올바르지 않습니다');
+                throw new Error('게시글 응답 형식이 올바르지 않습니다.');
             }
 
             const fragment = document.createDocumentFragment();
@@ -246,11 +246,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!hasNext) {
                 finishFeed();
             } else if (!nextCursor) {
-                throw new Error('다음 게시글 커서가 없습니다');
+                throw new Error('다음 게시글 커서가 없습니다.');
             }
         } catch (error) {
             console.error(error);
-            setMessage('게시글을 불러오지 못했습니다. 다시 시도해주세요');
+            setMessage('게시글을 불러오지 못했습니다. 다시 시도해주세요.');
             setLoadButtonContent('다시 시도', 'bi-arrow-repeat');
             loadButton.hidden = false;
         } finally {

@@ -52,7 +52,7 @@
             });
             commentContent.value = '';
             updateLengthCounter(commentContent, commentLength);
-            showMessage('댓글을 등록했습니다', false);
+            showMessage('댓글을 등록했습니다.', false);
             await loadComments();
         } catch (error) {
             showMessage(error.message, true);
@@ -166,7 +166,7 @@
                         method: 'POST',
                         body: JSON.stringify({ content: value })
                     });
-                    showMessage('답글을 등록했습니다', false);
+                    showMessage('답글을 등록했습니다.', false);
                 });
             }));
         }
@@ -178,7 +178,7 @@
                         method: 'PUT',
                         body: JSON.stringify({ content: value })
                     });
-                    showMessage('댓글을 수정했습니다', false);
+                    showMessage('댓글을 수정했습니다.', false);
                 });
             }));
         }
@@ -193,7 +193,7 @@
                     await request(`${commentsUrl}/${comment.id}`, {
                         method: 'DELETE'
                     });
-                    showMessage('댓글을 삭제했습니다', false);
+                    showMessage('댓글을 삭제했습니다.', false);
                     await loadComments();
                 } catch (error) {
                     showMessage(error.message, true);
@@ -358,11 +358,11 @@
         const length = countCharacters(content);
 
         if (!content) {
-            showMessage('댓글 내용을 입력해주세요', true);
+            showMessage('댓글 내용을 입력해주세요.', true);
             return null;
         }
         if (length > maxContentLength) {
-            showMessage(`댓글은 ${maxContentLength}자 이하로 작성해주세요`, true);
+            showMessage(`댓글은 ${maxContentLength}자 이하로 작성해주세요.`, true);
             return null;
         }
         return content;
@@ -417,16 +417,16 @@
         const response = await window.csrfFetch(url, requestOptions);
         if (response.status === 401) {
             location.replace('/login');
-            throw new Error('로그인이 필요합니다');
+            throw new Error('로그인이 필요합니다.');
         }
         if (!response.ok) {
             if (response.status === 403) {
-                throw new Error('댓글을 변경할 권한이 없습니다');
+                throw new Error('댓글을 변경할 권한이 없습니다.');
             }
             if (response.status === 400) {
-                throw new Error('댓글 요청 내용을 확인해주세요');
+                throw new Error('댓글 요청 내용을 확인해주세요.');
             }
-            throw new Error('댓글 처리에 실패했습니다');
+            throw new Error('댓글 처리에 실패했습니다.');
         }
         if (response.status === 204) {
             return null;

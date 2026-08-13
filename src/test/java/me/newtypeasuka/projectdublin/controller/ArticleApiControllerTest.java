@@ -765,7 +765,7 @@ class ArticleApiControllerTest {
         mockMvc.perform(get(commentsEndpoint).with(loginUser(member)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].deleted").value(true))
-                .andExpect(jsonPath("$[0].content").value("삭제된 댓글입니다"))
+                .andExpect(jsonPath("$[0].content").value("삭제된 댓글입니다."))
                 .andExpect(jsonPath("$[0].replies[0].id").value(replyId));
     }
 

@@ -45,7 +45,7 @@
                 }
             })
             .catch(() => {
-                showActionMessage('게시글 고정 상태를 변경하지 못했습니다. 잠시 후 다시 시도해주세요');
+                showActionMessage('게시글 고정 상태를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
             })
             .finally(() => {
                 pinButton.disabled = false;

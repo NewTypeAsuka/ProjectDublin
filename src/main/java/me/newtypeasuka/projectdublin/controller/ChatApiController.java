@@ -86,8 +86,8 @@ public class ChatApiController {
             return new ChatErrorResponse(responseStatusException.getReason());
         }
         if (exception instanceof BindException) {
-            return new ChatErrorResponse("채팅 메시지는 1자 이상 300자 이하로 입력해주세요");
+            return new ChatErrorResponse("채팅 메시지는 1자 이상 300자 이하로 입력해주세요.");
         }
-        return new ChatErrorResponse("채팅 메시지를 전송하지 못했습니다");
+        return new ChatErrorResponse("채팅 메시지를 전송하지 못했습니다.");
     }
 }
