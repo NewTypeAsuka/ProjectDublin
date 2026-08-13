@@ -63,7 +63,8 @@ class StockApiControllerTest {
     @DisplayName("로그인한 사용자는 관심 종목 시세 API를 조회할 수 있다")
     @Test
     void getWatchlist() throws Exception {
-        when(stockService.getWatchlist()).thenReturn(stockResponse("VOO", "VOO", "US"));
+        when(stockService.getWatchlist(member.getEmail()))
+                .thenReturn(stockResponse("VOO", "VOO", "US"));
 
         mockMvc.perform(get("/api/stocks").with(loginUser(member)))
                 .andExpect(status().isOk())
@@ -71,6 +72,8 @@ class StockApiControllerTest {
                 .andExpect(jsonPath("$.stocks[0].market").value("US"))
                 .andExpect(jsonPath("$.stocks[0].currentPrice").value(111))
                 .andExpect(jsonPath("$.stale").value(false));
+
+        verify(stockService).getWatchlist(member.getEmail());
     }
 
     @DisplayName("로그인하지 않은 사용자의 주식 API 접근은 거절한다")

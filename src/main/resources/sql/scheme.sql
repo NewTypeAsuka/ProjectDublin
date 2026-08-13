@@ -107,6 +107,22 @@ create table comments (
     index idx_comments_parent_id (parent_id)
 );
 
+create table stocks (
+    id bigint unsigned not null auto_increment,
+    user_id bigint unsigned not null,
+    symbol varchar(30) character set ascii collate ascii_general_ci not null
+            comment 'Yahoo Finance symbol (예: VOO, 8058.T)',
+    display_order int unsigned not null default 0,
+    created_at datetime not null default current_timestamp,
+    primary key (id),
+    constraint uq_stocks_user_symbol unique (user_id, symbol),
+    constraint fk_stocks_user_id
+            foreign key (user_id) references users (id)
+            on update restrict  -- 등록한 주식이 있으면 해당 사용자의 id 수정 불가능
+            on delete cascade,  -- 사용자가 삭제되면 해당 사용자의 주식 목록도 함께 삭제
+    index idx_stocks_user_display_order (user_id, display_order, id)
+);
+
 create table chat_messages (
     id bigint unsigned not null auto_increment,
     sender_id bigint unsigned not null,
@@ -129,6 +145,25 @@ select * from articles;
 select * from article_likes;
 select * from article_images;
 select * from comments;
+select * from stocks;
 select * from chat_messages;
 
 update users set role = 1 where email = 'sangzoon0102@gmail.com' and name = '상준';
+
+insert into stocks (user_id, symbol, display_order)
+select stock_owner.id, initial_stock.symbol, initial_stock.display_order
+from users stock_owner
+cross join (
+    select 'VOO' as symbol, 1 as display_order
+    union all select 'QQQM', 2
+    union all select 'TLT', 3
+    union all select 'SHY', 4
+    union all select 'SGOV', 5
+    union all select 'SGOL', 6
+    union all select 'GOOGL', 7
+    union all select 'OXY', 8
+    union all select 'UNH', 9
+    union all select '8058.T', 10
+    union all select 'VFS', 11
+) initial_stock
+where stock_owner.email = 'sangzoon0102@gmail.com';

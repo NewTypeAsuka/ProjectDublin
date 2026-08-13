@@ -6,6 +6,7 @@ import me.newtypeasuka.projectdublin.config.StockConfig.StockProperties;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.PricePointResponse;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockListResponse;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockResponse;
+import me.newtypeasuka.projectdublin.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,7 @@ public class StockService {
 
     private final RestClient restClient;
     private final StockProperties properties;
+    private final StockRepository stockRepository;
     private final Clock clock;
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
     private final Object cacheMonitor = new Object();
@@ -54,22 +56,34 @@ public class StockService {
     @Autowired
     public StockService(
             @Qualifier("stockRestClient") RestClient restClient,
-            StockProperties properties
+            StockProperties properties,
+            StockRepository stockRepository
     ) {
-        this(restClient, properties, Clock.systemUTC());
+        this(restClient, properties, stockRepository, Clock.systemUTC());
     }
 
     StockService(RestClient restClient,
                  StockProperties properties,
+                 StockRepository stockRepository,
                  Clock clock) {
         this.restClient = restClient;
         this.properties = properties;
+        this.stockRepository = stockRepository;
         this.clock = clock;
     }
 
-    // application.yml에 등록된 관심 종목을 설정 순서대로 조회
-    public StockListResponse getWatchlist() {
-        return getOrLoad("watchlist", () -> loadStocks(properties.watchlist()));
+    // 로그인 사용자가 DB에 등록한 관심 종목을 표시 순서대로 조회
+    public StockListResponse getWatchlist(String userEmail) {
+        List<String> symbols = normalizeSymbols(
+                stockRepository.findSymbolsByOwnerEmail(userEmail)
+        );
+        if (symbols.isEmpty()) {
+            return emptyStockList();
+        }
+
+        // 종목 구성과 표시 순서가 같은 목록끼리만 시세 캐시를 공유합니다.
+        String cacheKey = "watchlist:" + String.join(",", symbols);
+        return getOrLoad(cacheKey, () -> loadStocks(symbols));
     }
 
     // Yahoo 티커 검색 결과 중 지원 시장의 정확한 종목만 조회
@@ -207,12 +221,7 @@ public class StockService {
     }
 
     private StockListResponse loadStocks(List<String> requestedSymbols) {
-        List<String> symbols = requestedSymbols.stream()
-                .filter(StringUtils::hasText)
-                .map(symbol -> symbol.trim().toUpperCase(Locale.ROOT))
-                .filter(symbol -> PROVIDER_SYMBOL_PATTERN.matcher(symbol).matches())
-                .distinct()
-                .toList();
+        List<String> symbols = normalizeSymbols(requestedSymbols);
         if (symbols.isEmpty()) {
             throw new IllegalStateException("조회할 티커가 없습니다");
         }
@@ -266,6 +275,24 @@ public class StockService {
         return new StockListResponse(
                 stocks,
                 unavailableSymbols,
+                clock.instant(),
+                false
+        );
+    }
+
+    private List<String> normalizeSymbols(List<String> requestedSymbols) {
+        return requestedSymbols.stream()
+                .filter(StringUtils::hasText)
+                .map(symbol -> symbol.trim().toUpperCase(Locale.ROOT))
+                .filter(symbol -> PROVIDER_SYMBOL_PATTERN.matcher(symbol).matches())
+                .distinct()
+                .toList();
+    }
+
+    private StockListResponse emptyStockList() {
+        return new StockListResponse(
+                List.of(),
+                List.of(),
                 clock.instant(),
                 false
         );

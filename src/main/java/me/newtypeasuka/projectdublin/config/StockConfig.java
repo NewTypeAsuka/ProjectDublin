@@ -1,9 +1,7 @@
 package me.newtypeasuka.projectdublin.config;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +13,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
-import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(StockConfig.StockProperties.class)
@@ -44,16 +41,10 @@ public class StockConfig {
     @ConfigurationProperties(prefix = "stock")
     public record StockProperties(
             @NotBlank String yahooBaseUrl,
-            @NotEmpty List<@NotBlank @Pattern(
-                    regexp = "^[A-Za-z0-9.^\\-=]{1,30}$"
-            ) String> watchlist,
             @NotNull Duration cacheDuration,
             @NotNull Duration staleDuration,
             @NotNull Duration connectTimeout,
             @NotNull Duration readTimeout
     ) {
-        public StockProperties {
-            watchlist = watchlist == null ? List.of() : List.copyOf(watchlist);
-        }
     }
 }

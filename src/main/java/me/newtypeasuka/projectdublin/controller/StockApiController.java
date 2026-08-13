@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/stocks")
@@ -16,10 +18,10 @@ public class StockApiController {
 
     private final StockService stockService;
 
-    // 설정된 관심 종목의 최근 시세와 일별 그래프 조회 API
+    // 로그인 사용자가 DB에 등록한 관심 종목의 최근 시세와 일별 그래프 조회 API
     @GetMapping
-    public ResponseEntity<StockListResponse> getWatchlist() {
-        return ResponseEntity.ok(stockService.getWatchlist());
+    public ResponseEntity<StockListResponse> getWatchlist(Principal principal) {
+        return ResponseEntity.ok(stockService.getWatchlist(principal.getName()));
     }
 
     // 선택한 시장에서 정확히 일치하는 티커 검색 API

@@ -2,6 +2,7 @@ package me.newtypeasuka.projectdublin.service;
 
 import me.newtypeasuka.projectdublin.config.StockConfig.StockProperties;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockListResponse;
+import me.newtypeasuka.projectdublin.repository.StockRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,16 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class StockServiceTest {
+
+    private static final String MEMBER_EMAIL = "stock-member@example.com";
 
     private static final String SPARK_RESPONSE = """
             {
@@ -73,6 +80,7 @@ class StockServiceTest {
     private RestClient.Builder restClientBuilder;
     private MockRestServiceServer server;
     private MutableClock clock;
+    private StockRepository stockRepository;
     private StockService stockService;
 
     @BeforeEach
@@ -84,20 +92,24 @@ class StockServiceTest {
                 Instant.parse("2026-08-09T00:00:00Z"),
                 ZoneOffset.UTC
         );
+        stockRepository = mock(StockRepository.class);
+        when(stockRepository.findSymbolsByOwnerEmail(MEMBER_EMAIL))
+                .thenReturn(List.of("VOO", "8058.T"));
         stockService = new StockService(
                 restClientBuilder.build(),
-                properties(List.of("VOO", "8058.T")),
+                properties(),
+                stockRepository,
                 clock
         );
     }
 
-    @DisplayName("관심 종목을 설정 순서대로 반환하고 지난 영업일 대비 변동을 계산한다")
+    @DisplayName("로그인 사용자의 관심 종목을 DB 표시 순서대로 반환한다")
     @Test
-    void getWatchlistInConfiguredOrder() {
+    void getWatchlistInDatabaseOrder() {
         expectSpark("VOO,8058.T", SPARK_RESPONSE);
 
-        StockListResponse firstResponse = stockService.getWatchlist();
-        StockListResponse cachedResponse = stockService.getWatchlist();
+        StockListResponse firstResponse = stockService.getWatchlist(MEMBER_EMAIL);
+        StockListResponse cachedResponse = stockService.getWatchlist(MEMBER_EMAIL);
 
         assertThat(firstResponse.stocks())
                 .extracting(stock -> stock.symbol())
@@ -111,6 +123,44 @@ class StockServiceTest {
         assertThat(firstResponse.stocks().get(1).market()).isEqualTo("JP");
         assertThat(firstResponse.stocks().get(1).ticker()).isEqualTo("8058");
         assertThat(cachedResponse).isSameAs(firstResponse);
+        verify(stockRepository, times(2)).findSymbolsByOwnerEmail(MEMBER_EMAIL);
+        server.verify();
+    }
+
+    @DisplayName("관심 종목을 등록하지 않은 사용자는 외부 호출 없이 빈 목록을 반환한다")
+    @Test
+    void returnEmptyWatchlistWithoutProviderCall() {
+        String emptyMemberEmail = "empty-stock-member@example.com";
+        when(stockRepository.findSymbolsByOwnerEmail(emptyMemberEmail))
+                .thenReturn(List.of());
+
+        StockListResponse response = stockService.getWatchlist(emptyMemberEmail);
+
+        assertThat(response.stocks()).isEmpty();
+        assertThat(response.unavailableSymbols()).isEmpty();
+        assertThat(response.fetchedAt()).isEqualTo(clock.instant());
+        assertThat(response.stale()).isFalse();
+        server.verify();
+    }
+
+    @DisplayName("사용자별 종목 목록이 다르면 서로 다른 캐시로 시세를 조회한다")
+    @Test
+    void separateWatchlistCacheByUserSymbols() {
+        String otherMemberEmail = "other-stock-member@example.com";
+        when(stockRepository.findSymbolsByOwnerEmail(otherMemberEmail))
+                .thenReturn(List.of("8058.T", "VOO"));
+        expectSpark("VOO,8058.T", SPARK_RESPONSE);
+        expectSpark("8058.T,VOO", SPARK_RESPONSE);
+
+        StockListResponse memberResponse = stockService.getWatchlist(MEMBER_EMAIL);
+        StockListResponse otherResponse = stockService.getWatchlist(otherMemberEmail);
+
+        assertThat(memberResponse.stocks())
+                .extracting(stock -> stock.symbol())
+                .containsExactly("VOO", "8058.T");
+        assertThat(otherResponse.stocks())
+                .extracting(stock -> stock.symbol())
+                .containsExactly("8058.T", "VOO");
         server.verify();
     }
 
@@ -202,10 +252,10 @@ class StockServiceTest {
                         .isEqualTo("/v7/finance/spark"))
                 .andRespond(withServerError());
 
-        StockListResponse firstResponse = stockService.getWatchlist();
+        StockListResponse firstResponse = stockService.getWatchlist(MEMBER_EMAIL);
         clock.advance(Duration.ofMinutes(31));
 
-        StockListResponse staleResponse = stockService.getWatchlist();
+        StockListResponse staleResponse = stockService.getWatchlist(MEMBER_EMAIL);
 
         assertThat(firstResponse.stale()).isFalse();
         assertThat(staleResponse.stale()).isTrue();
@@ -236,10 +286,9 @@ class StockServiceTest {
                 .getFirst(name);
     }
 
-    private StockProperties properties(List<String> watchlist) {
+    private StockProperties properties() {
         return new StockProperties(
                 "https://query1.finance.yahoo.com",
-                watchlist,
                 Duration.ofMinutes(30),
                 Duration.ofHours(24),
                 Duration.ofSeconds(3),
