@@ -176,7 +176,9 @@ class UserApiControllerTest {
 
         assertThat(menu).isNotNull();
         assertThat(menu.children()).extracting(Element::text)
-                .containsExactly("홈", "마이페이지", "주식", "채팅");
+                .containsExactly("포스트", "마이페이지", "주식", "채팅");
+        assertThat(menu.child(0).selectFirst("i").classNames())
+                .containsExactly("bi", "bi-journal-richtext");
         assertThat(profileButton).isNotNull();
         assertThat(profileButton.attr("aria-controls")).isEqualTo("user-profile-dialog");
         assertThat(dialog).isNotNull();
