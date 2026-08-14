@@ -829,10 +829,11 @@
                                 <span>채팅</span>
                             </a>
 
-                            <!-- 향후 한국어·일본어 전환을 위한 언어 선택 영역 -->
+                            <!-- 언어 선택 토글 영역 -->
                             <div class="site-nav-language">
                                 <th:block th:replace="~{common :: languageToggle}"></th:block>
                             </div>
+                            
                         </div>
                     </details>
                 </div>
@@ -865,6 +866,7 @@
                 class="site-profile-dialog"
                 aria-labelledby="user-profile-title">
             <div class="site-profile-dialog__surface">
+
                 <!-- 마이페이지 모달 헤더 영역 -->
                 <header class="site-profile-dialog__header">
                     <div>
@@ -964,14 +966,17 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
+
             </div>
         </dialog>
+
         <script src="/js/userProfile.js"></script> <!-- 마이페이지 정보 조회와 닉네임 변경·화면 반영 -->
     </th:block>
 
-    <!-- 한국어·일본어 언어 선택 토글 영역 -->
+    <!-- 언어 선택 토글 영역 -->
     <div th:fragment="languageToggle" class="language-selector">
         <span class="language-selector__label" aria-hidden="true">Language</span>
         <button class="language-toggle"
@@ -986,7 +991,7 @@
                     src="/img/koreaFlag.svg"
                     width="19"
                     height="14"
-                    alt=""
+                    alt="태극기"
                     aria-hidden="true">
                 <span>한국어</span>
             </span>
@@ -996,7 +1001,7 @@
                     src="/img/japanFlag.svg"
                     width="19"
                     height="14"
-                    alt=""
+                    alt="일장기"
                     aria-hidden="true">
                 <span lang="ja">日本語</span>
             </span>
@@ -1013,5 +1018,6 @@
             </a>
         </div>
     </footer>
+
 </body>
 </html>

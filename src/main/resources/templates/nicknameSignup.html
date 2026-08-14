@@ -382,14 +382,15 @@
                     </button>
                 </form>
 
-                <!-- 다른 Google 계정으로 다시 로그인 -->
+                <!-- 다른 Google 계정으로 로그인 영역 -->
                 <form class="account-switch-form" th:action="@{/logout}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button class="account-switch" type="submit">다른 Google 계정으로 로그인</button>
                 </form>
 
-                <!-- 향후 한국어·일본어 전환을 위한 언어 선택 영역 -->
+                <!-- 언어 선택 토글 영역 -->
                 <th:block th:replace="~{common :: languageToggle}"></th:block>
+
             </div>
 
         </section>
