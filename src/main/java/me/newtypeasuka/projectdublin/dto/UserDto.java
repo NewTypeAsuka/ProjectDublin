@@ -11,15 +11,15 @@ public final class UserDto {
     }
 
     public record NicknameRequest(
-            @NotBlank(message = "닉네임을 입력해주세요.")
+            @NotBlank(message = "{validation.nickname.required}")
             @Size(
                     min = User.MIN_NICKNAME_LENGTH,
                     max = User.MAX_NICKNAME_LENGTH,
-                    message = "닉네임은 3자 이상 12자 이하로 입력해주세요."
+                    message = "{validation.nickname.length}"
             )
             @Pattern(
                     regexp = "^[^\\r\\n\\t]+$",
-                    message = "닉네임에는 줄바꿈을 사용할 수 없습니다."
+                    message = "{validation.nickname.linebreak}"
             )
             String nickname
     ) {

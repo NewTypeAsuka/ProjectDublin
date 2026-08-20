@@ -77,6 +77,9 @@
                 cursor: default;
                 opacity: 1;
             }
+            .language-toggle:not(:disabled) {
+                cursor: pointer;
+            }
             .language-toggle:disabled {
                 color: rgba(107, 118, 132, 1);
                 opacity: 1;
@@ -93,11 +96,16 @@
                 font-weight: 650;
                 line-height: 1;
                 white-space: nowrap;
+                transition: color 0.18s ease, background-color 0.18s ease,
+                    box-shadow 0.18s ease;
             }
             .language-toggle__option.is-active {
                 color: rgba(51, 61, 75, 1);
                 background-color: rgba(255, 255, 255, 0.98);
                 box-shadow: 0 2px 7px rgba(15, 23, 42, 0.08);
+            }
+            .language-toggle:not(:disabled):hover .language-toggle__option:not(.is-active) {
+                color: rgba(49, 130, 246, 1);
             }
             .language-toggle__mark {
                 display: block;
@@ -109,6 +117,12 @@
                 background-color: rgba(255, 255, 255, 1);
                 object-fit: cover;
                 box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+            }
+
+            /* 접근성: 언어 선택 토글의 키보드 포커스 표시 */
+            .language-toggle:not(:disabled):focus-visible {
+                outline: 3px solid rgba(49, 130, 246, 0.28);
+                outline-offset: 3px;
             }
         </style>
     </th:block>
@@ -831,7 +845,7 @@
 
                             <!-- 언어 선택 토글 영역 -->
                             <div class="site-nav-language">
-                                <th:block th:replace="~{common :: languageToggle}"></th:block>
+                                <th:block th:replace="~{common :: languageToggle(false)}"></th:block>
                             </div>
                             
                         </div>
@@ -977,15 +991,18 @@
     </th:block>
 
     <!-- 언어 선택 토글 영역 -->
-    <div th:fragment="languageToggle" class="language-selector">
+    <div th:fragment="languageToggle(enabled)" class="language-selector">
         <span class="language-selector__label" aria-hidden="true">Language</span>
         <button class="language-toggle"
                 type="button"
                 data-language-toggle
-                aria-label="현재 한국어가 선택되어 있습니다. 일본어 전환 기능은 준비 중입니다."
-                title="일본어 전환 준비 중"
-                disabled>
-            <span class="language-toggle__option is-active" data-language="ko">
+                th:disabled="${!enabled}"
+                th:attr="data-current-language=${enabled and #locale.language == 'ja'} ? 'ja' : 'ko',
+                    aria-label=${enabled} ? #{language.toggle.aria} : #{language.toggle.pending.aria},
+                    title=${enabled} ? #{language.toggle.title} : #{language.toggle.pending.title}">
+            <span class="language-toggle__option"
+                    data-language="ko"
+                    th:classappend="${!enabled or #locale.language == 'ko'} ? ' is-active'">
                 <img class="language-toggle__mark"
                     th:src="@{/img/koreaFlag.svg}"
                     src="/img/koreaFlag.svg"
@@ -993,9 +1010,11 @@
                     height="14"
                     alt="태극기"
                     aria-hidden="true">
-                <span>한국어</span>
+                <span lang="ko" th:text="#{language.korean}">한국어</span>
             </span>
-            <span class="language-toggle__option" data-language="ja">
+            <span class="language-toggle__option"
+                    data-language="ja"
+                    th:classappend="${enabled and #locale.language == 'ja'} ? ' is-active'">
                 <img class="language-toggle__mark"
                     th:src="@{/img/japanFlag.svg}"
                     src="/img/japanFlag.svg"
@@ -1003,7 +1022,7 @@
                     height="14"
                     alt="일장기"
                     aria-hidden="true">
-                <span lang="ja">日本語</span>
+                <span lang="ja" th:text="#{language.japanese}">日本語</span>
             </span>
         </button>
     </div>

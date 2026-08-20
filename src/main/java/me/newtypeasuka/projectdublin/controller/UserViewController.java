@@ -70,8 +70,7 @@ public class UserViewController {
                 && userService.isNicknameTaken(request.nickname())) {
             bindingResult.rejectValue(
                     "nickname",
-                    "duplicate",
-                    "이미 사용 중인 닉네임입니다."
+                    "validation.nickname.duplicate"
             );
         }
 
@@ -89,8 +88,7 @@ public class UserViewController {
         } catch (NicknameAlreadyExistsException exception) {
             bindingResult.rejectValue(
                     "nickname",
-                    "duplicate",
-                    exception.getMessage()
+                    "validation.nickname.duplicate"
             );
             model.addAttribute("googleName", name);
             return "nicknameSignup";
@@ -101,8 +99,7 @@ public class UserViewController {
             }
             bindingResult.rejectValue(
                     "nickname",
-                    "duplicate",
-                    "이미 사용 중인 닉네임입니다."
+                    "validation.nickname.duplicate"
             );
             model.addAttribute("googleName", name);
             return "nicknameSignup";

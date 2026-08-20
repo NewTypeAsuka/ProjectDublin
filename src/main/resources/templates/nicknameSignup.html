@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>닉네임 설정 · NewTypeBlog</title>
+    <title th:text="#{signup.page.title}">닉네임 설정 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <style>
         /* animation: 닉네임 설정 화면 배경과 장식 모션 */
@@ -318,7 +318,8 @@
         }
     </style>
 </head>
-<body class="gradient-custom tw:font-sans">
+<body class="gradient-custom tw:font-sans"
+        th:attr="data-language-change-confirm=#{language.change.unsaved}">
     <main id="main-content" class="container signup-shell tw:relative tw:z-10">
 
         <!-- 닉네임 설정 카드 섹션 -->
@@ -328,9 +329,13 @@
             <div class="signup-story">
                 <div>
                     <p class="signup-story__eyebrow">ONE LAST STEP</p>
-                    <h2 class="signup-story__title">당신의 이름으로<br>이야기를<br>시작해보세요.</h2>
+                    <h2 class="signup-story__title">
+                        <span th:text="#{signup.story.title.line1}">당신의 이름으로</span><br>
+                        <span th:text="#{signup.story.title.line2}">이야기를</span><br>
+                        <span th:text="#{signup.story.title.line3}">시작해보세요.</span>
+                    </h2>
                     <p class="signup-story__description">
-                        선택한 닉네임은 게시글과 댓글에서 나를 나타내는 이름으로 사용됩니다.
+                        <span th:text="#{signup.story.description}">선택한 닉네임은 게시글과 댓글에서 나를 나타내는 이름으로 사용됩니다.</span>
                     </p>
                 </div>
             </div>
@@ -338,19 +343,25 @@
             <!-- 닉네임 설정 카드 우측 입력 영역 -->
             <div class="signup-panel">
                 <p class="signup-panel__eyebrow">PROFILE SETUP</p>
-                <h1 id="signup-title" class="signup-panel__title">닉네임을 정해주세요.</h1>
+                <h1 id="signup-title" class="signup-panel__title"
+                    th:text="#{signup.title}">닉네임을 정해주세요.</h1>
                 <p class="signup-message">
-                    <strong th:text="${googleName}">Google 사용자</strong>님, 반가워요.<br>
-                    NewTypeBlog에서 사용할 닉네임을 입력해주세요.
+                    <strong th:text="${googleName}">Google 사용자</strong><span
+                        th:text="#{signup.greeting.suffix}">님, 반가워요.</span><br>
+                    <span th:text="#{signup.message}">NewTypeBlog에서 사용할 닉네임을 입력해주세요.</span>
                 </p>
 
                 <!-- 최초 로그인 닉네임 입력 폼 -->
                 <form id="nickname-signup-form"
                         th:action="@{/signup/nickname}"
                         th:object="${nicknameForm}"
+                        th:attr="data-guide-default=#{signup.nickname.guide},
+                            data-guide-short=#{signup.nickname.guide.short},
+                            data-guide-valid=#{signup.nickname.guide.valid}"
                         method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <label for="nickname" class="nickname-field__label">닉네임</label>
+                    <label for="nickname" class="nickname-field__label"
+                        th:text="#{signup.nickname.label}">닉네임</label>
                     <div class="nickname-input-wrap">
                         <input id="nickname"
                                 class="nickname-input"
@@ -361,14 +372,14 @@
                                 maxlength="12"
                                 autocomplete="nickname"
                                 aria-describedby="nickname-guide nickname-server-error"
-                                placeholder="3~12자로 입력해주세요."
+                                th:placeholder="#{signup.nickname.placeholder}"
                                 required
                                 autofocus>
                         <span id="nickname-counter" class="nickname-counter" aria-hidden="true">0/12</span>
                     </div>
                     <p id="nickname-guide" class="nickname-guide" aria-live="polite">
                         <i class="bi bi-info-circle" aria-hidden="true"></i>
-                        <span>3자 이상 12자 이하로 입력해주세요.</span>
+                        <span th:text="#{signup.nickname.guide}">3자 이상 12자 이하로 입력해주세요.</span>
                     </p>
                     <p id="nickname-server-error"
                         class="nickname-error"
@@ -376,8 +387,11 @@
                         th:errors="*{nickname}"
                         role="alert">닉네임 입력을 확인해주세요.</p>
 
-                    <button id="nickname-submit" class="signup-submit" type="submit">
-                        <span>가입 완료하기</span>
+                    <button id="nickname-submit"
+                            class="signup-submit"
+                            type="submit"
+                            th:attr="aria-label=#{signup.complete}">
+                        <span th:text="#{signup.complete}">가입 완료하기</span>
                         <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </button>
                 </form>
@@ -385,17 +399,22 @@
                 <!-- 다른 Google 계정으로 로그인 영역 -->
                 <form class="account-switch-form" th:action="@{/logout}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button class="account-switch" type="submit">다른 Google 계정으로 로그인</button>
+                    <button class="account-switch"
+                            type="submit"
+                            th:attr="aria-label=#{signup.switch.account.aria},
+                                title=#{signup.switch.account.aria}"
+                            th:text="#{signup.switch.account}">다른 Google 계정으로 로그인</button>
                 </form>
 
                 <!-- 언어 선택 토글 영역 -->
-                <th:block th:replace="~{common :: languageToggle}"></th:block>
+                <th:block th:replace="~{common :: languageToggle(true)}"></th:block>
 
             </div>
 
         </section>
     </main>
 
+    <script src="/js/languageToggle.js"></script> <!-- 인증 화면의 한국어·일본어 선택과 입력 중인 닉네임 보호 -->
     <script src="/js/nicknameSignup.js"></script> <!-- 닉네임 글자 수와 가입 버튼 상태 관리 -->
 </body>
 </html>

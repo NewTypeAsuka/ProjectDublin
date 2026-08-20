@@ -3,7 +3,9 @@ package me.newtypeasuka.projectdublin.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
+import me.newtypeasuka.projectdublin.config.LocaleConfig;
 import me.newtypeasuka.projectdublin.domain.Article;
 import me.newtypeasuka.projectdublin.domain.Comment;
 import me.newtypeasuka.projectdublin.domain.ArticleLike;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -264,7 +267,7 @@ class ArticleApiControllerTest {
                 .contains("state=");
     }
 
-    @DisplayName("Google 로그인 화면에 향후 한국어와 일본어 전환을 위한 토글을 렌더링한다")
+    @DisplayName("Google 로그인 화면에 활성화된 한국어와 일본어 전환 토글을 렌더링한다")
     @Test
     void renderLanguageToggleOnLoginPage() throws Exception {
         MvcResult result = mockMvc.perform(get("/login"))
@@ -276,7 +279,8 @@ class ArticleApiControllerTest {
         Element languageToggle = document.selectFirst("[data-language-toggle]");
 
         assertThat(languageToggle).isNotNull();
-        assertThat(languageToggle.hasAttr("disabled")).isTrue();
+        assertThat(languageToggle.hasAttr("disabled")).isFalse();
+        assertThat(document.select("script[src=/js/languageToggle.js]")).hasSize(1);
         assertThat(languageToggle.select(".language-toggle__option"))
                 .extracting(Element::text)
                 .containsExactly("한국어", "日本語");
@@ -286,6 +290,152 @@ class ArticleApiControllerTest {
                 .isEqualTo("/img/koreaFlag.svg");
         assertThat(languageToggle.selectFirst("[data-language=ja] img").attr("src"))
                 .isEqualTo("/img/japanFlag.svg");
+        assertThat(document.selectFirst(".google-login-link__title").text())
+                .isEqualTo("Google로 계속하기");
+    }
+
+    @DisplayName("일본어 선택을 쿠키에 저장하고 로그인과 닉네임 설정 화면에 유지한다")
+    @Test
+    void persistJapaneseAcrossAuthenticationPages() throws Exception {
+        MvcResult loginResult = mockMvc.perform(get("/login")
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "ja"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("oauthLogin"))
+                .andReturn();
+
+        Cookie languageCookie = loginResult.getResponse().getCookie(
+                LocaleConfig.LANGUAGE_COOKIE
+        );
+        String setCookie = loginResult.getResponse().getHeader(HttpHeaders.SET_COOKIE);
+        Document loginDocument = Jsoup.parse(
+                loginResult.getResponse().getContentAsString()
+        );
+        Element loginAction = loginDocument.selectFirst(".google-login-link__title");
+
+        assertThat(languageCookie).isNotNull();
+        assertThat(languageCookie.getValue()).isEqualTo("ja");
+        assertThat(languageCookie.isHttpOnly()).isTrue();
+        assertThat(languageCookie.getMaxAge()).isEqualTo(365 * 24 * 60 * 60);
+        assertThat(setCookie)
+                .contains("Path=/")
+                .contains("SameSite=Lax");
+        assertThat(loginDocument.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(loginDocument.title()).isEqualTo("ログイン · NewTypeBlog");
+        assertThat(loginDocument.selectFirst("meta[property=og:locale]").attr("content"))
+                .isEqualTo("ja_JP");
+        assertThat(loginDocument.select(".language-toggle__option.is-active").text())
+                .isEqualTo("日本語");
+        assertThat(loginAction.text()).isEqualTo("Googleで続行");
+
+        MvcResult signupResult = mockMvc.perform(get("/signup/nickname")
+                        .with(loginOAuthUser(
+                                "japanese-new-user@example.com",
+                                "Japanese New User"
+                        ))
+                        .cookie(languageCookie))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andReturn();
+
+        Document signupDocument = Jsoup.parse(
+                signupResult.getResponse().getContentAsString()
+        );
+        Element signupAction = signupDocument.selectFirst("#nickname-submit span");
+        Element switchAction = signupDocument.selectFirst(".account-switch");
+
+        assertThat(signupDocument.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(signupDocument.title()).isEqualTo("ニックネーム設定 · NewTypeBlog");
+        assertThat(signupDocument.select(".language-toggle__option.is-active").text())
+                .isEqualTo("日本語");
+        assertThat(signupDocument.selectFirst("#nickname").attr("placeholder"))
+                .isEqualTo("3～12文字で入力してください。");
+        assertThat(signupDocument.selectFirst("#nickname-signup-form")
+                .attr("data-guide-valid"))
+                .isEqualTo("使用可能な長さです。重複は登録時に確認します。");
+        assertThat(signupAction.text()).isEqualTo("登録");
+        assertThat(signupAction.text().codePointCount(0, signupAction.text().length()))
+                .isEqualTo(2);
+        assertThat(switchAction.text()).isEqualTo("別のGoogleアカウントでログイン");
+    }
+
+    @DisplayName("일본어 닉네임 설정 화면은 서버 검증 오류도 일본어로 표시한다")
+    @Test
+    void renderJapaneseNicknameValidationErrors() throws Exception {
+        Cookie languageCookie = new Cookie(LocaleConfig.LANGUAGE_COOKIE, "ja");
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser("japanese-short@example.com", "Short User"))
+                        .with(csrf())
+                        .cookie(languageCookie)
+                        .param("nickname", "二字"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(model().attributeHasFieldErrors("nicknameForm", "nickname"))
+                .andExpect(content().string(containsString(
+                        "ニックネームは3文字以上12文字以下で入力してください。"
+                )));
+
+        userRepository.saveAndFlush(User.builder()
+                .email("japanese-nickname-owner@example.com")
+                .name("Nickname Owner")
+                .nickname("TakenNick")
+                .build());
+
+        mockMvc.perform(post("/signup/nickname")
+                        .with(loginOAuthUser(
+                                "japanese-duplicate@example.com",
+                                "Duplicate User"
+                        ))
+                        .with(csrf())
+                        .cookie(languageCookie)
+                        .param("nickname", "takennick"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("nicknameSignup"))
+                .andExpect(model().attributeHasFieldErrors("nicknameForm", "nickname"))
+                .andExpect(content().string(containsString(
+                        "すでに使用されているニックネームです。"
+                )));
+    }
+
+    @DisplayName("아직 번역하지 않은 일반 화면의 언어 토글은 비활성 상태를 유지한다")
+    @Test
+    void keepLanguageToggleDisabledOutsideAuthenticationPages() throws Exception {
+        MvcResult result = mockMvc.perform(get("/articles")
+                        .with(loginUser(member))
+                        .cookie(new Cookie(LocaleConfig.LANGUAGE_COOKIE, "ja")))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element languageToggle = document.selectFirst(
+                ".site-nav-dropdown__menu [data-language-toggle]"
+        );
+
+        assertThat(languageToggle).isNotNull();
+        assertThat(languageToggle.hasAttr("disabled")).isTrue();
+        assertThat(languageToggle.attr("aria-label"))
+                .isEqualTo("현재 한국어가 선택되어 있습니다. 일본어 전환 기능은 준비 중입니다.");
+        assertThat(languageToggle.attr("data-current-language")).isEqualTo("ko");
+        assertThat(languageToggle.select(".language-toggle__option.is-active").text())
+                .isEqualTo("한국어");
+        assertThat(document.select("script[src=/js/languageToggle.js]")).isEmpty();
+    }
+
+    @DisplayName("지원하지 않는 언어 요청은 기본 한국어를 유지한다")
+    @Test
+    void ignoreUnsupportedLanguageParameter() throws Exception {
+        MvcResult result = mockMvc.perform(get("/login")
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "en"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+
+        assertThat(result.getResponse().getCookie(LocaleConfig.LANGUAGE_COOKIE)).isNull();
+        assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ko");
+        assertThat(document.title()).isEqualTo("로그인 · NewTypeBlog");
+        assertThat(document.select(".language-toggle__option.is-active").text())
+                .isEqualTo("한국어");
     }
 
     @DisplayName("Google 로그인 성공 후 기존 사용자는 목록, 신규 사용자는 닉네임 설정으로 이동한다")
@@ -332,6 +482,10 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(containsString("src=\"/img/japanFlag.svg\"")))
                 .andExpect(content().string(containsString(
                         "src=\"/js/nicknameSignup.js\""
+                )))
+                .andExpect(content().string(containsString("가입 완료하기")))
+                .andExpect(content().string(containsString(
+                        "다른 Google 계정으로 로그인"
                 )));
 
         mockMvc.perform(get("/articles").with(newUser))

@@ -12,6 +12,14 @@ if (nicknameForm && nicknameInput && nicknameCounter && nicknameGuide && nicknam
     const minimumLength = 3;
     const maximumLength = 12;
     const guideText = nicknameGuide.querySelector('span');
+    const guideMessages = {
+        default: nicknameForm.dataset.guideDefault || '',
+        short: nicknameForm.dataset.guideShort || '',
+        valid: nicknameForm.dataset.guideValid || ''
+    };
+
+    // Thymeleaf 메시지의 {0} 자리에 현재 부족한 글자 수를 넣는다.
+    const formatGuideMessage = (message, value) => message.replace('{0}', String(value));
 
     const updateNicknameState = () => {
         const nickname = nicknameInput.value.trim();
@@ -25,11 +33,14 @@ if (nicknameForm && nicknameInput && nicknameCounter && nicknameGuide && nicknam
 
         if (guideText) {
             if (length === 0) {
-                guideText.textContent = '3자 이상 12자 이하로 입력해주세요.';
+                guideText.textContent = guideMessages.default;
             } else if (length < minimumLength) {
-                guideText.textContent = `${minimumLength - length}자를 더 입력해주세요.`;
+                guideText.textContent = formatGuideMessage(
+                    guideMessages.short,
+                    minimumLength - length
+                );
             } else {
-                guideText.textContent = '사용 가능한 길이입니다. 중복 여부는 가입할 때 확인합니다.';
+                guideText.textContent = guideMessages.valid;
             }
         }
 

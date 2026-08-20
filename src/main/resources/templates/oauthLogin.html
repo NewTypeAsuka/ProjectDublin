@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
 
     <!-- 링크를 공유할 때 표시할 공통 사이트 정보(Open Graph) -->
     <meta property="og:type" content="website">
-    <meta property="og:locale" content="ko_KR">
+    <meta property="og:locale" content="ko_KR"
+        th:content="${#locale.language == 'ja'} ? 'ja_JP' : 'ko_KR'">
     <meta property="og:site_name" content="NewTypeBlog">
     <meta property="og:title" content="NewTypeBlog">
-    <meta property="og:description" content="일상의 생각이 글이 되는 나만의 공간.">
+    <meta property="og:description" content="일상의 생각이 글이 되는 나만의 공간."
+        th:content="#{login.og.description}">
     <meta property="og:url" content="https://www.newtypeblog.com/">
     <meta property="og:image" content="https://www.newtypeblog.com/img/newTypeBlogOg.png">
     <meta property="og:image:type" content="image/png">
@@ -17,7 +19,7 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="NewTypeBlog">
     
-    <title>로그인 · NewTypeBlog</title>
+    <title th:text="#{login.page.title}">로그인 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <style>
         /* animation: 로그인 화면 배경과 장식 모션 */
@@ -373,9 +375,13 @@
             <div class="login-story">
                 <div>
                     <p class="login-story__eyebrow">MY SPACE TO THINK</p>
-                    <h2 class="login-story__title">일상의 생각이<br>글이 되는<br>나만의 공간.</h2>
+                    <h2 class="login-story__title">
+                        <span th:text="#{login.story.title.line1}">일상의 생각이</span><br>
+                        <span th:text="#{login.story.title.line2}">글이 되는</span><br>
+                        <span th:text="#{login.story.title.line3}">나만의 공간.</span>
+                    </h2>
                     <p class="login-story__description">
-                        일상의 발견과 새로운 관점을 기록하고, 저만의 이야기를 차분히 이어가는 곳입니다.
+                        <span th:text="#{login.story.description}">일상의 발견과 새로운 관점을 기록하고, 저만의 이야기를 차분히 이어가는 곳입니다.</span>
                     </p>
                 </div>
             </div>
@@ -385,43 +391,51 @@
                 <p class="login-panel__eyebrow">WELCOME</p>
                 <h1 id="login-title" class="login-panel__title">NewTypeBlog</h1>
                 <p id="login-message" class="login-message">
-                    NewTypeBlog를 이용하기 위해서는<br>Google 계정이 필요합니다.
+                    <span th:text="#{login.message.line1}">NewTypeBlog를 이용하기 위해서는</span><br>
+                    <span th:text="#{login.message.line2}">Google 계정이 필요합니다.</span>
                 </p>
                 <div>
                     <a th:href="@{/oauth2/authorization/google}"
                         href="/oauth2/authorization/google"
                         id="google-login-link"
-                        class="google-login-link">
+                        class="google-login-link"
+                        th:attr="aria-label=#{login.google.aria}">
                         <img th:src="@{/img/googleIcon.png}"
                             src="/img/googleIcon.png"
                             alt="Google"
                             aria-hidden="true">
                         <span class="google-login-link__copy">
-                            <span class="google-login-link__title">Google로 계속하기</span>
-                            <span class="google-login-link__description">Google 계정으로 로그인합니다.</span>
+                            <span class="google-login-link__title"
+                                th:text="#{login.google.action}">Google로 계속하기</span>
+                            <span class="google-login-link__description"
+                                th:text="#{login.google.description}">Google 계정으로 로그인합니다.</span>
                         </span>
                         <i class="bi bi-arrow-right google-login-link__arrow" aria-hidden="true"></i>
                     </a>
                     <div id="google-login-loading" class="google-login-loading" aria-live="polite">
                         <div class="google-login-loading__inner">
                             <span class="spinner-border" aria-hidden="true"></span>
-                            <span>Google 로그인 화면으로 이동하고 있어요.</span>
+                            <span th:text="#{login.google.loading}">Google 로그인 화면으로 이동하고 있어요.</span>
                         </div>
                     </div>
                 </div>
                 <p class="login-security-note">
                     <i class="bi bi-shield-check" aria-hidden="true"></i>
-                    <span>비밀번호는 NewTypeBlog에 저장되지 않으며<br>Google OAuth2를 통한 안전한 액세스를 보장합니다.</span>
+                    <span>
+                        <span th:text="#{login.security.line1}">비밀번호는 NewTypeBlog에 저장되지 않으며</span><br>
+                        <span th:text="#{login.security.line2}">Google OAuth2를 통한 안전한 액세스를 보장합니다.</span>
+                    </span>
                 </p>
 
                 <!-- 언어 선택 토글 영역 -->
-                <th:block th:replace="~{common :: languageToggle}"></th:block>
+                <th:block th:replace="~{common :: languageToggle(true)}"></th:block>
                 
             </div>
 
         </section>
     </main>
 
+    <script src="/js/languageToggle.js"></script> <!-- 인증 화면의 한국어·일본어 선택과 언어 쿠키 갱신 -->
     <script src="/js/oauthLogin.js"></script> <!-- Google 로그인 클릭 시 로딩 상태 표시와 중복 요청 방지 -->
 </body>
 </html>
