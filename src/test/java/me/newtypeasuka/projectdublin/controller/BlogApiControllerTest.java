@@ -234,6 +234,61 @@ class BlogApiControllerTest {
                         "'article-card__modified-marker'")));
     }
 
+    @DisplayName("게시글 등록 시 한국어·일본어·기타·판별 불가 언어를 저장한다")
+    @Test
+    void saveDetectedArticleLanguages() throws Exception {
+        Long koreanArticleId = createArticle(
+                "제주 여행 기록",
+                "<p>오늘은 바닷가를 걸으며 여행 이야기를 기록했습니다.</p>"
+        );
+        Long japaneseArticleId = createArticle(
+                "京都旅行の記録",
+                "<p>今日は静かな町を歩きながら、きれいな景色を楽しみました。</p>"
+        );
+        Long otherArticleId = createArticle(
+                "A Weekend Journey",
+                "<p>This article was written entirely in English.</p>"
+        );
+        Long undeterminedArticleId = createArticle(
+                "2026",
+                "<p>🚀 1234</p>"
+        );
+
+        assertThat(blogRepository.findById(koreanArticleId).orElseThrow().getLanguage())
+                .isEqualTo(Article.Language.KOREAN);
+        assertThat(blogRepository.findById(japaneseArticleId).orElseThrow().getLanguage())
+                .isEqualTo(Article.Language.JAPANESE);
+        assertThat(blogRepository.findById(otherArticleId).orElseThrow().getLanguage())
+                .isEqualTo(Article.Language.OTHER);
+        assertThat(blogRepository.findById(undeterminedArticleId).orElseThrow().getLanguage())
+                .isEqualTo(Article.Language.UNDETERMINED);
+    }
+
+    @DisplayName("한국어 게시글 전체를 일본어로 수정하면 일본어로 다시 판별한다")
+    @Test
+    void redetectJapaneseWhenUpdatingKoreanArticle() throws Exception {
+        Long articleId = createArticle(
+                "한국어 게시글",
+                "<p>처음에는 한국어로 작성한 게시글입니다.</p>"
+        );
+        assertThat(blogRepository.findById(articleId).orElseThrow().getLanguage())
+                .isEqualTo(Article.Language.KOREAN);
+
+        UpdateArticleRequest updateRequest = new UpdateArticleRequest(
+                "日本語の記事",
+                "<p>内容をすべて日本語に修正した記事です。</p>"
+        );
+        mockMvc.perform(put("/api/articles/{id}", articleId)
+                        .with(loginUser())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+
+        assertThat(blogRepository.findById(articleId).orElseThrow().getLanguage())
+                .isEqualTo(Article.Language.JAPANESE);
+    }
+
     @DisplayName("게시글 제목은 40자까지 허용하고 작성 화면에 글자 수 표시를 제공한다")
     @Test
     void limitArticleTitleToFortyCharacters() throws Exception {
@@ -863,6 +918,20 @@ class BlogApiControllerTest {
         return articles.stream()
                 .map(ArticleListViewResponse::getId)
                 .toList();
+    }
+
+    private Long createArticle(String title, String content) throws Exception {
+        AddArticleRequest request = new AddArticleRequest(title, content);
+        String response = mockMvc.perform(post("/api/articles")
+                        .with(loginUser())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return objectMapper.readTree(response).get("id").asLong();
     }
 
     private RequestPostProcessor loginUser() {

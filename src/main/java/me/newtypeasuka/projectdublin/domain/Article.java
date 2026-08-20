@@ -48,23 +48,32 @@ public class Article {
     private boolean pinned;
 
     @Column(name = "language", nullable = false, length = 30)
-    private String language;
+    @Convert(converter = LanguageConverter.class)
+    private Language language;
 
     @Builder // 빌더 패턴으로 객체 생성
-    public Article(User author, String title, String content, String searchContent) {
+    public Article(User author,
+                   String title,
+                   String content,
+                   String searchContent,
+                   Language language) {
         this.author = author;
         this.title = title;
         this.content = content;
         this.searchContent = searchContent;
         this.viewCount = 0L;
         this.pinned = false;
-        this.language = "korean";
+        this.language = language == null ? Language.KOREAN : language;
     }
 
-    public void update(String title, String content, String searchContent) { // 블로그 글 수정
+    public void update(String title,
+                       String content,
+                       String searchContent,
+                       Language language) { // 블로그 글 수정 시 본문 언어도 다시 반영
         this.title = title;
         this.content = content;
         this.searchContent = searchContent;
+        this.language = language;
     }
 
     public void updatePinned(boolean pinned) {
@@ -78,5 +87,47 @@ public class Article {
     @LastModifiedDate // 수정일시 자동 저장
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // 게시글 목록의 표시 언어를 구분하는 articles.language 값
+    public enum Language {
+        KOREAN("korean"),
+        JAPANESE("japanese"),
+        OTHER("other"),
+        UNDETERMINED("undetermined");
+
+        private final String databaseValue;
+
+        Language(String databaseValue) {
+            this.databaseValue = databaseValue;
+        }
+
+        public String getDatabaseValue() {
+            return databaseValue;
+        }
+
+        public static Language fromDatabaseValue(String databaseValue) {
+            for (Language language : values()) {
+                if (language.databaseValue.equals(databaseValue)) {
+                    return language;
+                }
+            }
+            throw new IllegalArgumentException("unsupported article language: " + databaseValue);
+        }
+    }
+
+    // enum을 기존 소문자 language 컬럼 값으로 변환하여 저장
+    @Converter
+    public static class LanguageConverter implements AttributeConverter<Language, String> {
+
+        @Override
+        public String convertToDatabaseColumn(Language language) {
+            return language == null ? null : language.getDatabaseValue();
+        }
+
+        @Override
+        public Language convertToEntityAttribute(String databaseValue) {
+            return databaseValue == null ? null : Language.fromDatabaseValue(databaseValue);
+        }
+    }
 
 }

@@ -34,6 +34,7 @@ public class BlogService {
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
     private final ArticleContentService articleContentService;
+    private final ArticleLanguageService articleLanguageService;
     private final ArticleImageService articleImageService;
 
     // 블로그 글 작성
@@ -43,8 +44,18 @@ public class BlogService {
         String sanitizedTitle = sanitizeTitle(request.getTitle());
         String sanitizedContent = articleContentService.sanitize(request.getContent());
         String searchContent = articleContentService.extractSearchContent(sanitizedContent);
+        Article.Language language = articleLanguageService.detect(
+                sanitizedTitle,
+                searchContent
+        );
         Article article = blogRepository.save(
-                request.toEntity(author, sanitizedTitle, sanitizedContent, searchContent)
+                request.toEntity(
+                        author,
+                        sanitizedTitle,
+                        sanitizedContent,
+                        searchContent,
+                        language
+                )
         );
         articleImageService.synchronize(article, author);
         return article;
@@ -167,7 +178,11 @@ public class BlogService {
         String sanitizedTitle = sanitizeTitle(request.getTitle());
         String sanitizedContent = articleContentService.sanitize(request.getContent());
         String searchContent = articleContentService.extractSearchContent(sanitizedContent);
-        article.update(sanitizedTitle, sanitizedContent, searchContent);
+        Article.Language language = articleLanguageService.detect(
+                sanitizedTitle,
+                searchContent
+        );
+        article.update(sanitizedTitle, sanitizedContent, searchContent, language);
         articleImageService.synchronize(article, currentUser);
 
         return article; // @Transactional 어노테이션을 사용하면, 엔티티를 조회한 후 변경된 값을 디비에 반환하지 않아도 JPA가 자동으로 1차 캐시를 통해 변경을 감지하고 이를 DB에 반영함
