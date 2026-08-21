@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>채팅 · NewTypeBlog</title>
+    <title th:text="#{chat.page.title}">채팅 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
@@ -505,6 +505,24 @@
             .chat-composer__submit-label {
                 display: none;
             }
+            html[lang="ja"] .chat-toolbar__title {
+                flex: 0 0 auto;
+                font-size: 1.7rem;
+                letter-spacing: -0.04em;
+                white-space: nowrap;
+            }
+            html[lang="ja"] .chat-connection {
+                gap: 0.3rem;
+                padding: 0.45rem 0.55rem;
+                font-size: 0.64rem;
+            }
+            html[lang="ja"] .chat-panel__limit {
+                display: none;
+            }
+            html[lang="ja"] .chat-panel__name {
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
         }
 
         /* 접근성: 동작 줄이기 설정에서 메시지 애니메이션 제거 */
@@ -518,12 +536,13 @@
         }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
+<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans"
+    th:attr="data-language-change-confirm=#{chat.language.change.unsaved}">
     <!-- 공통 헤더 섹션 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <!-- 공통 네비게이션 섹션 -->
-    <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
+    <th:block th:replace="~{common :: siteNavbar(true, true)}"></th:block>
 
     <main id="main-content"
         class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
@@ -538,13 +557,16 @@
                             CHAT
                         </span>
                         <div class="chat-toolbar__title-row">
-                            <h2 id="chat-page-title" class="chat-toolbar__title">채팅</h2>
+                            <h2 id="chat-page-title"
+                                class="chat-toolbar__title"
+                                th:text="#{chat.heading}">채팅</h2>
                             <div id="chat-connection"
                                 class="chat-connection"
                                 role="status"
                                 aria-live="polite">
                                 <span class="chat-connection__dot" aria-hidden="true"></span>
-                                <span id="chat-connection-label">연결 준비 중</span>
+                                <span id="chat-connection-label"
+                                    th:text="#{chat.connection.preparing}">연결 준비 중</span>
                             </div>
                         </div>
                     </div>
@@ -560,13 +582,17 @@
                                 <i class="bi bi-people-fill"></i>
                             </span>
                             <div class="tw:min-w-0">
-                                <strong id="chat-room-name" class="chat-panel__name">공개 채팅방</strong>
-                                <span class="chat-panel__guide">모든 로그인 사용자가 함께 대화할 수 있습니다.</span>
+                                <strong id="chat-room-name"
+                                    class="chat-panel__name"
+                                    th:text="#{chat.room.name}">공개 채팅방</strong>
+                                <span class="chat-panel__guide"
+                                    th:text="#{chat.room.guide}">모든 로그인 사용자가 함께 대화할 수 있습니다.</span>
                             </div>
                         </div>
                         <span class="chat-panel__limit">
                             <i class="bi bi-chat-text" aria-hidden="true"></i>
-                            <span>메시지</span> 300자
+                            <span th:text="#{chat.limit.label}">메시지</span>
+                            <span th:text="#{chat.limit.unit}">300자</span>
                         </span>
                     </header>
 
@@ -577,7 +603,7 @@
                                 class="chat-history__button"
                                 type="button">
                                 <i class="bi bi-clock-history" aria-hidden="true"></i>
-                                이전 메시지
+                                <span th:text="#{chat.history.previous}">이전 메시지</span>
                             </button>
                         </div>
 
@@ -585,28 +611,31 @@
                             <span class="chat-state__icon" aria-hidden="true">
                                 <span class="spinner-border spinner-border-sm" role="presentation"></span>
                             </span>
-                            <strong class="chat-state__title">대화를 불러오는 중입니다.</strong>
-                            <span>잠시만 기다려주세요.</span>
+                            <strong class="chat-state__title"
+                                th:text="#{chat.state.loading.title}">대화를 불러오는 중입니다.</strong>
+                            <span th:text="#{common.wait}">잠시만 기다려주세요.</span>
                         </div>
 
                         <div id="chat-empty" class="chat-state" hidden>
                             <span class="chat-state__icon" aria-hidden="true">
                                 <i class="bi bi-chat-heart"></i>
                             </span>
-                            <strong class="chat-state__title">아직 작성된 메시지가 없습니다.</strong>
-                            <span>첫 번째 대화를 시작해보세요.</span>
+                            <strong class="chat-state__title"
+                                th:text="#{chat.state.empty.title}">아직 작성된 메시지가 없습니다.</strong>
+                            <span th:text="#{chat.state.empty.description}">첫 번째 대화를 시작해보세요.</span>
                         </div>
 
                         <div id="chat-load-error" class="chat-state" role="alert" hidden>
                             <span class="chat-state__icon" aria-hidden="true">
                                 <i class="bi bi-cloud-slash"></i>
                             </span>
-                            <strong class="chat-state__title">대화를 불러오지 못했습니다.</strong>
+                            <strong class="chat-state__title"
+                                th:text="#{chat.state.error.title}">대화를 불러오지 못했습니다.</strong>
                             <button id="chat-retry-button"
                                 class="btn btn-sm chat-history__button"
                                 type="button">
                                 <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-                                다시 시도
+                                <span th:text="#{common.action.retry}">다시 시도</span>
                             </button>
                         </div>
 
@@ -620,12 +649,16 @@
                     <form id="chat-form" class="chat-composer" novalidate>
                         <div class="chat-composer__row">
                             <div class="chat-composer__field">
-                                <label class="sr-only" for="chat-message-input">채팅 메시지</label>
+                                <label class="sr-only"
+                                    for="chat-message-input"
+                                    th:text="#{chat.input.label}">채팅 메시지</label>
                                 <textarea id="chat-message-input"
                                     class="chat-composer__input"
                                     rows="1"
                                     maxlength="300"
                                     placeholder="메시지를 입력해주세요."
+                                    th:placeholder="#{chat.input.placeholder}"
+                                    data-language-change-guard
                                     enterkeyhint="send"
                                     aria-describedby="chat-message-counter chat-form-message"
                                     disabled></textarea>
@@ -638,7 +671,8 @@
                                 type="submit"
                                 disabled>
                                 <i id="chat-submit-icon" class="bi bi-send-fill" aria-hidden="true"></i>
-                                <span class="chat-composer__submit-label">전송</span>
+                                <span class="chat-composer__submit-label"
+                                    th:text="#{chat.action.send}">전송</span>
                             </button>
                         </div>
                         <p id="chat-form-message"
@@ -654,6 +688,32 @@
 
     <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
+
+    <!-- 채팅 JavaScript 렌더링 문구 -->
+    <div id="chat-messages"
+        hidden
+        th:attr="data-user=#{chat.message.user},
+            data-admin=#{chat.message.admin},
+            data-delete=#{chat.message.delete},
+            data-history-loading=#{chat.history.loading},
+            data-history-previous=#{chat.history.previous},
+            data-history-load-error=#{chat.history.load.error},
+            data-delete-confirm=#{chat.message.delete.confirm},
+            data-delete-error=#{chat.message.delete.error},
+            data-connection-required=#{chat.connection.required},
+            data-validation-length=#{chat.validation.length},
+            data-sending=#{chat.message.sending},
+            data-send-delayed=#{chat.message.send.delayed},
+            data-process-error=#{chat.message.process.error},
+            data-module-error-label=#{chat.connection.module.error.label},
+            data-module-error=#{chat.connection.module.error},
+            data-security-error-label=#{chat.security.error.label},
+            data-security-error=#{chat.security.error},
+            data-connected=#{chat.connection.connected},
+            data-display-error=#{chat.message.display.error},
+            data-retrying=#{chat.connection.retrying},
+            data-disconnected-retrying=#{chat.connection.disconnected.retrying},
+            data-connecting=#{chat.connection.connecting}"></div>
 
     <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
     <!-- STOMP WebSocket 연결과 공개 채팅 동작 -->

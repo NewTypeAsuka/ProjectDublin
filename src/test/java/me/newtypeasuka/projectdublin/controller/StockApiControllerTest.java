@@ -1,11 +1,15 @@
 package me.newtypeasuka.projectdublin.controller;
 
+import me.newtypeasuka.projectdublin.config.LocaleConfig;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.PricePointResponse;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockListResponse;
 import me.newtypeasuka.projectdublin.dto.StockApiResponse.StockResponse;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.StockService;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +31,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
@@ -115,14 +121,50 @@ class StockApiControllerTest {
                 .andExpect(content().string(containsString("id=\"stock-list\"")))
                 .andExpect(content().string(containsString("src=\"/js/stocks.js\"")))
                 .andExpect(content().string(containsString(
-                        "미국·한국·일본·홍콩·중국 주식 시장 지원 · 30분 캐시"
-                )));
+                        "미국·한국·일본·홍콩·중국 주식 시장 지원"
+                )))
+                .andExpect(content().string(containsString("30분 캐시")));
 
         mockMvc.perform(get("/js/stocks.js"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(
                         "loadCollection(activeRequest)"
                 )));
+    }
+
+    @DisplayName("일본어 선택 시 공통 내비게이션과 주식의 정적·동적 문구를 일본어로 렌더링한다")
+    @Test
+    void renderJapaneseStocksPage() throws Exception {
+        MvcResult result = mockMvc.perform(get("/menu/stocks")
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "ja")
+                        .with(loginUser(member)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("stocks"))
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element languageToggle = document.selectFirst("[data-language-toggle]");
+        Element messageConfig = document.selectFirst("#stock-messages");
+
+        assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(document.title()).isEqualTo("株価 · NewTypeBlog");
+        assertThat(document.selectFirst("#stock-page-title").text()).isEqualTo("株価");
+        assertThat(document.selectFirst("#stock-search-input").attr("placeholder"))
+                .isEqualTo("ティッカー検索");
+        assertThat(document.selectFirst(".stock-summary__source").text())
+                .isEqualTo("米国・韓国・日本・香港・中国市場 · 30分キャッシュ");
+        assertThat(document.select(".site-nav-dropdown__item"))
+                .extracting(Element::text)
+                .containsExactly("記事", "マイページ", "株価", "チャット");
+        assertThat(languageToggle).isNotNull();
+        assertThat(languageToggle.hasAttr("disabled")).isFalse();
+        assertThat(languageToggle.attr("data-current-language")).isEqualTo("ja");
+        assertThat(languageToggle.select(".language-toggle__option.is-active").text())
+                .isEqualTo("日本語");
+        assertThat(messageConfig).isNotNull();
+        assertThat(messageConfig.attr("data-market-jp")).isEqualTo("日本");
+        assertThat(messageConfig.attr("data-chart-close")).isEqualTo("日次終値");
+        assertThat(document.select("script[src=/js/languageToggle.js]")).hasSize(1);
     }
 
     private StockListResponse stockResponse(String symbol,

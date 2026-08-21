@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>주식 · NewTypeBlog</title>
+    <title th:text="#{stocks.page.title}">주식 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
@@ -164,6 +164,15 @@
         }
         .stock-summary__source i {
             flex: 0 0 auto;
+        }
+        .stock-summary__source-text {
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            column-gap: 0.25rem;
+        }
+        .stock-summary__source-cache {
+            white-space: nowrap;
         }
         .stock-summary__count {
             color: rgba(27, 100, 218, 1);
@@ -464,6 +473,14 @@
                 justify-content: flex-start;
                 text-align: left;
             }
+            .stock-summary__source-text {
+                justify-content: flex-start;
+            }
+            html[lang="ja"] .stock-summary__source-markets,
+            html[lang="ja"] .stock-summary__source-cache {
+                font-size: 0.76rem;
+                white-space: nowrap;
+            }
             .stock-card__header {
                 align-items: flex-start;
                 flex-direction: column;
@@ -498,7 +515,7 @@
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <!-- 공통 네비게이션 섹션 -->
-    <th:block th:replace="~{common :: siteNavbar(true)}"></th:block>
+    <th:block th:replace="~{common :: siteNavbar(true, true)}"></th:block>
 
     <main id="main-content"
         class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
@@ -513,17 +530,22 @@
                             STOCKS
                         </span>
                         <div class="stock-toolbar__title-row">
-                            <h2 id="stock-page-title" class="stock-toolbar__title">주식</h2>
+                            <h2 id="stock-page-title"
+                                class="stock-toolbar__title"
+                                th:text="#{stocks.heading}">주식</h2>
                             <form id="stock-search-form"
                                 class="stock-search"
                                 role="search"
                                 novalidate>
-                                <label class="sr-only" for="stock-search-input">주식 티커 검색</label>
+                                <label class="sr-only"
+                                    for="stock-search-input"
+                                    th:text="#{stocks.search.label}">주식 티커 검색</label>
                                 <input id="stock-search-input"
                                     class="stock-search__input"
                                     type="search"
                                     name="query"
                                     placeholder="티커 검색"
+                                    th:placeholder="#{stocks.search.placeholder}"
                                     maxlength="15"
                                     pattern="[A-Za-z0-9.\-]+"
                                     autocomplete="off"
@@ -538,7 +560,9 @@
                                     aria-controls="stock-search-input"
                                     aria-expanded="false"
                                     aria-label="검색창 열기"
-                                    title="검색창 열기">
+                                    title="검색창 열기"
+                                    th:attr="aria-label=#{stocks.search.open},
+                                        title=#{stocks.search.open}">
                                     <i class="bi bi-search" aria-hidden="true"></i>
                                 </button>
 
@@ -547,6 +571,8 @@
                                     type="button"
                                     aria-label="관심 종목으로 돌아가기"
                                     title="관심 종목으로 돌아가기"
+                                    th:attr="aria-label=#{stocks.search.reset},
+                                        title=#{stocks.search.reset}"
                                     hidden>
                                     <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                                 </button>
@@ -556,15 +582,25 @@
                 </section>
 
                 <!-- 현재 주식 목록과 갱신 기준 안내 섹션 -->
-                <section class="stock-summary" aria-label="시세 조회 정보">
+                <section class="stock-summary"
+                    aria-label="시세 조회 정보"
+                    th:attr="aria-label=#{stocks.summary.aria}">
                     <span class="stock-summary__view">
                         <i class="bi bi-bookmark-star" aria-hidden="true"></i>
-                        <span id="stock-view-label">관심 종목</span>
+                        <span id="stock-view-label"
+                            th:text="#{stocks.watchlist}">관심 종목</span>
                         <span id="stock-count" class="stock-summary__count">0</span>
                     </span>
                     <span class="stock-summary__source">
                         <i class="bi bi-clock-history" aria-hidden="true"></i>
-                        <span>미국·한국·일본·홍콩·중국 주식 시장 지원 · 30분 캐시</span>
+                        <span class="stock-summary__source-text">
+                            <span class="stock-summary__source-markets"
+                                th:text="#{stocks.source.markets}">미국·한국·일본·홍콩·중국 주식 시장 지원</span>
+                            <span class="stock-summary__source-cache">
+                                <span aria-hidden="true">·</span>
+                                <span th:text="#{stocks.source.cache}">30분 캐시</span>
+                            </span>
+                        </span>
                     </span>
                 </section>
 
@@ -584,8 +620,9 @@
                     <span class="stock-state__icon" aria-hidden="true">
                         <span class="spinner-border spinner-border-sm" role="presentation"></span>
                     </span>
-                    <strong class="stock-state__title">주식 시세를 불러오는 중입니다.</strong>
-                    <span>잠시만 기다려주세요.</span>
+                    <strong class="stock-state__title"
+                        th:text="#{stocks.loading.title}">주식 시세를 불러오는 중입니다.</strong>
+                    <span th:text="#{common.wait}">잠시만 기다려주세요.</span>
                 </section>
 
                 <!-- 주식 API 오류 섹션 -->
@@ -596,14 +633,16 @@
                     <span class="stock-state__icon" aria-hidden="true">
                         <i class="bi bi-cloud-slash"></i>
                     </span>
-                    <strong class="stock-state__title">시세를 불러오지 못했습니다.</strong>
-                    <span id="stock-error-message">잠시 후 다시 시도해주세요.</span>
+                    <strong class="stock-state__title"
+                        th:text="#{stocks.error.title}">시세를 불러오지 못했습니다.</strong>
+                    <span id="stock-error-message"
+                        th:text="#{stocks.error.default}">잠시 후 다시 시도해주세요.</span>
                     <div>
                         <button id="stock-retry-button"
                             class="btn btn-sm stock-state__retry"
                             type="button">
                             <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-                            다시 시도
+                            <span th:text="#{common.action.retry}">다시 시도</span>
                         </button>
                     </div>
                 </section>
@@ -617,8 +656,9 @@
                     <span class="stock-state__icon" aria-hidden="true">
                         <i class="bi bi-search"></i>
                     </span>
-                    <strong class="stock-state__title">검색된 티커가 없습니다.</strong>
-                    <span>티커를 확인한 뒤 다시 검색해주세요.</span>
+                    <strong class="stock-state__title"
+                        th:text="#{stocks.empty.title}">검색된 티커가 없습니다.</strong>
+                    <span th:text="#{stocks.empty.description}">티커를 확인한 뒤 다시 검색해주세요.</span>
                 </section>
 
                 <!-- 주식 카드 목록 섹션 -->
@@ -629,7 +669,8 @@
 
                 <!-- 주식 시세 이용 안내 영역 -->
                 <p class="stock-disclaimer">
-                    표시된 정보는 개인적인 참고용이며<br>실제 거래 시세와 차이가 있을 수 있습니다.
+                    <span th:text="#{stocks.disclaimer.line1}">표시된 정보는 개인적인 참고용이며</span><br>
+                    <span th:text="#{stocks.disclaimer.line2}">실제 거래 시세와 차이가 있을 수 있습니다.</span>
                 </p>
 
             </div>
@@ -638,6 +679,32 @@
 
     <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
+
+    <!-- 주식 JavaScript 렌더링 문구 -->
+    <div id="stock-messages"
+        hidden
+        th:attr="data-search-action=#{stocks.search.action},
+            data-search-open=#{stocks.search.open},
+            data-watchlist=#{stocks.watchlist},
+            data-quote-time-unavailable=#{stocks.quote.time.unavailable},
+            data-chart-period=#{stocks.chart.period},
+            data-chart-close=#{stocks.chart.close},
+            data-chart-empty=#{stocks.chart.empty},
+            data-chart-aria=#{stocks.chart.aria},
+            data-quote-time-title=#{stocks.quote.time.title},
+            data-change-unavailable=#{stocks.change.unavailable},
+            data-stock-fallback=#{stocks.stock.fallback},
+            data-previous-close=#{stocks.previous.close},
+            data-search-result=#{stocks.search.result},
+            data-status-stale=#{stocks.status.stale},
+            data-status-partial=#{stocks.status.partial},
+            data-load-error=#{stocks.load.error},
+            data-ticker-invalid=#{stocks.ticker.invalid},
+            data-market-us=#{stocks.market.us},
+            data-market-jp=#{stocks.market.jp},
+            data-market-kr=#{stocks.market.kr},
+            data-market-hk=#{stocks.market.hk},
+            data-market-cn=#{stocks.market.cn}"></div>
 
     <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
     <script src="/js/stocks.js"></script> <!-- 관심 종목 조회·티커 검색·일별 주가 그래프 표시 -->

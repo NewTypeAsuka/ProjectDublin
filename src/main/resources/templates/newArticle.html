@@ -351,7 +351,7 @@
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <!-- 공통 네비게이션 섹션 -->
-    <th:block th:replace="~{common :: siteNavbar(false)}"></th:block> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
+    <th:block th:replace="~{common :: siteNavbar(false, false)}"></th:block> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
 
     <main id="main-content"
             class="container flex-fill py-4 py-md-5 editor-shell tw:relative">

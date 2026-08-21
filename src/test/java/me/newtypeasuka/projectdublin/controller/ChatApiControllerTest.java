@@ -1,11 +1,15 @@
 package me.newtypeasuka.projectdublin.controller;
 
+import me.newtypeasuka.projectdublin.config.LocaleConfig;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.ChatApiDto.MessageResponse;
 import me.newtypeasuka.projectdublin.dto.ChatApiDto.SendMessageRequest;
 import me.newtypeasuka.projectdublin.repository.ChatRepository;
 import me.newtypeasuka.projectdublin.repository.UserRepository;
 import me.newtypeasuka.projectdublin.service.ChatService;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +99,49 @@ class ChatApiControllerTest {
                 .andExpect(jsonPath("$.messages[0].expiresAtEpochMillis").isNumber())
                 .andExpect(jsonPath("$.currentUserId").value(member.getId()))
                 .andExpect(jsonPath("$.currentUserAdmin").value(false));
+    }
+
+    @DisplayName("일본어 선택 시 공통 내비게이션과 채팅의 정적·동적 문구를 일본어로 렌더링한다")
+    @Test
+    void renderJapaneseChatPage() throws Exception {
+        MvcResult result = mockMvc.perform(get("/menu/chat")
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "ja")
+                        .with(loginUser(member)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("chat"))
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element languageToggle = document.selectFirst("[data-language-toggle]");
+        Element messageConfig = document.selectFirst("#chat-messages");
+
+        assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(document.title()).isEqualTo("チャット · NewTypeBlog");
+        assertThat(document.selectFirst(".intro-header__subtitle").text())
+                .isEqualTo("NewTypeBlogへようこそ。");
+        assertThat(document.selectFirst("#chat-page-title").text()).isEqualTo("チャット");
+        assertThat(document.selectFirst("#chat-room-name").text())
+                .isEqualTo("公開チャットルーム");
+        assertThat(document.selectFirst("#chat-message-input").attr("placeholder"))
+                .isEqualTo("メッセージ");
+        assertThat(document.select(".site-nav-dropdown__item"))
+                .extracting(Element::text)
+                .containsExactly("記事", "マイページ", "株価", "チャット");
+        assertThat(languageToggle).isNotNull();
+        assertThat(languageToggle.hasAttr("disabled")).isFalse();
+        assertThat(languageToggle.attr("data-current-language")).isEqualTo("ja");
+        assertThat(languageToggle.select(".language-toggle__option.is-active").text())
+                .isEqualTo("日本語");
+        assertThat(messageConfig).isNotNull();
+        assertThat(messageConfig.attr("data-delete")).isEqualTo("削除");
+        assertThat(messageConfig.attr("data-connected")).isEqualTo("リアルタイム接続済み");
+        assertThat(document.selectFirst("#user-profile-loading").text())
+                .isEqualTo("ユーザー情報を読み込んでいます。");
+        assertThat(document.selectFirst("#user-profile-nickname-guide").text())
+                .isEqualTo("3文字以上12文字以下で入力してください。");
+        assertThat(document.selectFirst("#user-profile-cancel").text())
+                .isEqualTo("キャンセル");
+        assertThat(document.select("script[src=/js/languageToggle.js]")).hasSize(1);
     }
 
     @DisplayName("STOMP 메시지 처리 메서드는 세션 사용자를 작성자로 저장한다")

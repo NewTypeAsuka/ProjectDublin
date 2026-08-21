@@ -1,5 +1,5 @@
 // 공통 마이페이지 모달에서 사용자 정보 조회와 닉네임 변경을 관리하는 스크립트
-// 사용처: common.html (articleList.html, article.html, newArticle.html, stocks.html에 공통 적용)
+// 사용처: common.html (articleList.html, article.html, newArticle.html, chat.html, stocks.html에 공통 적용)
 
 (function () {
     const openButton = document.getElementById('user-profile-open');
@@ -22,16 +22,19 @@
     const message = document.getElementById('user-profile-message');
     const submitButton = document.getElementById('user-profile-submit');
     const submitIcon = document.getElementById('user-profile-submit-icon');
+    const messageConfig = document.getElementById('user-profile-messages');
 
     if (!openButton || !dialog || !closeButton || !cancelButton || !retryButton
             || !loading || !loadError || !loadErrorMessage || !content
             || !currentNickname || !email || !articleCount || !commentCount
             || !nicknameForm || !nicknameInput || !nicknameCounter
             || !nicknameGuide || !message || !submitButton || !submitIcon
+            || !messageConfig
             || typeof window.csrfFetch !== 'function') {
         return;
     }
 
+    const messages = messageConfig.dataset;
     const minimumLength = 3;
     const maximumLength = 12;
     const submitIconClass = submitIcon.className;
@@ -116,10 +119,10 @@
             const responseBody = await readJson(response);
             if (!response.ok) {
                 const fallbackMessage = response.status === 409
-                        ? '이미 사용 중인 닉네임입니다.'
-                        : '닉네임을 확인해주세요.';
+                        ? messages.nicknameDuplicate
+                        : messages.nicknameInvalid;
                 serverInvalid = true;
-                showMessage(responseBody.message || fallbackMessage, 'error');
+                showMessage(fallbackMessage, 'error');
                 return;
             }
 
@@ -131,9 +134,9 @@
             nicknameInput.value = responseBody.nickname;
             updateVisibleNicknames(responseBody.userId, responseBody.nickname);
             updateNicknameState();
-            showMessage('닉네임을 변경했습니다.', 'success');
+            showMessage(messages.nicknameUpdated, 'success');
         } catch (error) {
-            showMessage('닉네임을 변경하지 못했습니다. 잠시 후 다시 시도해주세요.', 'error');
+            showMessage(messages.nicknameUpdateError, 'error');
         } finally {
             setSubmitting(false);
         }
@@ -176,7 +179,7 @@
             if (requestSequence !== loadSequence) {
                 return;
             }
-            showLoadError('내 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+            showLoadError(messages.loadErrorRetry);
         }
     }
 
@@ -197,17 +200,20 @@
         );
 
         if (length === 0) {
-            nicknameGuide.textContent = '3자 이상 12자 이하로 입력해주세요.';
+            nicknameGuide.textContent = messages.guideDefault;
         } else if (length < minimumLength) {
-            nicknameGuide.textContent = `${minimumLength - length}자를 더 입력해주세요.`;
+            nicknameGuide.textContent = formatMessage(
+                messages.guideShort,
+                minimumLength - length
+            );
         } else if (length > maximumLength) {
-            nicknameGuide.textContent = `${maximumLength}자 이하로 입력해주세요.`;
+            nicknameGuide.textContent = formatMessage(messages.guideMax, maximumLength);
         } else if (serverInvalid) {
-            nicknameGuide.textContent = '다른 닉네임을 입력해주세요.';
+            nicknameGuide.textContent = messages.guideDifferent;
         } else {
             nicknameGuide.textContent = changed
-                    ? '사용 가능한 길이입니다. 중복 여부는 수정할 때 확인합니다.'
-                    : '현재 사용 중인 닉네임입니다.';
+                    ? messages.guideValid
+                    : messages.guideCurrent;
         }
 
         if (length > 0) {
@@ -251,6 +257,13 @@
         message.classList.remove('d-none', 'alert-danger', 'alert-success');
         message.classList.add(state === 'success' ? 'alert-success' : 'alert-danger');
         message.setAttribute('role', state === 'success' ? 'status' : 'alert');
+    }
+
+    function formatMessage(template, ...values) {
+        return values.reduce(
+            (result, value, index) => result.split(`{${index}}`).join(String(value)),
+            template
+        );
     }
 
     function clearMessage() {

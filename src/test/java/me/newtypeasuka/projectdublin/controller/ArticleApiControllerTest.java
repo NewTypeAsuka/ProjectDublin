@@ -397,9 +397,9 @@ class ArticleApiControllerTest {
                 )));
     }
 
-    @DisplayName("아직 번역하지 않은 일반 화면의 언어 토글은 비활성 상태를 유지한다")
+    @DisplayName("아직 번역하지 않은 게시글 화면의 언어 토글은 비활성 상태를 유지한다")
     @Test
-    void keepLanguageToggleDisabledOutsideAuthenticationPages() throws Exception {
+    void keepLanguageToggleDisabledOnUntranslatedArticlePages() throws Exception {
         MvcResult result = mockMvc.perform(get("/articles")
                         .with(loginUser(member))
                         .cookie(new Cookie(LocaleConfig.LANGUAGE_COOKIE, "ja")))
@@ -414,7 +414,7 @@ class ArticleApiControllerTest {
         assertThat(languageToggle).isNotNull();
         assertThat(languageToggle.hasAttr("disabled")).isTrue();
         assertThat(languageToggle.attr("aria-label"))
-                .isEqualTo("현재 한국어가 선택되어 있습니다. 일본어 전환 기능은 준비 중입니다.");
+                .isEqualTo("現在は韓国語が選択されています。日本語切替機能は準備中です。");
         assertThat(languageToggle.attr("data-current-language")).isEqualTo("ko");
         assertThat(languageToggle.select(".language-toggle__option.is-active").text())
                 .isEqualTo("한국어");

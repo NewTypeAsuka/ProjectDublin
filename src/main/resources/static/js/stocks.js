@@ -15,14 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('stock-status');
     const viewLabel = document.getElementById('stock-view-label');
     const stockCount = document.getElementById('stock-count');
+    const messageConfig = document.getElementById('stock-messages');
 
     if (!searchForm || !searchInput || !searchToggle || !resetButton
             || !retryButton || !list || !loading || !errorState
             || !errorMessage || !emptyState || !status || !viewLabel
-            || !stockCount) {
+            || !stockCount || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
+    const displayLocale = document.documentElement.lang === 'ja' ? 'ja-JP' : 'ko-KR';
+    const marketNames = {
+        US: messages.marketUs,
+        JP: messages.marketJp,
+        KR: messages.marketKr,
+        HK: messages.marketHk,
+        CN: messages.marketCn
+    };
     const tickerPattern = /^[A-Za-z0-9.\-]+$/;
     const svgNamespace = 'http://www.w3.org/2000/svg';
     let watchlistSnapshot = null;
@@ -37,8 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setSearchOpen(open, focusInput) {
         searchForm.classList.toggle('is-open', open);
         searchToggle.setAttribute('aria-expanded', String(open));
-        searchToggle.setAttribute('aria-label', open ? '티커 검색' : '검색창 열기');
-        searchToggle.title = open ? '티커 검색' : '검색창 열기';
+        const toggleLabel = open ? messages.searchAction : messages.searchOpen;
+        searchToggle.setAttribute('aria-label', toggleLabel);
+        searchToggle.title = toggleLabel;
         searchInput.tabIndex = open ? 0 : -1;
         searchInput.setAttribute('aria-hidden', String(!open));
 
@@ -62,6 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
             element.textContent = text;
         }
         return element;
+    }
+
+    function formatMessage(template, ...values) {
+        return values.reduce(
+            (result, value, index) => result.split(`{${index}}`).join(String(value)),
+            template
+        );
     }
 
     function setStatus(message, state = '') {
@@ -115,14 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const digits = currencyDigits(currency);
         try {
-            return new Intl.NumberFormat('ko-KR', {
+            return new Intl.NumberFormat(displayLocale, {
                 style: 'currency',
                 currency: currency || 'USD',
                 minimumFractionDigits: digits,
                 maximumFractionDigits: digits
             }).format(number);
         } catch (error) {
-            return `${number.toLocaleString('ko-KR', {
+            return `${number.toLocaleString(displayLocale, {
                 maximumFractionDigits: digits
             })} ${currency || ''}`.trim();
         }
@@ -148,13 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatQuotedAt(value) {
         if (!value) {
-            return '시세 기준 시각 없음';
+            return messages.quoteTimeUnavailable;
         }
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) {
-            return '시세 기준 시각 없음';
+            return messages.quoteTimeUnavailable;
         }
-        return `${new Intl.DateTimeFormat('ko-KR', {
+        return `${new Intl.DateTimeFormat(displayLocale, {
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
@@ -182,8 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const figure = createElement('figure', 'stock-chart');
         const label = createElement('div', 'stock-chart__label');
         label.append(
-            createElement('span', '', '최근 1개월'),
-            createElement('span', '', '일별 종가')
+            createElement('span', '', messages.chartPeriod),
+            createElement('span', '', messages.chartClose)
         );
         figure.append(label);
 
@@ -196,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
             figure.append(createElement(
                 'div',
                 'stock-chart__empty',
-                '표시할 가격 흐름이 부족합니다.'
+                messages.chartEmpty
             ));
             return figure;
         }
@@ -218,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         svg.setAttribute('class', 'stock-chart__svg');
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
         svg.setAttribute('role', 'img');
-        svg.setAttribute('aria-label', `${ticker} 최근 1개월 일별 주가 그래프`);
+        svg.setAttribute('aria-label', formatMessage(messages.chartAria, ticker));
         svg.setAttribute('preserveAspectRatio', 'none');
 
         const baseline = document.createElementNS(svgNamespace, 'line');
@@ -264,7 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const identity = createElement('div', 'stock-card__identity');
         identity.append(
             createElement('h3', 'stock-card__ticker', stock.ticker || stock.symbol || '-'),
-            createElement('span', 'stock-card__market', stock.marketName || stock.market || '-')
+            createElement(
+                'span',
+                'stock-card__market',
+                marketNames[String(stock.market || '').toUpperCase()] || stock.market || '-'
+            )
         );
 
         const quotedTime = createElement(
@@ -273,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formatQuotedAt(stock.quotedAt)
         );
         quotedTime.dateTime = stock.quotedAt || '';
-        quotedTime.title = '최근 시세 기준 시각';
+        quotedTime.title = messages.quoteTimeTitle;
         header.append(identity, quotedTime);
 
         const body = createElement('div', 'stock-card__body');
@@ -309,13 +331,17 @@ document.addEventListener('DOMContentLoaded', () => {
             hasChange
                 ? `${formatSignedMoney(stock.priceChange, stock.currency)} `
                     + `(${formatPercent(stock.changePercent)})`
-                : '변동 정보 없음'
+                : messages.changeUnavailable
         ));
         quote.append(change);
 
         body.append(
             quote,
-            createChart(stock.dailyPrices, changeState, stock.ticker || stock.symbol || '종목')
+            createChart(
+                stock.dailyPrices,
+                changeState,
+                stock.ticker || stock.symbol || messages.stockFallback
+            )
         );
 
         const footer = createElement('div', 'stock-card__footer');
@@ -327,7 +353,10 @@ document.addEventListener('DOMContentLoaded', () => {
             createElement(
                 'span',
                 '',
-                `전일 종가 ${formatMoney(stock.previousClose, stock.currency)}`
+                formatMessage(
+                    messages.previousClose,
+                    formatMoney(stock.previousClose, stock.currency)
+                )
             )
         );
 
@@ -356,8 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const stocks = Array.isArray(data.stocks) ? data.stocks : [];
         stockCount.textContent = String(stocks.length);
         viewLabel.textContent = request.mode === 'search'
-            ? `검색: ${request.query}`
-            : '관심 종목';
+            ? formatMessage(messages.searchResult, request.query)
+            : messages.watchlist;
         setSearchMode(request);
 
         if (stocks.length === 0) {
@@ -376,12 +405,12 @@ document.addEventListener('DOMContentLoaded', () => {
             : [];
         if (data.stale === true) {
             setStatus(
-                '외부 시세 연결이 불안정해 마지막으로 정상 조회한 데이터를 표시합니다.',
+                messages.statusStale,
                 'warning'
             );
         } else if (unavailable.length > 0) {
             setStatus(
-                `일부 종목의 시세를 불러오지 못했습니다: ${unavailable.join(', ')}.`,
+                formatMessage(messages.statusPartial, unavailable.join(', ')),
                 'warning'
             );
         } else {
@@ -397,8 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
         activeRequest = request;
         setLoading(true);
         viewLabel.textContent = request.mode === 'search'
-            ? `검색: ${request.query}`
-            : '관심 종목';
+            ? formatMessage(messages.searchResult, request.query)
+            : messages.watchlist;
         setSearchMode(request);
 
         try {
@@ -411,12 +440,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 signal: requestController.signal
             });
             if (!response.ok) {
-                throw new Error(`주식 API 응답 오류: ${response.status}`);
+                throw new Error(`Stock API response error: ${response.status}`);
             }
 
             const data = await response.json();
             if (!data || !Array.isArray(data.stocks)) {
-                throw new Error('주식 API 응답 형식이 올바르지 않습니다.');
+                throw new Error('Invalid stock API response format.');
             }
             if (request.mode === 'watchlist') {
                 watchlistSnapshot = data;
@@ -427,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             console.error(error);
-            showError('시세 제공 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.');
+            showError(messages.loadError);
         }
     }
 
@@ -441,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const query = searchInput.value.trim();
         if (!query || query.length > 15 || !tickerPattern.test(query)) {
             setStatus(
-                '티커는 영문, 숫자, 점, 하이픈을 사용해 15자 이하로 입력해주세요.',
+                messages.tickerInvalid,
                 'error'
             );
             searchInput.focus();

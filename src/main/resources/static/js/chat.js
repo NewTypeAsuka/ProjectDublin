@@ -18,14 +18,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = document.getElementById('chat-submit-button');
     const submitIcon = document.getElementById('chat-submit-icon');
     const formMessage = document.getElementById('chat-form-message');
+    const messageConfig = document.getElementById('chat-messages');
 
     if (!connection || !connectionLabel || !viewport || !history
             || !historyButton || !loading || !empty || !loadError
             || !retryButton || !messageList || !form || !input
-            || !counter || !submitButton || !submitIcon || !formMessage) {
+            || !counter || !submitButton || !submitIcon || !formMessage
+            || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
+    const displayLocale = document.documentElement.lang === 'ja' ? 'ja-JP' : 'ko-KR';
     const historyEndpoint = '/api/menu/chat/messages';
     const topicDestination = '/topic/chat';
     const sendDestination = '/app/chat/messages';
@@ -107,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return String(value).replace('T', ' ').slice(0, 16);
         }
 
-        return new Intl.DateTimeFormat('ko-KR', {
+        return new Intl.DateTimeFormat(displayLocale, {
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
@@ -167,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nickname = createElement(
             'span',
             'user-nickname',
-            message.senderNickname || '사용자'
+            message.senderNickname || messages.user
         );
         nickname.dataset.userId = String(message.senderId);
         sender.append(nickname);
@@ -176,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 'i',
                 'bi bi-patch-check-fill author-admin-badge chat-admin-badge'
             );
-            adminBadge.setAttribute('aria-label', '관리자');
-            adminBadge.setAttribute('title', '관리자');
+            adminBadge.setAttribute('aria-label', messages.admin);
+            adminBadge.setAttribute('title', messages.admin);
             sender.append(adminBadge);
         }
 
@@ -199,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteButton = createElement(
                 'button',
                 'chat-message__delete',
-                '삭제'
+                messages.delete
             );
             deleteButton.type = 'button';
             deleteButton.addEventListener('click', () => {
@@ -310,13 +314,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function parseError(response, fallbackMessage) {
-        try {
-            const body = await response.json();
-            return body.message || body.detail || fallbackMessage;
-        } catch (error) {
-            return fallbackMessage;
-        }
+    function renderHistoryButton(isLoading) {
+        const icon = createElement(
+            isLoading ? 'span' : 'i',
+            isLoading
+                ? 'spinner-border spinner-border-sm'
+                : 'bi bi-clock-history'
+        );
+        icon.setAttribute('aria-hidden', 'true');
+        historyButton.replaceChildren(
+            icon,
+            document.createTextNode(
+                ` ${isLoading ? messages.historyLoading : messages.historyPrevious}`
+            )
+        );
     }
 
     async function loadMessages(beforeId = null) {
@@ -332,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             empty.hidden = true;
         } else {
             historyButton.disabled = true;
-            historyButton.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> 불러오는 중';
+            renderHistoryButton(true);
         }
 
         try {
@@ -345,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 credentials: 'same-origin'
             });
             if (!response.ok) {
-                throw new Error(await parseError(response, '대화를 불러오지 못했습니다.'));
+                throw new Error(messages.historyLoadError);
             }
 
             const data = await response.json();
@@ -353,12 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUserAdmin = Boolean(data.currentUserAdmin);
             hasMore = Boolean(data.hasMore);
             nextBeforeId = data.nextBeforeId ?? null;
-            const messages = Array.isArray(data.messages) ? data.messages : [];
+            const chatMessages = Array.isArray(data.messages) ? data.messages : [];
 
             if (initialLoad) {
                 messageList.replaceChildren();
                 messageElements.clear();
-                messages.forEach(message => addMessage(message));
+                chatMessages.forEach(message => addMessage(message));
                 historyLoaded = true;
                 loading.hidden = true;
                 empty.hidden = messageElements.size !== 0;
@@ -366,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 removeExpiredMessages();
                 scrollToBottom();
             } else {
-                prependMessages(messages);
+                prependMessages(chatMessages);
             }
             history.hidden = !hasMore;
             loadError.hidden = true;
@@ -375,17 +386,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 loading.hidden = true;
                 loadError.hidden = false;
             }
-            setFormMessage(error.message || '대화를 불러오지 못했습니다.', 'error');
+            setFormMessage(messages.historyLoadError, 'error');
         } finally {
             historyLoading = false;
             historyButton.disabled = false;
-            historyButton.innerHTML = '<i class="bi bi-clock-history" aria-hidden="true"></i> 이전 메시지';
+            renderHistoryButton(false);
             updateFormAvailability();
         }
     }
 
     async function deleteMessage(messageId, button) {
-        if (!window.confirm('이 채팅 메시지를 삭제할까요?')) {
+        if (!window.confirm(messages.deleteConfirm)) {
             return;
         }
         button.disabled = true;
@@ -400,13 +411,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             );
             if (!response.ok) {
-                throw new Error(await parseError(response, '메시지를 삭제하지 못했습니다.'));
+                throw new Error(messages.deleteError);
             }
             const event = await response.json();
             applyChatEvent(event);
         } catch (error) {
             button.disabled = false;
-            setFormMessage(error.message || '메시지를 삭제하지 못했습니다.', 'error');
+            setFormMessage(messages.deleteError, 'error');
         }
     }
 
@@ -425,11 +436,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = input.value.trim();
         const length = contentLength(content);
         if (!connected || !stompClient || !stompClient.connected) {
-            setFormMessage('실시간 연결을 확인한 뒤 다시 시도해주세요.', 'error');
+            setFormMessage(messages.connectionRequired, 'error');
             return;
         }
         if (length < 1 || length > 300) {
-            setFormMessage('채팅 메시지는 1자 이상 300자 이하로 입력해주세요.', 'error');
+            setFormMessage(messages.validationLength, 'error');
             return;
         }
 
@@ -438,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
             : createClientMessageId();
         pendingContent = content;
         retryClientMessageId = null;
-        setFormMessage('메시지를 전송하는 중입니다.');
+        setFormMessage(messages.sending);
         updateFormAvailability();
 
         stompClient.publish({
@@ -455,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pendingClientMessageId = null;
             pendingTimer = null;
             setFormMessage(
-                '전송 확인이 지연되고 있습니다. 같은 내용으로 다시 전송할 수 있습니다.',
+                messages.sendDelayed,
                 'error'
             );
             updateFormAvailability();
@@ -463,34 +474,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleWebSocketError(payload) {
-        let message = '채팅 메시지를 처리하지 못했습니다.';
-        try {
-            const error = JSON.parse(payload);
-            message = error.message || message;
-        } catch (parseError) {
-            // 서버의 JSON 오류 응답이 아닌 경우 기본 문구를 사용
-        }
+        // 서버 오류 응답의 언어와 무관하게 현재 화면 언어의 안전한 문구를 표시합니다.
+        void payload;
 
         window.clearTimeout(pendingTimer);
         pendingTimer = null;
         retryClientMessageId = pendingClientMessageId;
         pendingClientMessageId = null;
-        setFormMessage(message, 'error');
+        setFormMessage(messages.processError, 'error');
         updateFormAvailability();
     }
 
     function connectWebSocket() {
         if (!window.StompJs || typeof window.StompJs.Client !== 'function') {
-            setConnectionState('disconnected', '연결 모듈 오류');
-            setFormMessage('실시간 채팅 모듈을 불러오지 못했습니다.', 'error');
+            setConnectionState('disconnected', messages.moduleErrorLabel);
+            setFormMessage(messages.moduleError, 'error');
             return;
         }
 
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
         if (!csrfToken || !csrfHeader) {
-            setConnectionState('disconnected', '보안 토큰 오류');
-            setFormMessage('보안 토큰을 확인하지 못했습니다.', 'error');
+            setConnectionState('disconnected', messages.securityErrorLabel);
+            setFormMessage(messages.securityError, 'error');
             return;
         }
 
@@ -507,13 +513,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         stompClient.onConnect = () => {
             connected = true;
-            setConnectionState('connected', '실시간 연결됨');
+            setConnectionState('connected', messages.connected);
             setFormMessage('');
             stompClient.subscribe(topicDestination, frame => {
                 try {
                     applyChatEvent(JSON.parse(frame.body));
                 } catch (error) {
-                    setFormMessage('새 메시지를 표시하지 못했습니다.', 'error');
+                    setFormMessage(messages.displayError, 'error');
                 }
             });
             stompClient.subscribe(errorDestination, frame => {
@@ -523,21 +529,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         stompClient.onStompError = frame => {
             connected = false;
-            setConnectionState('disconnected', '연결 오류 · 재시도 중');
+            setConnectionState('disconnected', messages.retrying);
             handleWebSocketError(frame.body || '{}');
         };
         stompClient.onWebSocketClose = () => {
             connected = false;
-            setConnectionState('disconnected', '연결 끊김 · 재시도 중');
+            setConnectionState('disconnected', messages.disconnectedRetrying);
             updateFormAvailability();
         };
         stompClient.onWebSocketError = () => {
             connected = false;
-            setConnectionState('disconnected', '연결 오류 · 재시도 중');
+            setConnectionState('disconnected', messages.retrying);
             updateFormAvailability();
         };
 
-        setConnectionState('', '실시간 연결 중');
+        setConnectionState('', messages.connecting);
         stompClient.activate();
     }
 

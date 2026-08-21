@@ -795,36 +795,37 @@
 <body>
     <!-- 공통 헤더 섹션 -->
     <header th:fragment="siteHeader" class="site-header border-bottom">
-        <a class="skip-link" href="#main-content">본문 바로가기</a>
+        <a class="skip-link" href="#main-content" th:text="#{common.header.skip}">본문 바로가기</a>
         <div class="container py-4 py-md-5 text-center tw:relative tw:z-10">
             <p class="intro-header__eyebrow tw:uppercase">MY SPACE TO THINK</p>
             <a href="/" class="intro-header__title-link tw:no-underline">
                 <h1 class="h1 intro-header__title">NewTypeBlog</h1>
             </a>
-            <p class="intro-header__subtitle">
+            <p class="intro-header__subtitle" th:text="#{common.header.subtitle}">
                 NewTypeBlog에 오신 것을 환영합니다.
             </p>
         </div>
     </header>
 
     <!-- 공통 내비게이션 섹션 -->
-    <th:block th:fragment="siteNavbar(showCreateButton)">
+    <th:block th:fragment="siteNavbar(showCreateButton, languageToggleEnabled)">
         <nav class="navbar py-2 site-nav" id="site-nav">
             <div class="container site-nav__inner">
 
                 <!-- 네비게이션 메뉴 영역 -->
                 <div class="navbar-nav flex-row site-nav__menu">
                     <details class="site-nav-dropdown">
-                        <summary aria-label="둘러보기 메뉴 열기">
+                        <summary aria-label="둘러보기 메뉴 열기"
+                                th:attr="aria-label=#{common.nav.open.aria}">
                             <i class="bi bi-compass" aria-hidden="true"></i>
-                            <span>메뉴</span>
+                            <span th:text="#{common.nav.menu}">메뉴</span>
                             <i class="bi bi-chevron-down site-nav-dropdown__icon"
                                 aria-hidden="true"></i>
                         </summary>
                         <div class="site-nav-dropdown__menu">
                             <a class="site-nav-dropdown__item" href="/">
                                 <i class="bi bi-journal-richtext" aria-hidden="true"></i>
-                                <span>포스트</span>
+                                <span th:text="#{common.nav.posts}">포스트</span>
                             </a>
                             <button id="user-profile-open"
                                     class="site-nav-dropdown__item site-nav-dropdown__item--button"
@@ -832,20 +833,20 @@
                                     aria-haspopup="dialog"
                                     aria-controls="user-profile-dialog">
                                 <i class="bi bi-person-circle" aria-hidden="true"></i>
-                                <span>마이페이지</span>
+                                <span th:text="#{common.nav.profile}">마이페이지</span>
                             </button>
                             <a class="site-nav-dropdown__item" href="/menu/stocks">
                                 <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
-                                <span>주식</span>
+                                <span th:text="#{common.nav.stocks}">주식</span>
                             </a>
                             <a class="site-nav-dropdown__item" href="/menu/chat">
                                 <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
-                                <span>채팅</span>
+                                <span th:text="#{common.nav.chat}">채팅</span>
                             </a>
 
                             <!-- 언어 선택 토글 영역 -->
                             <div class="site-nav-language">
-                                <th:block th:replace="~{common :: languageToggle(false)}"></th:block>
+                                <th:block th:replace="~{common :: languageToggle(${languageToggleEnabled})}"></th:block>
                             </div>
                             
                         </div>
@@ -859,7 +860,7 @@
                         id="create-btn"
                         class="btn btn-sm app-button site-nav__write">
                         <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                        <span>글쓰기</span>
+                        <span th:text="#{common.nav.write}">글쓰기</span>
                     </a> <!-- 글쓰기 버튼의 경우 newArticle에서는 렌더링 안되게 처리 -->
                     <form action="/logout" method="post" class="site-nav__logout-form">
                         <input type="hidden"
@@ -867,7 +868,7 @@
                                 th:value="${_csrf.token}"> <!-- 로그아웃도 토큰을 검증할 수 있도록 POST 폼으로 전송(csrf) -->
                         <button type="submit" class="btn btn-sm app-button site-nav__logout">
                             <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-                            <span>로그아웃</span>
+                            <span th:text="#{common.nav.logout}">로그아웃</span>
                         </button>
                     </form>
                 </div>
@@ -885,12 +886,15 @@
                 <header class="site-profile-dialog__header">
                     <div>
                         <p class="site-profile-dialog__eyebrow">MY PAGE</p>
-                        <h2 id="user-profile-title" class="site-profile-dialog__title">마이페이지</h2>
+                        <h2 id="user-profile-title"
+                            class="site-profile-dialog__title"
+                            th:text="#{common.profile.title}">마이페이지</h2>
                     </div>
                     <button id="user-profile-close"
                             class="site-profile-dialog__close"
                             type="button"
-                            aria-label="마이페이지 닫기">
+                            aria-label="마이페이지 닫기"
+                            th:attr="aria-label=#{common.profile.close.aria}">
                         <i class="bi bi-x-lg" aria-hidden="true"></i>
                     </button>
                 </header>
@@ -901,18 +905,19 @@
                         class="site-profile-dialog__loading"
                         role="status">
                         <span class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>
-                        내 정보를 불러오는 중입니다.
+                        <span th:text="#{common.profile.loading}">내 정보를 불러오는 중입니다.</span>
                     </div>
                     <div id="user-profile-load-error"
                         class="site-profile-dialog__load-error d-none"
                         role="alert">
                         <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-                        <p id="user-profile-load-error-message">내 정보를 불러오지 못했습니다.</p>
+                        <p id="user-profile-load-error-message"
+                            th:text="#{common.profile.load.error}">내 정보를 불러오지 못했습니다.</p>
                         <button id="user-profile-retry"
                                 class="btn btn-sm app-button btn-outline-secondary"
                                 type="button">
                             <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
-                            <span>다시 시도</span>
+                            <span th:text="#{common.action.retry}">다시 시도</span>
                         </button>
                     </div>
                     <div id="user-profile-content" class="d-none">
@@ -924,13 +929,15 @@
                         </div>
 
                         <!-- 사용자 활동 요약 영역 -->
-                        <dl class="site-profile-dialog__stats" aria-label="내 활동 요약">
+                        <dl class="site-profile-dialog__stats"
+                            aria-label="내 활동 요약"
+                            th:attr="aria-label=#{common.profile.stats.aria}">
                             <div class="site-profile-dialog__stat">
-                                <dt>작성한 글</dt>
+                                <dt th:text="#{common.profile.stats.articles}">작성한 글</dt>
                                 <dd id="user-profile-article-count">0</dd>
                             </div>
                             <div class="site-profile-dialog__stat">
-                                <dt>댓글·답글</dt>
+                                <dt th:text="#{common.profile.stats.comments}">댓글·답글</dt>
                                 <dd id="user-profile-comment-count">0</dd>
                             </div>
                         </dl>
@@ -940,7 +947,8 @@
                             class="site-profile-dialog__form"
                             novalidate>
                             <label for="user-profile-nickname"
-                                class="site-profile-dialog__label">닉네임 수정</label>
+                                class="site-profile-dialog__label"
+                                th:text="#{common.profile.nickname.label}">닉네임 수정</label>
                             <div class="site-profile-dialog__input-wrap">
                                 <input id="user-profile-nickname"
                                         class="form-control site-profile-dialog__input"
@@ -955,7 +963,8 @@
                                     aria-hidden="true">0/12</span>
                             </div>
                             <p id="user-profile-nickname-guide"
-                                class="site-profile-dialog__guide">
+                                class="site-profile-dialog__guide"
+                                th:text="#{common.profile.nickname.guide.default}">
                                 3자 이상 12자 이하로 입력해주세요.
                             </p>
                             <p id="user-profile-message"
@@ -967,7 +976,7 @@
                                         class="btn btn-outline-secondary app-button site-profile-dialog__action"
                                         type="button">
                                     <i class="bi bi-x-lg" aria-hidden="true"></i>
-                                    <span>취소</span>
+                                    <span th:text="#{common.action.cancel}">취소</span>
                                 </button>
                                 <button id="user-profile-submit"
                                         class="btn btn-primary app-button site-profile-dialog__action"
@@ -976,7 +985,7 @@
                                     <i id="user-profile-submit-icon"
                                         class="bi bi-check2"
                                         aria-hidden="true"></i>
-                                    <span>수정</span>
+                                    <span th:text="#{common.action.modify}">수정</span>
                                 </button>
                             </div>
                         </form>
@@ -987,7 +996,24 @@
             </div>
         </dialog>
 
+        <!-- 마이페이지 JavaScript 렌더링 문구 -->
+        <div id="user-profile-messages"
+            hidden
+            th:attr="data-nickname-duplicate=#{common.profile.nickname.duplicate},
+                data-nickname-invalid=#{common.profile.nickname.invalid},
+                data-nickname-updated=#{common.profile.nickname.updated},
+                data-nickname-update-error=#{common.profile.nickname.update.error},
+                data-load-error-retry=#{common.profile.load.error.retry},
+                data-guide-default=#{common.profile.nickname.guide.default},
+                data-guide-short=#{common.profile.nickname.guide.short},
+                data-guide-max=#{common.profile.nickname.guide.max},
+                data-guide-different=#{common.profile.nickname.guide.different},
+                data-guide-valid=#{common.profile.nickname.guide.valid},
+                data-guide-current=#{common.profile.nickname.guide.current}"></div>
+
         <script src="/js/userProfile.js"></script> <!-- 마이페이지 정보 조회와 닉네임 변경·화면 반영 -->
+        <script th:if="${languageToggleEnabled}"
+                src="/js/languageToggle.js"></script> <!-- 전환 지원 화면에서 한국어·일본어 선택을 현재 URL에 반영 -->
     </th:block>
 
     <!-- 언어 선택 토글 영역 -->
