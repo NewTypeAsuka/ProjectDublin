@@ -1,10 +1,11 @@
-// 게시글 검색 입력창 표시
+// 게시글 검색 입력창의 표시·제출과 번역된 접근성 문구를 관리하는 스크립트
 // 사용처: articleList.html
 
 (function () {
     const searchControl = document.querySelector('[data-article-search]');
+    const messageConfig = document.getElementById('article-list-messages');
 
-    if (!searchControl) {
+    if (!searchControl || !messageConfig) {
         return;
     }
 
@@ -15,14 +16,16 @@
         return;
     }
 
+    const messages = messageConfig.dataset;
     const maxSearchLength = Number(searchInput.dataset.maxLength) || 15;
 
     // 검색창의 표시 상태와 키보드 접근성을 함께 관리합니다.
     const setSearchOpen = function (open, focusInput) {
         searchControl.classList.toggle('is-open', open);
         searchToggle.setAttribute('aria-expanded', String(open));
-        searchToggle.setAttribute('aria-label', open ? '검색' : '검색창 열기');
-        searchToggle.title = open ? '검색' : '검색창 열기';
+        const toggleLabel = open ? messages.searchAction : messages.searchOpen;
+        searchToggle.setAttribute('aria-label', toggleLabel);
+        searchToggle.title = toggleLabel;
         searchInput.tabIndex = open ? 0 : -1;
         searchInput.setAttribute('aria-hidden', String(!open));
 

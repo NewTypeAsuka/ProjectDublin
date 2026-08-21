@@ -1,17 +1,20 @@
-// 게시글 삭제와 삭제 후 목록 이동을 관리하는 스크립트
+// 현재 표시 언어로 게시글 삭제를 안내하고 삭제 후 목록 이동을 관리하는 스크립트
 // 사용처: article.html
 
 (function () {
     const deleteButton = document.getElementById('delete-btn');
     const articleId = document.getElementById('article-id')?.value;
     const actionMessage = document.getElementById('article-action-message');
+    const messageConfig = document.getElementById('article-detail-messages');
 
-    if (!deleteButton || !articleId) {
+    if (!deleteButton || !articleId || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
+
     deleteButton.addEventListener('click', async function () {
-        if (!window.confirm('정말 삭제하시겠습니까?')) {
+        if (!window.confirm(messages.deleteConfirm)) {
             return;
         }
 
@@ -36,7 +39,7 @@
 
             location.replace('/articles');
         } catch (error) {
-            showActionMessage('게시글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.');
+            showActionMessage(messages.deleteError);
             deleteButton.disabled = false;
             deleteButton.innerHTML = defaultContent;
             deleteButton.setAttribute('aria-busy', 'false');

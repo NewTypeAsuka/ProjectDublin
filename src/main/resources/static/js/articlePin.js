@@ -1,4 +1,4 @@
-// 관리자용 게시글 고정 상태 변경과 화면 표시를 관리하는 스크립트
+// 현재 표시 언어로 관리자용 게시글 고정 상태 변경과 화면 표시를 관리하는 스크립트
 // 사용처: article.html
 
 (function () {
@@ -8,11 +8,14 @@
     const pinLabel = document.getElementById('pin-label');
     const pinnedMarker = document.getElementById('article-pinned-marker');
     const actionMessage = document.getElementById('article-action-message');
+    const messageConfig = document.getElementById('article-detail-messages');
 
-    if (!pinButton || !articleId || !pinIcon || !pinLabel || !pinnedMarker) {
+    if (!pinButton || !articleId || !pinIcon || !pinLabel || !pinnedMarker
+            || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
     let pinned = pinButton.dataset.pinned === 'true';
 
     pinButton.addEventListener('click', function () {
@@ -45,7 +48,7 @@
                 }
             })
             .catch(() => {
-                showActionMessage('게시글 고정 상태를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                showActionMessage(messages.pinError);
             })
             .finally(() => {
                 pinButton.disabled = false;
@@ -57,10 +60,13 @@
         pinButton.dataset.pinned = String(pinned);
         pinButton.classList.toggle('is-pinned', pinned);
         pinButton.setAttribute('aria-pressed', String(pinned));
-        pinButton.setAttribute('aria-label', pinned ? '글 고정 해제' : '글 고정');
+        pinButton.setAttribute(
+            'aria-label',
+            pinned ? messages.pinRemoveAria : messages.pinAddAria
+        );
         pinIcon.classList.toggle('bi-pin-angle', !pinned);
         pinIcon.classList.toggle('bi-pin-angle-fill', pinned);
-        pinLabel.textContent = pinned ? '해제' : '고정';
+        pinLabel.textContent = pinned ? messages.pinRemove : messages.pinAdd;
         pinnedMarker.classList.toggle('is-hidden', !pinned);
         pinnedMarker.setAttribute('aria-hidden', String(!pinned));
         hideActionMessage();

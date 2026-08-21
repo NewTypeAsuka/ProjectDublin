@@ -1,4 +1,4 @@
-// 댓글·대댓글의 조회, 작성, 수정, 삭제와 화면 렌더링을 관리하는 스크립트
+// 현재 표시 언어로 댓글·대댓글 조회·작성·수정·삭제와 화면 렌더링을 관리하는 스크립트
 // 사용처: article.html
 
 (function () {
@@ -13,6 +13,7 @@
     const commentLoading = document.getElementById('comment-loading');
     const commentList = document.getElementById('comment-list');
     const commentEmpty = document.getElementById('comment-empty');
+    const messageConfig = document.getElementById('article-detail-messages');
 
     if (!articleId
         || !commentForm
@@ -24,10 +25,12 @@
         || !commentMessage
         || !commentLoading
         || !commentList
-        || !commentEmpty) {
+        || !commentEmpty
+        || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
     const maxContentLength = Number(commentContent.dataset.maxLength) || 1000;
     const commentsUrl = `/api/articles/${articleId}/comments`;
 
@@ -52,7 +55,7 @@
             });
             commentContent.value = '';
             updateLengthCounter(commentContent, commentLength);
-            showMessage('댓글을 등록했습니다.', false);
+            showMessage(messages.commentCreated, false);
             await loadComments();
         } catch (error) {
             showMessage(error.message, true);
@@ -122,8 +125,8 @@
             const adminBadge = document.createElement('i');
             adminBadge.className = 'bi bi-patch-check-fill author-admin-badge';
             adminBadge.setAttribute('role', 'img');
-            adminBadge.setAttribute('aria-label', '관리자');
-            adminBadge.title = '관리자';
+            adminBadge.setAttribute('aria-label', messages.admin);
+            adminBadge.title = messages.admin;
             author.appendChild(adminBadge);
         }
 
@@ -140,8 +143,8 @@
             modifiedMarker.className = 'comment-item__modified-marker';
             modifiedMarker.textContent = '*';
             modifiedMarker.setAttribute('role', 'img');
-            modifiedMarker.setAttribute('aria-label', '수정됨');
-            modifiedMarker.title = '수정됨';
+            modifiedMarker.setAttribute('aria-label', messages.modified);
+            modifiedMarker.title = messages.modified;
             dateMeta.appendChild(modifiedMarker);
         }
 
@@ -152,7 +155,9 @@
         if (comment.deleted) {
             content.classList.add('comment-item__content--deleted');
         }
-        content.textContent = comment.content;
+        content.textContent = comment.deleted
+            ? messages.commentDeleted
+            : comment.content;
 
         item.append(header, content);
 
@@ -160,47 +165,60 @@
         actions.className = 'comment-item__actions';
 
         if (!reply && !comment.deleted) {
-            actions.appendChild(createActionButton('답글', function () {
-                openInlineForm(item, '', '등록', async value => {
-                    await request(`${commentsUrl}/${comment.id}/replies`, {
-                        method: 'POST',
-                        body: JSON.stringify({ content: value })
+            actions.appendChild(createActionButton(
+                messages.commentReply,
+                'bi-reply',
+                function () {
+                    openInlineForm(item, '', 'reply', async value => {
+                        await request(`${commentsUrl}/${comment.id}/replies`, {
+                            method: 'POST',
+                            body: JSON.stringify({ content: value })
+                        });
+                        showMessage(messages.commentReplyCreated, false);
                     });
-                    showMessage('답글을 등록했습니다.', false);
-                });
-            }));
+                }
+            ));
         }
 
         if (comment.editable) {
-            actions.appendChild(createActionButton('수정', function () {
-                openInlineForm(item, comment.content, '수정', async value => {
-                    await request(`${commentsUrl}/${comment.id}`, {
-                        method: 'PUT',
-                        body: JSON.stringify({ content: value })
+            actions.appendChild(createActionButton(
+                messages.commentEdit,
+                'bi-pencil',
+                function () {
+                    openInlineForm(item, comment.content, 'edit', async value => {
+                        await request(`${commentsUrl}/${comment.id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ content: value })
+                        });
+                        showMessage(messages.commentUpdated, false);
                     });
-                    showMessage('댓글을 수정했습니다.', false);
-                });
-            }));
+                }
+            ));
         }
 
         if (comment.deletable) {
-            actions.appendChild(createActionButton('삭제', async function (deleteButton) {
-                if (!window.confirm('댓글을 삭제하시겠습니까?')) {
-                    return;
-                }
-                setButtonBusy(deleteButton, true);
-                try {
-                    await request(`${commentsUrl}/${comment.id}`, {
-                        method: 'DELETE'
-                    });
-                    showMessage('댓글을 삭제했습니다.', false);
-                    await loadComments();
-                } catch (error) {
-                    showMessage(error.message, true);
-                } finally {
-                    setButtonBusy(deleteButton, false);
-                }
-            }, 'text-danger'));
+            actions.appendChild(createActionButton(
+                messages.commentDelete,
+                'bi-trash3',
+                async function (deleteButton) {
+                    if (!window.confirm(messages.commentDeleteConfirm)) {
+                        return;
+                    }
+                    setButtonBusy(deleteButton, true);
+                    try {
+                        await request(`${commentsUrl}/${comment.id}`, {
+                            method: 'DELETE'
+                        });
+                        showMessage(messages.commentDeletedSuccess, false);
+                        await loadComments();
+                    } catch (error) {
+                        showMessage(error.message, true);
+                    } finally {
+                        setButtonBusy(deleteButton, false);
+                    }
+                },
+                'text-danger'
+            ));
         }
 
         if (actions.childElementCount > 0) {
@@ -219,16 +237,11 @@
         return item;
     }
 
-    function createActionButton(label, clickHandler, extraClass = '') {
+    function createActionButton(label, iconClass, clickHandler, extraClass = '') {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = `btn btn-link app-button text-secondary ${extraClass}`.trim();
-        const iconClasses = {
-            '답글': 'bi-reply',
-            '수정': 'bi-pencil',
-            '삭제': 'bi-trash3'
-        };
-        setButtonContent(button, iconClasses[label], label);
+        setButtonContent(button, iconClass, label);
         button.addEventListener('click', function () {
             clickHandler(button);
         });
@@ -271,8 +284,13 @@
     }
 
     // 답글 작성과 댓글 수정에 공통으로 사용하는 인라인 폼
-    function openInlineForm(container, initialContent, submitLabel, submitHandler) {
+    function openInlineForm(container, initialContent, mode, submitHandler) {
         closeInlineForms();
+
+        const replying = mode === 'reply';
+        const submitLabel = replying
+            ? messages.commentSubmit
+            : messages.commentEdit;
 
         const form = document.createElement('form');
         form.className = 'comment-inline-form';
@@ -280,6 +298,7 @@
         const textarea = document.createElement('textarea');
         textarea.className = 'form-control';
         textarea.value = initialContent;
+        textarea.setAttribute('data-language-change-guard', '');
         textarea.setAttribute('aria-label', submitLabel);
 
         const controls = document.createElement('div');
@@ -294,7 +313,7 @@
         const cancelButton = document.createElement('button');
         cancelButton.type = 'button';
         cancelButton.className = 'btn btn-outline-secondary btn-sm app-button comment-inline-form__button';
-        setButtonContent(cancelButton, 'bi-x-lg', '취소');
+        setButtonContent(cancelButton, 'bi-x-lg', messages.commentCancel);
         cancelButton.addEventListener('click', function () {
             form.remove();
         });
@@ -302,9 +321,7 @@
         const submitButton = document.createElement('button');
         submitButton.type = 'submit';
         submitButton.className = 'btn btn-primary btn-sm app-button comment-inline-form__button';
-        const submitIconClass = submitLabel === '등록'
-            ? 'bi-reply'
-            : 'bi-check2';
+        const submitIconClass = replying ? 'bi-reply' : 'bi-check2';
         setButtonContent(submitButton, submitIconClass, submitLabel);
 
         buttons.append(cancelButton, submitButton);
@@ -358,11 +375,14 @@
         const length = countCharacters(content);
 
         if (!content) {
-            showMessage('댓글 내용을 입력해주세요.', true);
+            showMessage(messages.commentValidationRequired, true);
             return null;
         }
         if (length > maxContentLength) {
-            showMessage(`댓글은 ${maxContentLength}자 이하로 작성해주세요.`, true);
+            showMessage(
+                formatMessage(messages.commentValidationLength, maxContentLength),
+                true
+            );
             return null;
         }
         return content;
@@ -378,6 +398,13 @@
 
     function countCharacters(value) {
         return Array.from(value).length;
+    }
+
+    function formatMessage(template, ...values) {
+        return values.reduce(
+            (result, value, index) => result.split(`{${index}}`).join(String(value)),
+            template
+        );
     }
 
     function formatDate(value) {
@@ -414,23 +441,32 @@
             requestOptions.body = options.body;
         }
 
-        const response = await window.csrfFetch(url, requestOptions);
+        let response;
+        try {
+            response = await window.csrfFetch(url, requestOptions);
+        } catch (error) {
+            throw new Error(messages.commentProcessError);
+        }
         if (response.status === 401) {
             location.replace('/login');
-            throw new Error('로그인이 필요합니다.');
+            throw new Error(messages.commentLoginRequired);
         }
         if (!response.ok) {
             if (response.status === 403) {
-                throw new Error('댓글을 변경할 권한이 없습니다.');
+                throw new Error(messages.commentPermissionDenied);
             }
             if (response.status === 400) {
-                throw new Error('댓글 요청 내용을 확인해주세요.');
+                throw new Error(messages.commentRequestInvalid);
             }
-            throw new Error('댓글 처리에 실패했습니다.');
+            throw new Error(messages.commentProcessError);
         }
         if (response.status === 204) {
             return null;
         }
-        return response.json();
+        try {
+            return await response.json();
+        } catch (error) {
+            throw new Error(messages.commentProcessError);
+        }
     }
 })();

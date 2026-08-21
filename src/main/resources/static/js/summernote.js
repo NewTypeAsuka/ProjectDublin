@@ -1,30 +1,34 @@
-// Summernote 본문 편집기 초기화와 게시글 이미지 업로드를 관리하는 스크립트
+// 현재 표시 언어로 Summernote를 초기화하고 게시글 이미지 업로드를 관리하는 스크립트
 // 사용처: newArticle.html
 
 (function ($) {
     // 글 작성 화면의 본문 textarea를 찾는다.
     const $content = $('#content');
     const uploadStatus = document.getElementById('image-upload-status');
-    if ($content.length === 0) {
+    const messageConfig = document.getElementById('article-form-messages');
+    if ($content.length === 0 || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
     let activeUploads = 0;
     let uploadFailures = 0;
+    let editorReady = false;
 
     // 수정 화면에서는 서버가 textarea에 넣어준 기존 HTML을 보관한다.
     const initialHtml = $content.val();
 
-    // 동영상 입력창에는 공급자 목록 없이 간결한 URL 라벨만 표시한다.
-    const koreanLanguage = $.summernote.lang['ko-KR'];
-    if (koreanLanguage?.video) {
-        koreanLanguage.video.providers = '';
+    // 선택된 언어의 동영상 입력창에는 공급자 목록 없이 간결한 URL 라벨만 표시한다.
+    const editorLanguage = messages.editorLanguage;
+    const localizedLanguage = $.summernote.lang[editorLanguage];
+    if (localizedLanguage?.video) {
+        localizedLanguage.video.providers = '';
     }
 
     // textarea를 Summernote 에디터로 초기화한다.
     $content.summernote({
-        lang: 'ko-KR',
-        placeholder: '내용을 입력하세요.',
+        lang: editorLanguage,
+        placeholder: messages.contentPlaceholder,
         tabsize: 2,
         height: 360,
         dialogsInBody: true, // 이미지·링크 창이 편집기 카드의 overflow에 잘리지 않게 한다.
@@ -43,6 +47,11 @@
             },
             onPaste: function (event) {
                 insertYoutubeVideoOnPaste(event);
+            },
+            onChange: function () {
+                if (editorReady) {
+                    window.dispatchEvent(new Event('article-editor-change'));
+                }
             }
         }
     });
@@ -72,6 +81,7 @@
 
     // 새 글이면 빈 문자열을, 수정이면 기존 HTML을 에디터에 표시한다.
     $content.summernote('code', initialHtml || '');
+    editorReady = true;
 
     // articleForm.js가 글을 저장할 때 현재 Summernote HTML을 가져갈 수 있게 공개한다.
     window.articleEditor = {
@@ -121,7 +131,7 @@
         iframe.src = embedUrl;
         iframe.width = '640';
         iframe.height = '360';
-        iframe.title = 'YouTube 동영상';
+        iframe.title = messages.youtubeTitle;
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute(
             'allow',
@@ -164,7 +174,7 @@
             uploadFailures = 0;
         }
         activeUploads += 1;
-        setUploadStatus('이미지를 업로드하고 있습니다.', false);
+        setUploadStatus(messages.imageUploading, false);
 
         try {
             const response = await window.csrfFetch('/api/articles/images', {
@@ -193,19 +203,29 @@
         } finally {
             activeUploads -= 1;
             if (activeUploads > 0) {
-                setUploadStatus(`이미지를 업로드하고 있습니다 (${activeUploads}개 남음).`, false);
+                setUploadStatus(
+                    formatMessage(messages.imageUploadingRemaining, activeUploads),
+                    false
+                );
             } else if (uploadFailures > 0) {
                 setUploadStatus(
-                    `${uploadFailures}개 이미지 업로드에 실패했습니다. 파일 형식과 크기를 확인해주세요.`,
+                    formatMessage(messages.imageFailed, uploadFailures),
                     true
                 );
             } else {
-                setUploadStatus('이미지 업로드가 완료되었습니다.', false);
+                setUploadStatus(messages.imageComplete, false);
                 window.setTimeout(function () {
                     setUploadStatus('', false);
                 }, 2000);
             }
         }
+    }
+
+    function formatMessage(template, ...values) {
+        return values.reduce(
+            (result, value, index) => result.split(`{${index}}`).join(String(value)),
+            template
+        );
     }
 
     function setUploadStatus(message, isError) {

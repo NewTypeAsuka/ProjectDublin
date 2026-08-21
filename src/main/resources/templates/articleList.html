@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
-    <title>포스트 · NewTypeBlog</title>
+    <title th:text="#{article.list.page.title}">포스트 · NewTypeBlog</title>
     <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
     <th:block th:replace="~{common :: styles}"></th:block> <!-- 공통 모듈 CSS -->
     <style>
@@ -359,7 +359,7 @@
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <!-- 공통 네비게이션 섹션 -->
-    <th:block th:replace="~{common :: siteNavbar(true, false)}"></th:block>
+    <th:block th:replace="~{common :: siteNavbar(true, true)}"></th:block>
 
     <main id="main-content"
         class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
@@ -374,7 +374,8 @@
                             POSTS
                         </span>
                         <div class="article-list-toolbar__title-row">
-                            <h2 class="article-list-toolbar__title">포스트</h2>
+                            <h2 class="article-list-toolbar__title"
+                                th:text="#{article.list.heading}">포스트</h2>
                             <form class="article-list-search"
                                 th:classappend="${searching} ? 'is-open' : ''"
                                 th:action="@{/articles}"
@@ -383,12 +384,14 @@
                                 data-article-search
                                 novalidate>
                                 <label class="sr-only"
-                                        for="article-list-search-input">포스트 검색</label>
+                                        for="article-list-search-input"
+                                        th:text="#{article.list.search.label}">포스트 검색</label>
                                 <input id="article-list-search-input"
                                         class="article-list-search__input"
                                         type="search"
                                         name="keyword"
                                         placeholder="포스트 검색(제목+내용)"
+                                        th:placeholder="#{article.list.search.placeholder}"
                                         maxlength="15"
                                         data-max-length="15"
                                         th:value="${keyword}"
@@ -402,7 +405,9 @@
                                         type="submit"
                                         aria-controls="article-list-search-input"
                                         aria-expanded="false"
-                                        th:attr="aria-expanded=${searching}"
+                                        th:attr="aria-expanded=${searching},
+                                            aria-label=#{article.list.search.open},
+                                            title=#{article.list.search.open}"
                                         aria-label="검색창 열기"
                                         title="검색창 열기">
                                     <i class="bi bi-search" aria-hidden="true"></i>
@@ -429,7 +434,9 @@
                                         <i th:if="${item.pinned}"
                                             class="bi bi-pin-angle-fill article-card__pin"
                                             aria-hidden="true"></i>
-                                        <span th:if="${item.pinned}" class="sr-only">고정 게시글</span>
+                                        <span th:if="${item.pinned}"
+                                            class="sr-only"
+                                            th:text="#{article.meta.pinned}">고정 게시글</span>
                                         <span th:text="|#${item.id}|"></span>
                                     </div>
                                     <div class="article-card__byline">
@@ -441,6 +448,8 @@
                                                     and item.updatedAt.isAfter(item.createdAt)}"
                                                 class="article-card__modified-marker"
                                                 role="img"
+                                                th:attr="aria-label=#{article.meta.modified},
+                                                    title=#{article.meta.modified}"
                                                 aria-label="수정됨"
                                                 title="수정됨">*</span>
                                         </span>
@@ -452,6 +461,8 @@
                                                 th:if="${item.authorAdmin}"
                                                 class="bi bi-patch-check-fill author-admin-badge"
                                                 role="img"
+                                                th:attr="aria-label=#{article.meta.admin},
+                                                    title=#{article.meta.admin}"
                                                 aria-label="관리자"
                                                 title="관리자"></i>
                                         </span>
@@ -468,24 +479,33 @@
 
                                 <!-- 게시글 카드 3단 영역 -->
                                 <div class="article-card__metrics justify-content-end text-muted small mt-3">
-                                    <span class="article-card__metric" title="조회수">
+                                    <span class="article-card__metric"
+                                        title="조회수"
+                                        th:title="#{article.metric.views}">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
-                                        <span class="sr-only">조회수</span>
+                                        <span class="sr-only"
+                                            th:text="#{article.metric.views}">조회수</span>
                                         <span class="article-card__view-count"
                                             th:text="${item.viewCount}"></span>
                                     </span>
                                     <span class="article-card__separator" aria-hidden="true">·</span>
-                                    <span class="article-card__metric" title="좋아요">
+                                    <span class="article-card__metric"
+                                        title="좋아요"
+                                        th:title="#{article.metric.likes}">
                                         <i class="bi bi-heart-fill article-card__like-icon"
                                             aria-hidden="true"></i>
-                                        <span class="sr-only">좋아요</span>
+                                        <span class="sr-only"
+                                            th:text="#{article.metric.likes}">좋아요</span>
                                         <span class="article-card__like-count"
                                             th:text="${item.likeCount}"></span>
                                     </span>
                                     <span class="article-card__separator" aria-hidden="true">·</span>
-                                    <span class="article-card__metric" title="댓글">
+                                    <span class="article-card__metric"
+                                        title="댓글"
+                                        th:title="#{article.metric.comments}">
                                         <i class="bi bi-chat-dots" aria-hidden="true"></i>
-                                        <span class="sr-only">댓글</span>
+                                        <span class="sr-only"
+                                            th:text="#{article.metric.comments}">댓글</span>
                                         <span class="article-card__comment-count"
                                             th:text="${item.commentCount}"></span>
                                     </span>
@@ -506,14 +526,16 @@
                     <span class="article-empty-state__icon" aria-hidden="true">
                         <i class="bi bi-search"></i>
                     </span>
-                    <strong class="tw:block tw:text-lg tw:text-ink">검색된 결과가 없습니다.</strong>
-                    <span class="tw:mt-2 tw:block tw:text-sm tw:leading-6 tw:text-muted">
+                    <strong class="tw:block tw:text-lg tw:text-ink"
+                        th:text="#{article.list.search.empty.title}">검색된 결과가 없습니다.</strong>
+                    <span class="tw:mt-2 tw:block tw:text-sm tw:leading-6 tw:text-muted"
+                        th:text="#{article.list.search.empty.description}">
                         다른 검색어로 다시 검색해주세요.
                     </span>
                     <a th:href="@{/new-article}"
                         class="btn btn-sm app-button site-nav__write tw:mt-5">
                         <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                        <span>글쓰기</span>
+                        <span th:text="#{common.nav.write}">글쓰기</span>
                     </a>
                 </section>
 
@@ -524,14 +546,16 @@
                     <span class="article-empty-state__icon" aria-hidden="true">
                         <i class="bi bi-file-earmark-text"></i>
                     </span>
-                    <strong class="tw:block tw:text-lg tw:text-ink">아직 작성된 포스트가 없습니다.</strong>
-                    <span class="tw:mt-2 tw:block tw:text-sm tw:leading-6 tw:text-muted">
+                    <strong class="tw:block tw:text-lg tw:text-ink"
+                        th:text="#{article.list.empty.title}">아직 작성된 포스트가 없습니다.</strong>
+                    <span class="tw:mt-2 tw:block tw:text-sm tw:leading-6 tw:text-muted"
+                        th:text="#{article.list.empty.description}">
                         게시글을 작성하면 이곳에 표시됩니다.
                     </span>
                     <a th:href="@{/new-article}"
                         class="btn btn-sm app-button site-nav__write tw:mt-5">
                         <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                        <span>글쓰기</span>
+                        <span th:text="#{common.nav.write}">글쓰기</span>
                     </a>
                 </section>
 
@@ -544,7 +568,7 @@
                         hidden>
                         <span class="spinner-border spinner-border-sm mr-2"
                             aria-hidden="true"></span>
-                        게시글을 불러오는 중입니다.
+                        <span th:text="#{article.list.loading}">게시글을 불러오는 중입니다.</span>
                     </div>
                     <p id="article-feed-message"
                         class="text-muted small mb-2"
@@ -556,7 +580,7 @@
                         class="btn btn-outline-secondary btn-sm app-button article-feed__load-button"
                         hidden>
                         <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
-                        <span>게시글 더보기</span>
+                        <span th:text="#{article.list.load.more}">게시글 더보기</span>
                     </button>
                 </section>
 
@@ -571,8 +595,25 @@
     <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
+    <!-- 게시글 목록 JavaScript 렌더링 문구 -->
+    <div id="article-list-messages"
+        hidden
+        th:attr="data-search-action=#{article.list.search.action},
+            data-search-open=#{article.list.search.open},
+            data-pinned=#{article.meta.pinned},
+            data-modified=#{article.meta.modified},
+            data-admin=#{article.meta.admin},
+            data-views=#{article.metric.views},
+            data-likes=#{article.metric.likes},
+            data-comments=#{article.metric.comments},
+            data-load-complete-search=#{article.list.load.complete.search},
+            data-load-complete-all=#{article.list.load.complete.all},
+            data-load-error=#{article.list.load.error},
+            data-retry=#{common.action.retry},
+            data-load-more=#{article.list.load.more}"></div>
+
     <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
-    <script src="/js/articleSearch.js"></script> <!-- 게시글 검색창 표시·입력 제한과 검색 제출 관리 -->
-    <script src="/js/articleFeed.js"></script> <!-- 게시글 추가 조회와 무한 스크롤 카드 렌더링 -->
+    <script src="/js/articleSearch.js"></script> <!-- 게시글 검색창 표시·입력 제한·검색 제출과 접근성 문구 관리 -->
+    <script src="/js/articleFeed.js"></script> <!-- 게시글 추가 조회와 현재 표시 언어의 무한 스크롤 카드 렌더링 -->
 </body>
 </html>

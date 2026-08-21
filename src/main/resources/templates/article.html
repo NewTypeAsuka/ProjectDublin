@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 반응형 디자인을 위한 viewport 설정 -->
@@ -525,12 +525,13 @@
         }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans">
+<body class="d-flex flex-column min-vh-100 bg-light project-shell tw:bg-canvas tw:text-ink tw:font-sans"
+    th:attr="data-language-change-confirm=#{article.detail.language.change.unsaved}">
     <!-- 공통 헤더 섹션 -->
     <th:block th:replace="~{common :: siteHeader}"></th:block>
 
     <!-- 공통 네비게이션 섹션 -->
-    <th:block th:replace="~{common :: siteNavbar(true, false)}"></th:block>
+    <th:block th:replace="~{common :: siteNavbar(true, true)}"></th:block>
 
     <main id="main-content"
         class="container flex-fill py-4 py-md-5 tw:relative tw:z-0">
@@ -538,7 +539,7 @@
             <div class="col-12 col-lg-10 col-xl-9 tw:max-w-4xl">
                 <a th:href="@{/articles}" class="article-back-link">
                     <i class="bi bi-arrow-left" aria-hidden="true"></i>
-                    모든 포스트
+                    <span th:text="#{article.detail.back}">모든 포스트</span>
                 </a>
 
                 <!-- 게시글 섹션 -->
@@ -555,7 +556,8 @@
                                     th:classappend="${article.pinned} ? '' : ' is-hidden'"
                                     th:attr="aria-hidden=${!article.pinned}">
                                 <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
-                                <span class="sr-only">고정 게시글</span> 
+                                <span class="sr-only"
+                                    th:text="#{article.meta.pinned}">고정 게시글</span>
                             </span>
                             <div class="text-muted small article-meta">
                                 <span class="article-meta__date">
@@ -567,6 +569,8 @@
                                                 and article.updatedAt.isAfter(article.createdAt)}"
                                         class="article-meta__modified-marker"
                                         role="img"
+                                        th:attr="aria-label=#{article.meta.modified},
+                                            title=#{article.meta.modified}"
                                         aria-label="수정됨"
                                         title="수정됨">*</span>
                                 </span>
@@ -578,6 +582,8 @@
                                         th:if="${article.authorAdmin}"
                                         class="bi bi-patch-check-fill author-admin-badge"
                                         role="img"
+                                        th:attr="aria-label=#{article.meta.admin},
+                                            title=#{article.meta.admin}"
                                         aria-label="관리자"
                                         title="관리자"></i>
                                 </span>
@@ -597,22 +603,31 @@
 
                                 <!-- 게시글 조회수·좋아요·댓글 영역 -->
                                 <div class="article-detail__metrics text-muted small mt-4">
-                                    <span class="article-meta__metric" title="조회수">
+                                    <span class="article-meta__metric"
+                                        title="조회수"
+                                        th:title="#{article.metric.views}">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
-                                        <span class="sr-only">조회수</span>
+                                        <span class="sr-only"
+                                            th:text="#{article.metric.views}">조회수</span>
                                         <span id="article-view-count" th:text="${article.viewCount}"></span>
                                     </span>
                                     <span class="article-meta__separator" aria-hidden="true">·</span>
-                                    <span class="article-meta__metric" title="좋아요">
+                                    <span class="article-meta__metric"
+                                        title="좋아요"
+                                        th:title="#{article.metric.likes}">
                                         <i class="bi bi-heart-fill article-meta__like-icon"
                                             aria-hidden="true"></i>
-                                        <span class="sr-only">좋아요</span>
+                                        <span class="sr-only"
+                                            th:text="#{article.metric.likes}">좋아요</span>
                                         <span id="article-like-count" th:text="${article.likeCount}"></span>
                                     </span>
                                     <span class="article-meta__separator" aria-hidden="true">·</span>
-                                    <span class="article-meta__metric" title="댓글">
+                                    <span class="article-meta__metric"
+                                        title="댓글"
+                                        th:title="#{article.metric.comments}">
                                         <i class="bi bi-chat-dots" aria-hidden="true"></i>
-                                        <span class="sr-only">댓글</span>
+                                        <span class="sr-only"
+                                            th:text="#{article.metric.comments}">댓글</span>
                                         <span id="article-comment-count"
                                                 th:text="${article.commentCount}"></span>
                                     </span>
@@ -625,12 +640,13 @@
                                 <button type="button" id="like-btn"
                                         class="app-button article-like__button"
                                         aria-label="좋아요"
+                                        th:aria-label="#{article.detail.like.add.aria}"
                                         aria-pressed="false"
                                         disabled>
                                     <i id="like-icon"
                                         class="bi bi-heart article-like__icon"
                                         aria-hidden="true"></i>
-                                    <span>좋아요</span>
+                                    <span th:text="#{article.detail.like}">좋아요</span>
                                     <span id="like-count"
                                         class="article-like__count"
                                         th:text="${article.likeCount}">0</span>
@@ -641,13 +657,17 @@
                                         th:classappend="${article.pinned} ? ' is-pinned'"
                                         th:attr="data-pinned=${article.pinned},
                                                 aria-pressed=${article.pinned},
-                                                aria-label=${article.pinned} ? '글 고정 해제' : '글 고정'">
+                                                aria-label=${article.pinned}
+                                                    ? #{article.detail.pin.remove.aria}
+                                                    : #{article.detail.pin.add.aria}">
                                     <i id="pin-icon"
                                         class="bi article-pin__icon"
                                         th:classappend="${article.pinned} ? ' bi-pin-angle-fill' : ' bi-pin-angle'"
                                         aria-hidden="true"></i>
                                     <span id="pin-label"
-                                        th:text="${article.pinned} ? '해제' : '고정'"></span>
+                                        th:text="${article.pinned}
+                                            ? #{article.detail.pin.remove}
+                                            : #{article.detail.pin.add}"></span>
                                 </button>
                             </div>
 
@@ -657,12 +677,12 @@
                                     th:href="@{/new-article(id=${article.id})}"
                                     class="btn btn-primary btn-sm app-button">
                                     <i class="bi bi-pencil" aria-hidden="true"></i>
-                                    <span>수정</span>
+                                    <span th:text="#{article.detail.edit}">수정</span>
                                 </a>
                                 <button type="button" id="delete-btn"
                                         class="btn btn-sm app-button article-actions__delete">
                                     <i class="bi bi-trash3" aria-hidden="true"></i>
-                                    <span>삭제</span>
+                                    <span th:text="#{article.detail.delete}">삭제</span>
                                 </button>
                             </div>
                             <div id="article-action-message"
@@ -683,18 +703,22 @@
                     <div class="card-body p-4 p-md-5 article-comments__body">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h2 class="h5 mb-0" id="comment-heading">
-                                댓글
+                                <span th:text="#{article.comment.heading}">댓글</span>
                                 <span id="comment-count" class="text-muted tw:ml-1">0</span>
                             </h2>
                         </div>
 
                         <!-- 댓글 작성 영역 -->
                         <form id="comment-form" novalidate>
-                            <label class="sr-only" for="comment-content">내용</label>
+                            <label class="sr-only"
+                                for="comment-content"
+                                th:text="#{article.comment.content.label}">내용</label>
                             <textarea id="comment-content"
                                     class="form-control article-comments__textarea"
                                     data-max-length="1000"
+                                    data-language-change-guard
                                     placeholder="댓글을 입력해주세요."
+                                    th:placeholder="#{article.comment.placeholder}"
                                     aria-describedby="comment-length"
                                     required></textarea>
                             <div class="d-flex align-items-center justify-content-between mt-2">
@@ -704,7 +728,7 @@
                                         id="comment-submit"
                                         class="btn btn-primary btn-sm app-button article-comments__submit">
                                     <i class="bi bi-send" aria-hidden="true"></i>
-                                    <span>등록</span>
+                                    <span th:text="#{article.comment.submit}">등록</span>
                                 </button>
                             </div>
                         </form>
@@ -719,14 +743,14 @@
                             class="py-4 text-center text-muted">
                             <span class="spinner-border spinner-border-sm mr-2"
                                     aria-hidden="true"></span>
-                            댓글을 불러오는 중입니다.
+                            <span th:text="#{article.comment.loading}">댓글을 불러오는 중입니다.</span>
                         </div>
                         <div id="comment-list" class="comment-list d-none"></div> <!-- 댓글 목록 렌더링 -->
                         <p id="comment-empty"
                             class="d-none py-4 mb-0 text-center text-muted">
                             <i class="bi bi-chat-square-text tw:mb-2 tw:block tw:text-2xl"
                                 aria-hidden="true"></i>
-                            아직 작성된 댓글이 없습니다.
+                            <span th:text="#{article.comment.empty}">아직 작성된 댓글이 없습니다.</span>
                         </p>
 
                     </div>
@@ -739,10 +763,43 @@
     <!-- 공통 푸터 섹션 -->
     <th:block th:replace="~{common :: siteFooter}"></th:block>
 
+    <!-- 게시글 상세·댓글 JavaScript 렌더링 문구 -->
+    <div id="article-detail-messages"
+        hidden
+        th:attr="data-admin=#{article.meta.admin},
+            data-modified=#{article.meta.modified},
+            data-like-add-aria=#{article.detail.like.add.aria},
+            data-like-remove-aria=#{article.detail.like.remove.aria},
+            data-like-error=#{article.detail.like.error},
+            data-pin-add=#{article.detail.pin.add},
+            data-pin-remove=#{article.detail.pin.remove},
+            data-pin-add-aria=#{article.detail.pin.add.aria},
+            data-pin-remove-aria=#{article.detail.pin.remove.aria},
+            data-pin-error=#{article.detail.pin.error},
+            data-delete-confirm=#{article.detail.delete.confirm},
+            data-delete-error=#{article.detail.delete.error},
+            data-comment-deleted=#{article.comment.deleted},
+            data-comment-reply=#{article.comment.reply},
+            data-comment-edit=#{article.comment.edit},
+            data-comment-delete=#{article.comment.delete},
+            data-comment-cancel=#{article.comment.cancel},
+            data-comment-submit=#{article.comment.submit},
+            data-comment-created=#{article.comment.created},
+            data-comment-reply-created=#{article.comment.reply.created},
+            data-comment-updated=#{article.comment.updated},
+            data-comment-delete-confirm=#{article.comment.delete.confirm},
+            data-comment-deleted-success=#{article.comment.deleted.success},
+            data-comment-validation-required=#{article.comment.validation.required},
+            data-comment-validation-length=#{article.comment.validation.length},
+            data-comment-login-required=#{article.comment.login.required},
+            data-comment-permission-denied=#{article.comment.permission.denied},
+            data-comment-request-invalid=#{article.comment.request.invalid},
+            data-comment-process-error=#{article.comment.process.error}"></div>
+
     <script src="/js/siteNavigation.js"></script> <!-- 스크롤 위치에 따른 공통 내비게이션 고정 상태 표시 -->
-    <script src="/js/articleLike.js?v=2"></script> <!-- 게시글 좋아요 조회·등록·취소와 개수 갱신(캐시 갱신용 ?v=2) -->
-    <script src="/js/articlePin.js"></script> <!-- 관리자용 게시글 고정·해제와 화면 상태 갱신 -->
-    <script src="/js/articleComment.js"></script> <!-- 댓글·대댓글 조회·작성·수정·삭제와 화면 렌더링 -->
-    <script src="/js/articleDelete.js"></script> <!-- 게시글 삭제와 삭제 후 목록 이동 -->
+    <script src="/js/articleLike.js?v=2"></script> <!-- 현재 표시 언어로 게시글 좋아요 조회·등록·취소와 개수 갱신(캐시 갱신용 ?v=2) -->
+    <script src="/js/articlePin.js"></script> <!-- 현재 표시 언어로 관리자용 게시글 고정·해제와 화면 상태 갱신 -->
+    <script src="/js/articleComment.js"></script> <!-- 현재 표시 언어로 댓글·대댓글 조회·작성·수정·삭제와 화면 렌더링 -->
+    <script src="/js/articleDelete.js"></script> <!-- 현재 표시 언어로 게시글 삭제와 삭제 후 목록 이동 -->
 </body>
 </html>

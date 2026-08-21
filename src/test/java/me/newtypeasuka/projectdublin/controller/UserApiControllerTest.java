@@ -183,7 +183,8 @@ class UserApiControllerTest {
         assertThat(menu.child(0).selectFirst("i").classNames())
                 .containsExactly("bi", "bi-journal-richtext");
         assertThat(languageToggle).isNotNull();
-        assertThat(languageToggle.hasAttr("disabled")).isTrue();
+        assertThat(languageToggle.hasAttr("disabled")).isFalse();
+        assertThat(document.select("script[src=/js/languageToggle.js]")).hasSize(1);
         assertThat(languageToggle.select("[data-language=ko]").text()).isEqualTo("한국어");
         assertThat(languageToggle.select("[data-language=ja]").text()).isEqualTo("日本語");
         assertThat(languageToggle.selectFirst("[data-language=ko] img").attr("src"))

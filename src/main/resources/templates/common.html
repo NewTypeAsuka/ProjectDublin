@@ -156,7 +156,7 @@
         }
 
         /* layout: 공통 내비게이션 내부 정렬 */
-        .site-nav__inner {
+        .site-nav > .site-nav__inner {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -774,6 +774,32 @@
             }
             .site-profile-dialog__stat {
                 padding: 0.85rem;
+            }
+        }
+
+        /* 반응형layout: 320px 화면에서도 메뉴와 글쓰기·로그아웃 액션을 한 줄에 유지 */
+        @media (max-width: 359.98px) {
+            .site-nav > .site-nav__inner {
+                gap: 0.25rem;
+                padding-right: 0.35rem;
+                padding-left: 0.35rem;
+            }
+            .site-nav-dropdown > summary {
+                gap: 0.2rem;
+                padding-right: 0.2rem;
+                padding-left: 0.2rem;
+                font-size: 0.74rem;
+                white-space: nowrap;
+            }
+            .site-nav__actions {
+                gap: 0.2rem;
+            }
+            .site-nav__write,
+            .site-nav__logout {
+                gap: 0.2rem;
+                padding-right: 0.35rem;
+                padding-left: 0.35rem;
+                font-size: 0.68rem;
             }
         }
 

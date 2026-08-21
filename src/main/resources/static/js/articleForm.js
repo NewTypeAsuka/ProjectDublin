@@ -1,4 +1,4 @@
-// 게시글 작성·수정과 제목 40자 제한을 관리하는 스크립트
+// 게시글 작성·수정 검증, 번역된 상태 문구, 제목 제한과 편집 상태를 관리하는 스크립트
 // 사용처: newArticle.html
 
 const articleForm = document.getElementById('article-form');
@@ -9,16 +9,26 @@ const titleInput = document.getElementById('title');
 const titleLength = document.getElementById('title-length');
 const titleError = document.getElementById('title-error');
 const formMessage = document.getElementById('article-form-message');
+const contentField = document.getElementById('content');
+const messageConfig = document.getElementById('article-form-messages');
+const messages = messageConfig?.dataset;
 const maxTitleLength = Number(titleInput?.dataset.maxLength) || 40;
 
 // 글 작성과 수정 화면에서 제목 글자 수를 실시간으로 표시(40자 제한)
 if (titleInput && titleLength) {
-    titleInput.addEventListener('input', updateTitleLengthCounter);
+    titleInput.addEventListener('input', function () {
+        updateTitleLengthCounter();
+        markLanguageChangeDirty();
+    });
     updateTitleLengthCounter();
 }
 
+// 본문 편집이나 Summernote 변경이 발생하면 언어 전환 전에 작성 내용 유실을 경고합니다.
+contentField?.addEventListener('input', markLanguageChangeDirty);
+window.addEventListener('article-editor-change', markLanguageChangeDirty);
+
 // 게시글 등록·수정을 하나의 폼 제출 흐름으로 처리
-if (articleForm && (modifyButton || createButton)) {
+if (articleForm && messages && (modifyButton || createButton)) {
     articleForm.addEventListener('submit', async event => {
         event.preventDefault();
         const requestBody = createArticleRequestBody();
@@ -41,13 +51,13 @@ if (articleForm && (modifyButton || createButton)) {
                 requestBody
             );
             if (!editing && !article?.id) {
-                throw new Error('글 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                throw new Error(messages.responseInvalid);
             }
 
-            showMessage(editing ? '수정을 완료했습니다.' : '글을 등록했습니다.', false);
+            showMessage(editing ? messages.updated : messages.created, false);
             location.replace(editing ? `/articles/${articleId}` : `/articles/${article.id}`);
         } catch (error) {
-            showMessage(error.message || '글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.', true);
+            showMessage(error.message || messages.saveError, true);
             setFormBusy(submitButton, false);
         }
     });
@@ -56,12 +66,11 @@ if (articleForm && (modifyButton || createButton)) {
 // 게시글 저장 요청 본문 생성
 function createArticleRequestBody() {
     if (window.articleEditor && window.articleEditor.isUploading()) {
-        showMessage('이미지 업로드가 완료된 뒤 저장해주세요.', true);
+        showMessage(messages.imageWait, true);
         return null;
     }
 
     const title = titleInput.value.trim();
-    const contentField = document.getElementById('content');
     const content = window.articleEditor
         ? window.articleEditor.getHtml()
         : contentField.value;
@@ -73,18 +82,18 @@ function createArticleRequestBody() {
 
     if (!title) {
         titleInput.setAttribute('aria-invalid', 'true');
-        showMessage('제목을 입력해주세요.', true);
+        showMessage(messages.titleRequired, true);
         titleInput.focus();
         return null;
     }
     if (!hasContent) {
-        showMessage('본문 내용을 입력해주세요.', true);
+        showMessage(messages.contentRequired, true);
         const editableArea = document.querySelector('.note-editable');
         (editableArea || contentField).focus();
         return null;
     }
     if (countCharacters(title) > maxTitleLength) {
-        showMessage(`제목은 ${maxTitleLength}자 이내로 작성해주세요.`, true);
+        showMessage(formatMessage(messages.titleLimit, maxTitleLength), true);
         titleInput.focus();
         return null;
     }
@@ -110,6 +119,19 @@ function updateTitleLengthCounter() {
 
 function countCharacters(value) {
     return Array.from(value).length;
+}
+
+function formatMessage(template, ...values) {
+    return values.reduce(
+        (result, value, index) => result.split(`{${index}}`).join(String(value)),
+        template
+    );
+}
+
+function markLanguageChangeDirty() {
+    if (document.body.hasAttribute('data-language-change-dirty')) {
+        document.body.dataset.languageChangeDirty = 'true';
+    }
 }
 
 // 저장 중 상태와 화면 내 성공·오류 피드백 표시
@@ -173,23 +195,33 @@ async function httpRequest(method, url, body) {
         options.body = body;
     }
 
-    const response = await window.csrfFetch(url, options);
+    let response;
+    try {
+        response = await window.csrfFetch(url, options);
+    } catch (error) {
+        throw new Error(messages.saveError);
+    }
     if (response.status === 401) {
         location.replace('/login');
-        throw new Error('로그인이 필요합니다.');
+        throw new Error(messages.loginRequired);
     }
     if (!response.ok) {
         if (response.status === 400) {
-            throw new Error('제목과 본문 내용을 다시 확인해주세요.');
+            throw new Error(messages.requestInvalid);
         }
         if (response.status === 403) {
-            throw new Error('글을 저장할 권한이 없습니다.');
+            throw new Error(messages.permissionDenied);
         }
-        throw new Error('글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        throw new Error(messages.saveError);
     }
 
     const contentType = response.headers.get('content-type') || '';
-    return contentType.includes('application/json')
-        ? response.json()
-        : null;
+    if (!contentType.includes('application/json')) {
+        return null;
+    }
+    try {
+        return await response.json();
+    } catch (error) {
+        throw new Error(messages.responseInvalid);
+    }
 }

@@ -397,12 +397,12 @@ class ArticleApiControllerTest {
                 )));
     }
 
-    @DisplayName("아직 번역하지 않은 게시글 화면의 언어 토글은 비활성 상태를 유지한다")
+    @DisplayName("일본어 선택 시 게시글 목록의 정적·동적 문구를 일본어로 렌더링한다")
     @Test
-    void keepLanguageToggleDisabledOnUntranslatedArticlePages() throws Exception {
+    void renderJapaneseArticleList() throws Exception {
         MvcResult result = mockMvc.perform(get("/articles")
                         .with(loginUser(member))
-                        .cookie(new Cookie(LocaleConfig.LANGUAGE_COOKIE, "ja")))
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "ja"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -410,15 +410,122 @@ class ArticleApiControllerTest {
         Element languageToggle = document.selectFirst(
                 ".site-nav-dropdown__menu [data-language-toggle]"
         );
+        Element messageConfig = document.selectFirst("#article-list-messages");
 
+        assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(document.title()).isEqualTo("記事 · NewTypeBlog");
+        assertThat(document.selectFirst(".article-list-toolbar__title").text())
+                .isEqualTo("記事");
+        assertThat(document.selectFirst("#article-list-search-input")
+                .attr("placeholder"))
+                .isEqualTo("記事を検索（タイトル＋本文）");
+        assertThat(document.text()).contains(article.getTitle());
         assertThat(languageToggle).isNotNull();
-        assertThat(languageToggle.hasAttr("disabled")).isTrue();
-        assertThat(languageToggle.attr("aria-label"))
-                .isEqualTo("現在は韓国語が選択されています。日本語切替機能は準備中です。");
-        assertThat(languageToggle.attr("data-current-language")).isEqualTo("ko");
+        assertThat(languageToggle.hasAttr("disabled")).isFalse();
+        assertThat(languageToggle.attr("data-current-language")).isEqualTo("ja");
         assertThat(languageToggle.select(".language-toggle__option.is-active").text())
-                .isEqualTo("한국어");
-        assertThat(document.select("script[src=/js/languageToggle.js]")).isEmpty();
+                .isEqualTo("日本語");
+        assertThat(document.select("script[src=/js/languageToggle.js]")).hasSize(1);
+        assertThat(messageConfig).isNotNull();
+        assertThat(messageConfig.attr("data-load-error"))
+                .isEqualTo("記事を読み込めませんでした。もう一度お試しください。");
+        assertThat(messageConfig.attr("data-admin")).isEqualTo("管理者");
+    }
+
+    @DisplayName("일본어 선택 시 게시글 상세와 댓글의 정적·동적 문구를 일본어로 렌더링한다")
+    @Test
+    void renderJapaneseArticleDetailAndComments() throws Exception {
+        MvcResult result = mockMvc.perform(get("/articles/{id}", article.getId())
+                        .with(loginUser(member))
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "ja"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element messageConfig = document.selectFirst("#article-detail-messages");
+        Element languageToggle = document.selectFirst("[data-language-toggle]");
+
+        assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(document.selectFirst(".article-back-link").text())
+                .isEqualTo("すべての記事");
+        assertThat(document.selectFirst("#like-btn > span").text()).isEqualTo("いいね");
+        assertThat(document.selectFirst("#comment-heading > span").text())
+                .isEqualTo("コメント");
+        assertThat(document.selectFirst("#comment-content").attr("placeholder"))
+                .isEqualTo("コメントを入力してください。");
+        assertThat(document.selectFirst("body").attr("data-language-change-confirm"))
+                .contains("入力中のコメントまたは返信");
+        assertThat(languageToggle.hasAttr("disabled")).isFalse();
+        assertThat(languageToggle.attr("data-current-language")).isEqualTo("ja");
+        assertThat(messageConfig).isNotNull();
+        assertThat(messageConfig.attr("data-comment-reply")).isEqualTo("返信");
+        assertThat(messageConfig.attr("data-comment-delete-confirm"))
+                .isEqualTo("コメントを削除しますか？");
+        assertThat(messageConfig.attr("data-comment-validation-length"))
+                .isEqualTo("コメントは{0}文字以下で入力してください。");
+        assertThat(messageConfig.attr("data-like-error"))
+                .startsWith("いいねを変更できませんでした。");
+    }
+
+    @DisplayName("일본어 선택 시 글쓰기·글수정 화면과 Summernote를 일본어로 렌더링한다")
+    @Test
+    void renderJapaneseArticleFormsAndSummernote() throws Exception {
+        MvcResult createResult = mockMvc.perform(get("/new-article")
+                        .with(loginUser(member))
+                        .param(LocaleConfig.LANGUAGE_PARAMETER, "ja"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document createDocument = Jsoup.parse(
+                createResult.getResponse().getContentAsString()
+        );
+        Element createMessageConfig = createDocument.selectFirst(
+                "#article-form-messages"
+        );
+
+        assertThat(createDocument.selectFirst("html").attr("lang")).isEqualTo("ja");
+        assertThat(createDocument.title()).isEqualTo("新規投稿 · NewTypeBlog");
+        assertThat(createDocument.selectFirst(".editor-intro__title").text())
+                .isEqualTo("新規投稿");
+        assertThat(createDocument.selectFirst("#title").attr("placeholder"))
+                .isEqualTo("タイトルを入力してください。");
+        assertThat(createDocument.selectFirst("#create-btn span").text())
+                .isEqualTo("投稿");
+        assertThat(createDocument.selectFirst("body")
+                .attr("data-language-change-dirty"))
+                .isEqualTo("false");
+        assertThat(createMessageConfig.attr("data-editor-language"))
+                .isEqualTo("ja-JP");
+        assertThat(createMessageConfig.attr("data-title-limit"))
+                .isEqualTo("タイトルは{0}文字以内で入力してください。");
+        assertThat(createMessageConfig.attr("data-image-uploading-remaining"))
+                .isEqualTo("画像をアップロードしています（残り{0}件）。");
+        assertThat(createMessageConfig.attr("data-image-complete"))
+                .isEqualTo("画像のアップロードが完了しました。");
+        assertThat(createDocument.select("script[src$=summernote-ja-JP.min.js]"))
+                .hasSize(1);
+        assertThat(createDocument.select("script[src$=summernote-ko-KR.min.js]"))
+                .isEmpty();
+        assertThat(createDocument.select("script[src=/js/languageToggle.js]"))
+                .hasSize(1);
+
+        MvcResult editResult = mockMvc.perform(get("/new-article")
+                        .param("id", article.getId().toString())
+                        .with(loginUser(admin))
+                        .cookie(new Cookie(LocaleConfig.LANGUAGE_COOKIE, "ja")))
+                .andExpect(status().isOk())
+                .andReturn();
+        Document editDocument = Jsoup.parse(
+                editResult.getResponse().getContentAsString()
+        );
+
+        assertThat(editDocument.title()).isEqualTo("記事編集 · NewTypeBlog");
+        assertThat(editDocument.selectFirst(".editor-intro__title").text())
+                .isEqualTo("記事編集");
+        assertThat(editDocument.selectFirst("#modify-btn span").text())
+                .isEqualTo("更新");
+        assertThat(editDocument.selectFirst("#title").attr("value"))
+                .isEqualTo(article.getTitle());
     }
 
     @DisplayName("지원하지 않는 언어 요청은 기본 한국어를 유지한다")

@@ -1,18 +1,20 @@
-// 게시글 무한 스크롤
+// 게시글 무한 스크롤 조회와 번역된 추가 카드 렌더링을 관리하는 스크립트
 // 사용처: articleList.html
 
-// 게시글 목록 무한 스크롤
 document.addEventListener('DOMContentLoaded', () => {
     const feed = document.getElementById('article-feed');
     const sentinel = document.getElementById('article-feed-sentinel');
     const loading = document.getElementById('article-feed-loading');
     const message = document.getElementById('article-feed-message');
     const loadButton = document.getElementById('article-feed-load-button');
+    const messageConfig = document.getElementById('article-list-messages');
 
-    if (!feed || !sentinel || !loading || !message || !loadButton) {
+    if (!feed || !sentinel || !loading || !message || !loadButton
+            || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
     let nextCursor = feed.dataset.nextCursor || '';
     let hasNext = feed.dataset.hasNext === 'true';
     const keyword = (feed.dataset.keyword || '').trim();
@@ -87,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             pin.setAttribute('aria-hidden', 'true');
             articleNumber.append(pin);
-            articleNumber.append(createElement('span', 'sr-only', '고정 게시글'));
+            articleNumber.append(createElement('span', 'sr-only', messages.pinned));
         }
         articleNumber.append(createElement('span', '', `#${article.id}`));
 
@@ -104,8 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 '*'
             );
             modifiedMarker.setAttribute('role', 'img');
-            modifiedMarker.setAttribute('aria-label', '수정됨');
-            modifiedMarker.title = '수정됨';
+            modifiedMarker.setAttribute('aria-label', messages.modified);
+            modifiedMarker.title = messages.modified;
             articleDate.append(modifiedMarker);
         }
 
@@ -121,8 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 'bi bi-patch-check-fill author-admin-badge'
             );
             adminBadge.setAttribute('role', 'img');
-            adminBadge.setAttribute('aria-label', '관리자');
-            adminBadge.title = '관리자';
+            adminBadge.setAttribute('aria-label', messages.admin);
+            adminBadge.title = messages.admin;
             articleAuthor.append(adminBadge);
         }
         byline.append(articleDate, articleAuthor);
@@ -146,21 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
             'article-card__metrics justify-content-end text-muted small mt-3'
         );
         metrics.append(createMetric(
-            '조회수',
+            messages.views,
             'bi bi-eye',
             'article-card__view-count',
             article.viewCount
         ));
         metrics.append(createSeparator());
         metrics.append(createMetric(
-            '좋아요',
+            messages.likes,
             'bi bi-heart-fill article-card__like-icon',
             'article-card__like-count',
             article.likeCount
         ));
         metrics.append(createSeparator());
         metrics.append(createMetric(
-            '댓글',
+            messages.comments,
             'bi bi-chat-dots',
             'article-card__comment-count',
             article.commentCount
@@ -187,8 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (feed.children.length > 0) {
             setMessage(keyword
-                ? '모든 검색 결과를 불러왔습니다.'
-                : '모든 게시글을 불러왔습니다.');
+                ? messages.loadCompleteSearch
+                : messages.loadCompleteAll);
         }
     }
 
@@ -250,8 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(error);
-            setMessage('게시글을 불러오지 못했습니다. 다시 시도해주세요.');
-            setLoadButtonContent('다시 시도', 'bi-arrow-repeat');
+            setMessage(messages.loadError);
+            setLoadButtonContent(messages.retry, 'bi-arrow-repeat');
             loadButton.hidden = false;
         } finally {
             isLoading = false;
@@ -262,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (observer) {
                     observer.observe(sentinel);
                 } else {
-                    setLoadButtonContent('게시글 더보기');
+                    setLoadButtonContent(messages.loadMore);
                     loadButton.hidden = false;
                 }
             }

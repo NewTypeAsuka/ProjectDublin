@@ -1,4 +1,4 @@
-// 게시글 좋아요 상태의 조회, 등록, 취소와 화면 표시를 관리하는 스크립트
+// 현재 표시 언어로 게시글 좋아요 조회·변경과 화면 상태를 관리하는 스크립트
 // 사용처: article.html
 
 (function () {
@@ -8,11 +8,14 @@
     const likeCount = document.getElementById('like-count');
     const articleLikeCount = document.getElementById('article-like-count');
     const actionMessage = document.getElementById('article-action-message');
+    const messageConfig = document.getElementById('article-detail-messages');
 
-    if (!likeButton || !articleId || !likeIcon || !likeCount || !articleLikeCount) {
+    if (!likeButton || !articleId || !likeIcon || !likeCount || !articleLikeCount
+            || !messageConfig) {
         return;
     }
 
+    const messages = messageConfig.dataset;
     let liked = false;
 
     likeButton.addEventListener('click', function () {
@@ -45,7 +48,7 @@
             })
             .catch(() => {
                 if (showError) {
-                    showActionMessage('좋아요를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                    showActionMessage(messages.likeError);
                 }
             })
             .finally(() => {
@@ -62,7 +65,10 @@
         articleLikeCount.textContent = state.likeCount;
         likeButton.classList.toggle('is-liked', liked);
         likeButton.setAttribute('aria-pressed', String(liked));
-        likeButton.setAttribute('aria-label', liked ? '좋아요 취소' : '좋아요');
+        likeButton.setAttribute(
+            'aria-label',
+            liked ? messages.likeRemoveAria : messages.likeAddAria
+        );
         hideActionMessage();
     }
 
