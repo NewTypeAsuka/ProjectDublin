@@ -325,7 +325,7 @@ class ArticleApiControllerTest {
                 .isEqualTo("ja_JP");
         assertThat(loginDocument.select(".language-toggle__option.is-active").text())
                 .isEqualTo("日本語");
-        assertThat(loginAction.text()).isEqualTo("Googleで続行");
+        assertThat(loginAction.text()).isEqualTo("Googleでログイン");
 
         MvcResult signupResult = mockMvc.perform(get("/signup/nickname")
                         .with(loginOAuthUser(
@@ -352,9 +352,9 @@ class ArticleApiControllerTest {
         assertThat(signupDocument.selectFirst("#nickname-signup-form")
                 .attr("data-guide-valid"))
                 .isEqualTo("使用可能な長さです。重複は登録時に確認します。");
-        assertThat(signupAction.text()).isEqualTo("登録");
+        assertThat(signupAction.text()).isEqualTo("登録する");
         assertThat(signupAction.text().codePointCount(0, signupAction.text().length()))
-                .isEqualTo(2);
+                .isEqualTo(4);
         assertThat(switchAction.text()).isEqualTo("別のGoogleアカウントでログイン");
     }
 
@@ -413,12 +413,12 @@ class ArticleApiControllerTest {
         Element messageConfig = document.selectFirst("#article-list-messages");
 
         assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ja");
-        assertThat(document.title()).isEqualTo("記事 · NewTypeBlog");
+        assertThat(document.title()).isEqualTo("ポスト · NewTypeBlog");
         assertThat(document.selectFirst(".article-list-toolbar__title").text())
-                .isEqualTo("記事");
+                .isEqualTo("ポスト");
         assertThat(document.selectFirst("#article-list-search-input")
                 .attr("placeholder"))
-                .isEqualTo("記事を検索（タイトル＋本文）");
+                .isEqualTo("ポストを検索（タイトル＋本文）");
         assertThat(document.text()).contains(article.getTitle());
         assertThat(languageToggle).isNotNull();
         assertThat(languageToggle.hasAttr("disabled")).isFalse();
@@ -428,7 +428,7 @@ class ArticleApiControllerTest {
         assertThat(document.select("script[src=/js/languageToggle.js]")).hasSize(1);
         assertThat(messageConfig).isNotNull();
         assertThat(messageConfig.attr("data-load-error"))
-                .isEqualTo("記事を読み込めませんでした。もう一度お試しください。");
+                .isEqualTo("ポストを読み込めませんでした。もう一度お試しください。");
         assertThat(messageConfig.attr("data-admin")).isEqualTo("管理者");
     }
 
@@ -447,7 +447,7 @@ class ArticleApiControllerTest {
 
         assertThat(document.selectFirst("html").attr("lang")).isEqualTo("ja");
         assertThat(document.selectFirst(".article-back-link").text())
-                .isEqualTo("すべての記事");
+                .isEqualTo("すべてのポスト");
         assertThat(document.selectFirst("#like-btn > span").text()).isEqualTo("いいね");
         assertThat(document.selectFirst("#comment-heading > span").text())
                 .isEqualTo("コメント");
@@ -519,9 +519,9 @@ class ArticleApiControllerTest {
                 editResult.getResponse().getContentAsString()
         );
 
-        assertThat(editDocument.title()).isEqualTo("記事編集 · NewTypeBlog");
+        assertThat(editDocument.title()).isEqualTo("ポスト編集 · NewTypeBlog");
         assertThat(editDocument.selectFirst(".editor-intro__title").text())
-                .isEqualTo("記事編集");
+                .isEqualTo("ポスト編集");
         assertThat(editDocument.selectFirst("#modify-btn span").text())
                 .isEqualTo("更新");
         assertThat(editDocument.selectFirst("#title").attr("value"))

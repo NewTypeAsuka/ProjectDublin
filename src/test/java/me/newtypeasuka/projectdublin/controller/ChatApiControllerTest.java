@@ -126,7 +126,7 @@ class ChatApiControllerTest {
                 .isEqualTo("メッセージ");
         assertThat(document.select(".site-nav-dropdown__item"))
                 .extracting(Element::text)
-                .containsExactly("記事", "マイページ", "株価", "チャット");
+                .containsExactly("ポスト", "マイページ", "株価", "チャット");
         assertThat(languageToggle).isNotNull();
         assertThat(languageToggle.hasAttr("disabled")).isFalse();
         assertThat(languageToggle.attr("data-current-language")).isEqualTo("ja");

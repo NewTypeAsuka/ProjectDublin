@@ -275,8 +275,8 @@ class BlogApiControllerTest {
                 .isEqualTo(Article.Language.KOREAN);
 
         UpdateArticleRequest updateRequest = new UpdateArticleRequest(
-                "日本語の記事",
-                "<p>内容をすべて日本語に修正した記事です。</p>"
+                "日本語のポスト",
+                "<p>内容をすべて日本語に修正したポストです。</p>"
         );
         mockMvc.perform(put("/api/articles/{id}", articleId)
                         .with(loginUser())
