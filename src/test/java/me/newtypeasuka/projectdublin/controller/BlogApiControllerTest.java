@@ -98,6 +98,13 @@ class BlogApiControllerTest {
                 .build());
     }
 
+    @DisplayName("사용하지 않는 전체 게시글 GET API를 허용하지 않는다")
+    @Test
+    void doNotExposeUnusedAllArticlesApi() throws Exception {
+        mockMvc.perform(get("/api/articles").with(loginUser()))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
     @DisplayName("로그인 사용자 ID와 Summernote HTML로 글을 생성, 조회, 수정한다")
     @Test
     void createReadAndUpdateSummernoteArticle() throws Exception {

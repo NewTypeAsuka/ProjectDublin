@@ -36,7 +36,8 @@ public class BlogApiController {
     }
 
     // 블로그 글 모두 조회 API
-    @GetMapping("/api/articles")
+    // 무한 스크롤 전환 후 사용하지 않아 전체 본문 조회를 막기 위해 매핑을 비활성화한다.
+    // @GetMapping("/api/articles")
     public ResponseEntity<List<ArticleResponse>> findAllArticles() {
         List<ArticleResponse> articles = blogService.findAll()
                 .stream()
