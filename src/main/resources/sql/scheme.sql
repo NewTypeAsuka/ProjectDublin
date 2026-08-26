@@ -33,6 +33,8 @@ create table articles (
     updated_at datetime not null default current_timestamp,
     primary key (id),
     constraint ck_article_pinned check (pinned in (0, 1)),
+    constraint ck_article_language
+            check (language in ('korean', 'japanese', 'other', 'undetermined')),
     constraint fk_article_author_id
             foreign key (author_id) references users (id)
             on update restrict  -- 이미 작성자가 있으면 작성자 수정 불가능
