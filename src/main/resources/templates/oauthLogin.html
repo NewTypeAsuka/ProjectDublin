@@ -86,6 +86,7 @@
             display: grid;
             grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
             overflow: hidden;
+            width: 100%;
             max-width: 62rem;
             margin: 0 auto;
             border: 1px solid rgba(255, 255, 255, 0.78);
@@ -102,8 +103,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            container-type: inline-size; /* 번역 제목 크기를 좌측 영역 너비에 맞춘다. */
             min-height: 36rem;
-            padding: clamp(2rem, 5vw, 3.5rem);
+            padding: clamp(2rem, 5vw, 3.5rem) clamp(2rem, 4vw, 3rem);
             color: rgba(255, 255, 255, 1);
             background:
                 radial-gradient(circle at 82% 12%,
@@ -133,12 +135,17 @@
             text-transform: uppercase;
         }
         .login-story__title {
-            max-width: 21rem;
+            width: 100%;
+            max-width: none;
             margin-bottom: 1rem;
-            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            font-size: clamp(2.2rem, 14.25cqi, 3.4rem);
             font-weight: 800;
             line-height: 1.14;
             letter-spacing: -0.06em;
+        }
+        .login-story__title-line {
+            display: block;
+            white-space: nowrap;
         }
         .login-story__description {
             max-width: 22rem;
@@ -376,9 +383,12 @@
                 <div>
                     <p class="login-story__eyebrow">MY SPACE TO THINK</p>
                     <h2 class="login-story__title">
-                        <span th:text="#{login.story.title.line1}">일상의 생각이</span><br>
-                        <span th:text="#{login.story.title.line2}">글이 되는</span><br>
-                        <span th:text="#{login.story.title.line3}">나만의 공간.</span>
+                        <span class="login-story__title-line"
+                            th:text="#{login.story.title.line1}">일상의 생각이</span>
+                        <span class="login-story__title-line"
+                            th:text="#{login.story.title.line2}">글이 되는</span>
+                        <span class="login-story__title-line"
+                            th:text="#{login.story.title.line3}">나만의 공간.</span>
                     </h2>
                     <p class="login-story__description">
                         <span th:text="#{login.story.description}">일상의 발견과 새로운 관점을 기록하고, 저만의 이야기를 차분히 이어가는 곳입니다.</span>

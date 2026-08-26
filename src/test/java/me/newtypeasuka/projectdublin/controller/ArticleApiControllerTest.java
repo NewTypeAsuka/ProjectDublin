@@ -326,6 +326,10 @@ class ArticleApiControllerTest {
         assertThat(loginDocument.select(".language-toggle__option.is-active").text())
                 .isEqualTo("日本語");
         assertThat(loginAction.text()).isEqualTo("Googleでログイン");
+        assertThat(loginDocument.select(".login-story__title-line"))
+                .extracting(Element::text)
+                .containsExactly("日々の思いが", "文章になる", "私だけの場所。");
+        assertThat(loginDocument.select(".login-story__title > br")).isEmpty();
 
         MvcResult signupResult = mockMvc.perform(get("/signup/nickname")
                         .with(loginOAuthUser(
@@ -347,6 +351,8 @@ class ArticleApiControllerTest {
         assertThat(signupDocument.title()).isEqualTo("ニックネーム設定 · NewTypeBlog");
         assertThat(signupDocument.select(".language-toggle__option.is-active").text())
                 .isEqualTo("日本語");
+        assertThat(signupDocument.selectFirst(".signup-message > br + span").text())
+                .isEqualTo("使用するニックネームを入力してください。");
         assertThat(signupDocument.selectFirst("#nickname").attr("placeholder"))
                 .isEqualTo("3～12文字で入力してください。");
         assertThat(signupDocument.selectFirst("#nickname-signup-form")
@@ -356,6 +362,10 @@ class ArticleApiControllerTest {
         assertThat(signupAction.text().codePointCount(0, signupAction.text().length()))
                 .isEqualTo(4);
         assertThat(switchAction.text()).isEqualTo("別のGoogleアカウントでログイン");
+        assertThat(signupDocument.select(".signup-story__title-line"))
+                .extracting(Element::text)
+                .containsExactly("あなたの名前で", "物語を", "始めましょう。");
+        assertThat(signupDocument.select(".signup-story__title > br")).isEmpty();
     }
 
     @DisplayName("일본어 닉네임 설정 화면은 서버 검증 오류도 일본어로 표시한다")
