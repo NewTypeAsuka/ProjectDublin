@@ -312,7 +312,7 @@
 
         const cancelButton = document.createElement('button');
         cancelButton.type = 'button';
-        cancelButton.className = 'btn btn-outline-secondary btn-sm app-button comment-inline-form__button';
+        cancelButton.className = 'btn btn-outline-secondary btn-sm app-button comment-inline-form__button comment-inline-form__button--cancel';
         setButtonContent(cancelButton, 'bi-x-lg', messages.commentCancel);
         cancelButton.addEventListener('click', function () {
             form.remove();
