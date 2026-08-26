@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const articleAuthor = createElement('span', 'article-card__author');
-        articleAuthor.append(createElement('span', '', 'by'));
         const nickname = createElement('span', 'user-nickname', article.author || '');
         nickname.dataset.userId = String(article.authorId);
         articleAuthor.append(nickname);

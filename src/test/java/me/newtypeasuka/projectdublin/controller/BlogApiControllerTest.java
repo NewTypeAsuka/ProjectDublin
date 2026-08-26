@@ -198,6 +198,8 @@ class BlogApiControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-meta__author\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString(">by<"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString(">수정됨<"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "target=\"_blank\"")))
@@ -220,6 +222,8 @@ class BlogApiControllerTest {
                         "class=\"article-card__date\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-card__author\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString(">by<"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-card__modified-marker\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
@@ -237,6 +241,8 @@ class BlogApiControllerTest {
                         "'article-card__date'")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "'article-card__author'")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("'by'"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "'article-card__modified-marker'")));
     }
