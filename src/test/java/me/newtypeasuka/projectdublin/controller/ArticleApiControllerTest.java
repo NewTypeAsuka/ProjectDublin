@@ -349,6 +349,8 @@ class ArticleApiControllerTest {
 
         assertThat(signupDocument.selectFirst("html").attr("lang")).isEqualTo("ja");
         assertThat(signupDocument.title()).isEqualTo("ニックネーム設定 · NewTypeBlog");
+        assertThat(signupDocument.selectFirst("#signup-title").text())
+                .isEqualTo("ニックネーム設定");
         assertThat(signupDocument.select(".language-toggle__option.is-active").text())
                 .isEqualTo("日本語");
         assertThat(signupDocument.selectFirst(".signup-message > br + span").text())
@@ -597,6 +599,7 @@ class ArticleApiControllerTest {
                 .andExpect(content().string(containsString("data-language-toggle")))
                 .andExpect(content().string(containsString("src=\"/img/koreaFlag.svg\"")))
                 .andExpect(content().string(containsString("src=\"/img/japanFlag.svg\"")))
+                .andExpect(content().string(containsString(">닉네임 설정</h1>")))
                 .andExpect(content().string(containsString(
                         "src=\"/js/nicknameSignup.js\""
                 )))
