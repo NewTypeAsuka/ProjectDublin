@@ -197,6 +197,10 @@ class BlogApiControllerTest {
                         "class=\"article-meta__date\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "class=\"article-meta__author\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "class=\"article-detail__number\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        ">#" + articleId + "</span>")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString(">by<"))))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
