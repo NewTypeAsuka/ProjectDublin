@@ -418,7 +418,7 @@ class ArticleApiControllerTest {
                 .isEqualTo("ポスト");
         assertThat(document.selectFirst("#article-list-search-input")
                 .attr("placeholder"))
-                .isEqualTo("ポストを検索（タイトル＋本文）");
+                .isEqualTo("ポスト検索（タイトル＋本文）");
         assertThat(document.text()).contains(article.getTitle());
         assertThat(languageToggle).isNotNull();
         assertThat(languageToggle.hasAttr("disabled")).isFalse();
