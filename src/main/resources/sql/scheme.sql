@@ -61,19 +61,40 @@ create table article_likes (
 
 create table article_images (
     id bigint unsigned not null auto_increment,
-    article_id bigint unsigned not null,
+    article_id bigint unsigned null,
+    uploader_id bigint unsigned null,
+    status varchar(20) not null default 'attached'
+            comment 'pending: 업로드 대기 / attached: 게시글 연결 / delete_pending: S3 삭제 대기',
     s3_key varchar(512) collate utf8mb4_bin not null,
     original_filename varchar(255) not null,
     content_type varchar(100) not null,
     file_size bigint unsigned not null,
     created_at datetime not null default current_timestamp,
+    updated_at datetime not null default current_timestamp on update current_timestamp,
+    delete_attempts int unsigned not null default 0,
+    next_delete_attempt_at datetime null,
+    last_delete_error varchar(1000) null,
     primary key (id),
     constraint uq_article_images_s3_key unique (s3_key),
-    constraint fk_article_images_article_id
-            foreign key (article_id) references articles (id)
-            on update restrict  -- 이미지가 있으면 해당 글의 id 수정 불가능
-            on delete cascade,  -- 글이 삭제되면 해당 글의 이미지 정보도 함께 삭제
-    index idx_article_images_article_id (article_id)
+    constraint ck_article_images_status
+            check (status in ('pending', 'attached', 'delete_pending')),
+    constraint ck_article_images_status_article
+            check (
+                (status = 'pending' and article_id is null and uploader_id is not null)
+                or (status = 'attached' and article_id is not null)
+                or (status = 'delete_pending' and article_id is null)
+            ),
+    constraint fk_article_images_article_id_restrict
+            foreign key (article_id) references articles (id),
+    constraint fk_article_images_uploader_id
+            foreign key (uploader_id) references users (id),
+    index idx_article_images_article_id (article_id),
+    index idx_article_images_uploader_status_created
+            (uploader_id, status, created_at, id),
+    index idx_article_images_status_created
+            (status, created_at, id),
+    index idx_article_images_delete_retry
+            (status, next_delete_attempt_at, id)
 );
 
 create table comments (
