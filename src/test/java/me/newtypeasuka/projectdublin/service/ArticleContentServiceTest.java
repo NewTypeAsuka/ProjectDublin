@@ -10,6 +10,8 @@ import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Utilities;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -26,7 +28,9 @@ class ArticleContentServiceTest {
                     java.util.List.of(
                             "https://legacy-projectdublin-images.s3.ap-northeast-2.amazonaws.com/articles/"
                     ),
-                    DataSize.ofMegabytes(10)
+                    DataSize.ofMegabytes(10),
+                    Duration.ofHours(24),
+                    100
             ),
             S3Utilities.builder().region(Region.AP_NORTHEAST_2).build()
     );

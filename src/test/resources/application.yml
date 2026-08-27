@@ -31,6 +31,8 @@ aws:
     public-base-url:
     legacy-image-prefix-urls: []
     max-file-size: 10MB
+    pending-expiration: 24h
+    cleanup-batch-size: 100
 
 stock:
   yahoo-base-url: https://query1.finance.yahoo.com

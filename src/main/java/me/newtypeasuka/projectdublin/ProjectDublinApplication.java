@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.TimeZone;
 
-@EnableScheduling // 보존 기간이 지난 채팅 메시지 정리 작업 활성화
+@EnableScheduling // 보존 기간이 지난 채팅과 미첨부·삭제 대기 이미지 정리 작업 활성화
 @EnableJpaAuditing // created_at, updated_at 자동 저장을 위해 JPA Auditing 활성화
 @SpringBootApplication // 스프링부트 시작점
 public class ProjectDublinApplication {

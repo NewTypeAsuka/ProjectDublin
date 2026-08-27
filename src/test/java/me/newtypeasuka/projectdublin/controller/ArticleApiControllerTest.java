@@ -514,6 +514,9 @@ class ArticleApiControllerTest {
                 .isEqualTo("画像をアップロードしています（残り{0}件）。");
         assertThat(createMessageConfig.attr("data-image-complete"))
                 .isEqualTo("画像のアップロードが完了しました。");
+        assertThat(createMessageConfig.attr("data-image-max-count")).isEqualTo("50");
+        assertThat(createMessageConfig.attr("data-image-limit"))
+                .isEqualTo("画像は1件のポストにつき最大{0}枚まで添付できます。");
         assertThat(createDocument.select("script[src$=summernote-ja-JP.min.js]"))
                 .hasSize(1);
         assertThat(createDocument.select("script[src$=summernote-ko-KR.min.js]"))

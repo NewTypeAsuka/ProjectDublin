@@ -3,6 +3,7 @@ package me.newtypeasuka.projectdublin.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.newtypeasuka.projectdublin.domain.Article;
+import me.newtypeasuka.projectdublin.domain.ArticleImage;
 import me.newtypeasuka.projectdublin.domain.Comment;
 import me.newtypeasuka.projectdublin.domain.User;
 import me.newtypeasuka.projectdublin.dto.AddArticleRequest;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,6 +49,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -251,6 +254,28 @@ class BlogApiControllerTest {
                         "'article-card__modified-marker'")));
     }
 
+    @DisplayName("게시글 본문의 이미지가 51장이면 API에서 저장을 거부한다")
+    @Test
+    void rejectArticleWithMoreThanFiftyImages() throws Exception {
+        String imageUrl = s3ObjectUrlService.resolve(
+                "articles/%d/2026/08/image.png".formatted(user.getId())
+        );
+        AddArticleRequest request = new AddArticleRequest(
+                "Too many images",
+                ("<img src=\"" + imageUrl + "\">").repeat(51)
+        );
+
+        mockMvc.perform(post("/api/articles")
+                        .with(loginUser())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        assertThat(blogRepository.findAll()).isEmpty();
+        verify(s3Client, never()).headObject(any(HeadObjectRequest.class));
+    }
+
     @DisplayName("게시글 등록 시 한국어·일본어·기타·판별 불가 언어를 저장한다")
     @Test
     void saveDetectedArticleLanguages() throws Exception {
@@ -364,23 +389,38 @@ class BlogApiControllerTest {
     @DisplayName("S3 이미지를 게시글과 연결하고 게시글 삭제 후 S3에서도 제거한다")
     @Test
     void mapAndDeleteArticleImage() throws Exception {
-        String key = "articles/%d/2026/07/image.png".formatted(user.getId());
-        String encodedFilename = Base64.getUrlEncoder()
-                .withoutPadding()
-                .encodeToString("image.png".getBytes(StandardCharsets.UTF_8));
-        when(s3Client.headObject(any(HeadObjectRequest.class))).thenReturn(
-                HeadObjectResponse.builder()
-                        .contentType("image/png")
-                        .contentLength(9L)
-                        .metadata(Map.of(
-                                "uploader-id", user.getId().toString(),
-                                "original-filename", encodedFilename
-                        ))
-                        .build()
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "image.png",
+                "image/png",
+                new byte[]{
+                        (byte) 0x89, 0x50, 0x4E, 0x47,
+                        0x0D, 0x0A, 0x1A, 0x0A, 0x01
+                }
         );
+        String uploadResponse = mockMvc.perform(multipart("/api/articles/images")
+                        .file(image)
+                        .with(loginUser())
+                        .with(csrf()))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String imageUrl = objectMapper.readTree(uploadResponse).get("url").asText();
+        String key = s3ObjectUrlService.extractArticleImageKey(imageUrl).orElseThrow();
+
+        assertThat(articleImageRepository.findAll())
+                .singleElement()
+                .satisfies(pendingImage -> {
+                    assertThat(pendingImage.getStatus())
+                            .isEqualTo(ArticleImage.Status.PENDING);
+                    assertThat(pendingImage.getArticle()).isNull();
+                    assertThat(pendingImage.getS3Key()).isEqualTo(key);
+                });
+
         AddArticleRequest createRequest = new AddArticleRequest(
                 "Image title",
-                "<p>Image content</p><img src=\"" + s3ObjectUrlService.resolve(key) + "\">"
+                "<p>Image content</p><img src=\"" + imageUrl + "\">"
         );
 
         String createResponse = mockMvc.perform(post("/api/articles")
@@ -396,11 +436,13 @@ class BlogApiControllerTest {
 
         assertThat(articleImageRepository.findAllByArticleId(articleId))
                 .singleElement()
-                .satisfies(image -> {
-                    assertThat(image.getS3Key()).isEqualTo(key);
-                    assertThat(image.getOriginalFilename()).isEqualTo("image.png");
-                    assertThat(image.getContentType()).isEqualTo("image/png");
-                    assertThat(image.getFileSize()).isEqualTo(9L);
+                .satisfies(attachedImage -> {
+                    assertThat(attachedImage.getS3Key()).isEqualTo(key);
+                    assertThat(attachedImage.getStatus())
+                            .isEqualTo(ArticleImage.Status.ATTACHED);
+                    assertThat(attachedImage.getOriginalFilename()).isEqualTo("image.png");
+                    assertThat(attachedImage.getContentType()).isEqualTo("image/png");
+                    assertThat(attachedImage.getFileSize()).isEqualTo(9L);
                 });
 
         mockMvc.perform(delete("/api/articles/{id}", articleId)
@@ -496,7 +538,7 @@ class BlogApiControllerTest {
                 .singleElement()
                 .satisfies(image -> assertThat(image.getS3Key()).isEqualTo(key));
 
-        // 후속 수정 HTML에서 이미지가 누락되어도 이미 연결된 S3 원본은 영구 삭제하지 않는다.
+        // 후속 수정 HTML에서 제거한 이미지는 S3와 DB에서도 함께 정리한다.
         UpdateArticleRequest textOnlyRequest = new UpdateArticleRequest(
                 "Managed without image",
                 "<p>이미지가 누락된 수정 본문</p>"
@@ -508,10 +550,10 @@ class BlogApiControllerTest {
                         .content(objectMapper.writeValueAsString(textOnlyRequest)))
                 .andExpect(status().isOk());
 
-        assertThat(articleImageRepository.findAllByArticleId(article.getId()))
-                .singleElement()
-                .satisfies(image -> assertThat(image.getS3Key()).isEqualTo(key));
-        verify(s3Client, never()).deleteObject(any(DeleteObjectRequest.class));
+        assertThat(articleImageRepository.findAllByArticleId(article.getId())).isEmpty();
+        verify(s3Client).deleteObject(argThat(
+                (DeleteObjectRequest request) -> request.key().equals(key)
+        ));
     }
 
     @DisplayName("존재하지 않는 게시글의 조회·수정·삭제 요청은 404를 반환한다")

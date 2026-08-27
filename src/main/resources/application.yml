@@ -55,3 +55,5 @@ aws:
     legacy-image-prefix-urls: # 과거 저장소 이미지가 글 수정 과정에서 제거되지 않도록 읽기만 허용
       - https://projectdublin-image-storage-592011500003-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/articles/
     max-file-size: 50MB # 파일 업로드 최대 크기 설정. application.yml에서 설정한 값보다 큰 파일을 업로드하면 500 에러 발생
+    pending-expiration: 24h # 작성·수정 화면에서 사용하지 않은 이미지는 24시간 뒤 S3 정리 대상으로 전환
+    cleanup-batch-size: 100 # 한 번의 정리 작업에서 조회할 이미지 수

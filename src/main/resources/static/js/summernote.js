@@ -11,8 +11,10 @@
     }
 
     const messages = messageConfig.dataset;
+    const maxImageCount = Number(messages.imageMaxCount) || 50;
     let activeUploads = 0;
     let uploadFailures = 0;
+    let uploadLimitExceeded = false;
     let editorReady = false;
 
     // 수정 화면에서는 서버가 textarea에 넣어준 기존 HTML을 보관한다.
@@ -43,7 +45,7 @@
         ],
         callbacks: {
             onImageUpload: function (files) {
-                Array.from(files).forEach(uploadImage);
+                uploadSelectedImages(files);
             },
             onPaste: function (event) {
                 insertYoutubeVideoOnPaste(event);
@@ -170,9 +172,6 @@
     async function uploadImage(file) {
         const formData = new FormData();
         formData.append('image', file);
-        if (activeUploads === 0) {
-            uploadFailures = 0;
-        }
         activeUploads += 1;
         setUploadStatus(messages.imageUploading, false);
 
@@ -212,6 +211,11 @@
                     formatMessage(messages.imageFailed, uploadFailures),
                     true
                 );
+            } else if (uploadLimitExceeded) {
+                setUploadStatus(
+                    formatMessage(messages.imageLimit, maxImageCount),
+                    true
+                );
             } else {
                 setUploadStatus(messages.imageComplete, false);
                 window.setTimeout(function () {
@@ -219,6 +223,35 @@
                 }, 2000);
             }
         }
+    }
+
+    // 현재 본문과 진행 중인 업로드를 합산하여 51번째 이미지 요청을 보내지 않는다.
+    function uploadSelectedImages(files) {
+        const selectedFiles = Array.from(files);
+        if (activeUploads === 0) {
+            uploadFailures = 0;
+            uploadLimitExceeded = false;
+        }
+
+        const availableSlots = Math.max(
+            0,
+            maxImageCount - countEditorImages() - activeUploads
+        );
+        const acceptedFiles = selectedFiles.slice(0, availableSlots);
+        if (acceptedFiles.length < selectedFiles.length) {
+            uploadLimitExceeded = true;
+            setUploadStatus(
+                formatMessage(messages.imageLimit, maxImageCount),
+                true
+            );
+        }
+        acceptedFiles.forEach(uploadImage);
+    }
+
+    function countEditorImages() {
+        const contentContainer = document.createElement('div');
+        contentContainer.innerHTML = $content.summernote('code') || '';
+        return contentContainer.querySelectorAll('img[src]').length;
     }
 
     function formatMessage(template, ...values) {

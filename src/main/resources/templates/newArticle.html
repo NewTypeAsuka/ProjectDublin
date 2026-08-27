@@ -480,11 +480,13 @@
     <!-- 게시글 작성·수정 JavaScript와 Summernote 렌더링 문구 -->
     <div id="article-form-messages"
         hidden
+        data-image-max-count="50"
         th:attr="data-response-invalid=#{article.form.response.invalid},
             data-created=#{article.form.created},
             data-updated=#{article.form.updated},
             data-save-error=#{article.form.save.error},
             data-image-wait=#{article.form.image.wait},
+            data-image-limit=#{article.form.image.limit},
             data-title-required=#{article.form.title.required},
             data-content-required=#{article.form.content.required},
             data-title-limit=#{article.form.title.limit},

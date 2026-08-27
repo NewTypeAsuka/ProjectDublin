@@ -13,6 +13,7 @@ const contentField = document.getElementById('content');
 const messageConfig = document.getElementById('article-form-messages');
 const messages = messageConfig?.dataset;
 const maxTitleLength = Number(titleInput?.dataset.maxLength) || 40;
+const maxImageCount = Number(messages?.imageMaxCount) || 50;
 
 // 글 작성과 수정 화면에서 제목 글자 수를 실시간으로 표시(40자 제한)
 if (titleInput && titleLength) {
@@ -79,6 +80,7 @@ function createArticleRequestBody() {
     contentContainer.innerHTML = content;
     const hasContent = contentContainer.textContent.trim()
         || contentContainer.querySelector('iframe, img');
+    const imageCount = contentContainer.querySelectorAll('img[src]').length;
 
     if (!title) {
         titleInput.setAttribute('aria-invalid', 'true');
@@ -95,6 +97,12 @@ function createArticleRequestBody() {
     if (countCharacters(title) > maxTitleLength) {
         showMessage(formatMessage(messages.titleLimit, maxTitleLength), true);
         titleInput.focus();
+        return null;
+    }
+    if (imageCount > maxImageCount) {
+        showMessage(formatMessage(messages.imageLimit, maxImageCount), true);
+        const editableArea = document.querySelector('.note-editable');
+        (editableArea || contentField).focus();
         return null;
     }
 

@@ -1,5 +1,6 @@
 package me.newtypeasuka.projectdublin.config;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,6 +19,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Utilities;
 
+import java.time.Duration;
 import java.util.List;
 
 @Configuration
@@ -70,7 +72,9 @@ public class S3Config {
             @NotBlank String keyPrefix,
             String publicBaseUrl,
             List<String> legacyImagePrefixUrls,
-            @NotNull DataSize maxFileSize
+            @NotNull DataSize maxFileSize,
+            @NotNull Duration pendingExpiration,
+            @Min(1) int cleanupBatchSize
     ) {
     }
 }
