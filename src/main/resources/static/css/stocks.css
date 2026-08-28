@@ -1,0 +1,501 @@
+/* layout: 주식 목록 상단 제목과 검색 */
+.stock-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+.stock-toolbar__heading {
+    width: 100%;
+    min-width: 0;
+}
+.stock-toolbar__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+    color: rgba(27, 100, 218, 1);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.stock-toolbar__title {
+    margin: 0;
+    color: rgba(25, 31, 40, 1);
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    font-weight: 780;
+    letter-spacing: -0.055em;
+    line-height: 1.08;
+}
+.stock-toolbar__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+    padding-bottom: 0.7rem;
+}
+
+/* layout: 주식 티커 검색 입력창과 아이콘 버튼 */
+.stock-search {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    flex: 0 1 auto;
+    min-width: 2.75rem;
+}
+.stock-search__input {
+    box-sizing: border-box;
+    width: 0;
+    min-width: 0;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    opacity: 0;
+    color: rgba(51, 61, 75, 1);
+    background-color: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    pointer-events: none;
+    text-transform: uppercase;
+    transition: width 0.22s ease, padding 0.22s ease,
+        border-color 0.18s ease, opacity 0.16s ease;
+}
+.stock-search.is-open .stock-search__input {
+    width: clamp(10rem, 24vw, 17rem);
+    padding: 0.55rem 1rem;
+    border-color: rgba(49, 130, 246, 0.2);
+    opacity: 1;
+    pointer-events: auto;
+}
+.stock-search__input::placeholder {
+    color: rgba(139, 149, 161, 1);
+    text-transform: none;
+}
+.stock-search__toggle,
+.stock-search__reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 2.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: rgba(49, 130, 246, 1);
+    background-color: transparent;
+    font-size: 1.05rem;
+    transition: border-color 0.18s ease, color 0.18s ease,
+        background-color 0.18s ease, transform 0.18s ease;
+}
+.stock-search__reset {
+    color: rgba(107, 118, 132, 1);
+}
+.stock-search__reset[hidden] {
+    display: none;
+}
+
+/* interaction: 주식 검색 컨트롤의 hover·focus·열림 상태 */
+.stock-search__toggle:hover,
+.stock-search__toggle:focus,
+.stock-search.is-open .stock-search__toggle {
+    border-color: rgba(49, 130, 246, 0.14);
+    color: rgba(27, 100, 218, 1);
+    background-color: rgba(235, 244, 255, 1);
+}
+.stock-search__reset:hover,
+.stock-search__reset:focus {
+    border-color: rgba(15, 23, 42, 0.08);
+    color: rgba(51, 61, 75, 1);
+    background-color: rgba(242, 244, 246, 1);
+}
+.stock-search__toggle:active,
+.stock-search__reset:active {
+    transform: scale(0.96);
+}
+
+/* 접근성: 주식 검색 컨트롤의 키보드 포커스 표시 */
+.stock-search__input:focus-visible,
+.stock-search__toggle:focus-visible,
+.stock-search__reset:focus-visible {
+    outline: 3px solid rgba(49, 130, 246, 0.25);
+    outline-offset: 3px;
+}
+
+/* layout: 현재 목록과 시세 갱신 기준 안내 */
+.stock-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 1rem;
+    color: rgba(91, 103, 117, 1);
+    background-color: rgba(255, 255, 255, 0.68);
+    font-size: 0.82rem;
+}
+.stock-summary__view,
+.stock-summary__source {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+.stock-summary__source {
+    min-width: 0;
+    justify-content: flex-end;
+    line-height: 1.5;
+    text-align: right;
+}
+.stock-summary__source i {
+    flex: 0 0 auto;
+}
+.stock-summary__source-text {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    column-gap: 0.25rem;
+}
+.stock-summary__source-cache {
+    white-space: nowrap;
+}
+.stock-summary__count {
+    color: rgba(27, 100, 218, 1);
+    font-weight: 750;
+}
+
+/* state: 외부 시세 상태 안내 */
+.stock-status {
+    margin-bottom: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 1rem;
+    color: rgba(71, 85, 105, 1);
+    background-color: rgba(248, 250, 252, 0.92);
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+.stock-status.is-warning {
+    border-color: rgba(217, 119, 6, 0.18);
+    color: rgba(146, 82, 10, 1);
+    background-color: rgba(255, 247, 237, 0.95);
+}
+.stock-status.is-error {
+    border-color: rgba(225, 45, 63, 0.18);
+    color: rgba(185, 28, 28, 1);
+    background-color: rgba(254, 242, 242, 0.95);
+}
+
+/* layout: 주식 카드 목록 */
+.stock-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+.stock-card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.25rem, 4vw, 1.85rem);
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 1.6rem;
+    background-color: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.055);
+    transition: transform 0.2s ease, box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* interaction: 주식 카드의 hover 상태 */
+.stock-card:hover {
+    border-color: rgba(49, 130, 246, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 22px 52px rgba(15, 23, 42, 0.09);
+}
+.stock-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+}
+.stock-card__identity {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+.stock-card__ticker {
+    margin: 0;
+    color: rgba(25, 31, 40, 1);
+    font-size: clamp(1.25rem, 4vw, 1.55rem);
+    font-weight: 780;
+    letter-spacing: -0.025em;
+}
+.stock-card__market {
+    flex-shrink: 0;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    color: rgba(27, 100, 218, 1);
+    background-color: rgba(235, 244, 255, 1);
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+}
+.stock-card__time {
+    flex-shrink: 0;
+    color: rgba(139, 149, 161, 1);
+    font-size: 0.72rem;
+    text-align: right;
+}
+.stock-card__body {
+    display: grid;
+    grid-template-columns: minmax(11rem, 0.9fr) minmax(16rem, 1.35fr);
+    align-items: center;
+    gap: clamp(1.25rem, 4vw, 2.5rem);
+}
+.stock-card__name {
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    color: rgba(91, 103, 117, 1);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.stock-card__price {
+    margin-bottom: 0.45rem;
+    color: rgba(25, 31, 40, 1);
+    font-size: clamp(1.7rem, 6vw, 2.35rem);
+    font-weight: 790;
+    letter-spacing: -0.045em;
+    line-height: 1.12;
+}
+.stock-card__change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 720;
+}
+.stock-card__change.is-positive {
+    color: rgba(220, 38, 38, 1);
+}
+.stock-card__change.is-negative {
+    color: rgba(37, 99, 235, 1);
+}
+.stock-card__change.is-flat {
+    color: rgba(107, 118, 132, 1);
+}
+
+/* chart: 최근 1개월 일별 주가 그래프 */
+.stock-chart {
+    min-width: 0;
+    margin: 0;
+}
+.stock-chart__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+    color: rgba(139, 149, 161, 1);
+    font-size: 0.7rem;
+}
+.stock-chart__svg {
+    display: block;
+    width: 100%;
+    height: 6.5rem;
+    overflow: visible;
+}
+.stock-chart__baseline {
+    stroke: rgba(148, 163, 184, 0.2);
+    stroke-width: 1;
+}
+.stock-chart__line {
+    fill: none;
+    stroke: rgba(107, 118, 132, 1);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+.stock-chart__line.is-positive {
+    stroke: rgba(220, 38, 38, 1);
+}
+.stock-chart__line.is-negative {
+    stroke: rgba(37, 99, 235, 1);
+}
+.stock-chart__point {
+    fill: rgba(255, 255, 255, 1);
+    stroke: rgba(107, 118, 132, 1);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+}
+.stock-chart__point.is-positive {
+    stroke: rgba(220, 38, 38, 1);
+}
+.stock-chart__point.is-negative {
+    stroke: rgba(37, 99, 235, 1);
+}
+.stock-chart__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 6.5rem;
+    border-radius: 1rem;
+    color: rgba(139, 149, 161, 1);
+    background-color: rgba(248, 250, 252, 0.8);
+    font-size: 0.78rem;
+}
+
+/* layout: 주식 카드의 전일 종가와 거래소 정보 */
+.stock-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+    color: rgba(107, 118, 132, 1);
+    font-size: 0.75rem;
+}
+.stock-card__previous,
+.stock-card__exchange {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.stock-card__exchange {
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* state: 주식 목록 로딩·오류·빈 검색 결과 */
+.stock-state {
+    padding: 4rem 1.5rem;
+    border: 1px dashed rgba(15, 23, 42, 0.12);
+    border-radius: 1.6rem;
+    color: rgba(91, 103, 117, 1);
+    background-color: rgba(255, 255, 255, 0.72);
+    text-align: center;
+}
+.stock-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    border-radius: 1.35rem;
+    color: rgba(49, 130, 246, 1);
+    background-color: rgba(235, 244, 255, 1);
+    font-size: 1.4rem;
+}
+.stock-state__title {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: rgba(25, 31, 40, 1);
+    font-size: 1.05rem;
+}
+.stock-state__retry {
+    margin-top: 1rem;
+    border-color: rgba(49, 130, 246, 0.16);
+    color: rgba(27, 100, 218, 1);
+    background-color: rgba(235, 244, 255, 0.9);
+}
+.stock-disclaimer {
+    margin: 1.4rem 0 0;
+    color: rgba(139, 149, 161, 1);
+    font-size: 0.72rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* 반응형layout: 태블릿 이하에서 주식 카드를 세로 정렬 */
+@media (max-width: 767.98px) {
+    .stock-toolbar {
+        margin-bottom: 1.35rem;
+    }
+    .stock-card__body {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* 반응형layout: 모바일 화면에서 검색창과 메타데이터 밀도 조정 */
+@media (max-width: 575.98px) {
+    .stock-toolbar__title-row {
+        gap: 0.35rem;
+        padding-bottom: 0;
+    }
+    .stock-search {
+        gap: 0.25rem;
+        min-width: 2.5rem;
+    }
+    .stock-search__toggle,
+    .stock-search__reset {
+        flex-basis: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    .stock-search.is-open .stock-search__input {
+        width: min(12rem, calc(100vw - 11rem));
+        padding-right: 0.7rem;
+        padding-left: 0.7rem;
+    }
+    .stock-search.is-open.has-search-results .stock-search__input {
+        width: min(8rem, calc(100vw - 14rem));
+    }
+    .stock-summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.45rem;
+    }
+    .stock-summary__source {
+        justify-content: flex-start;
+        text-align: left;
+    }
+    .stock-summary__source-text {
+        justify-content: flex-start;
+    }
+    html[lang="ja"] .stock-summary__source-markets,
+    html[lang="ja"] .stock-summary__source-cache {
+        font-size: 0.76rem;
+        white-space: nowrap;
+    }
+    .stock-card__header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+    .stock-card__time {
+        text-align: left;
+    }
+    .stock-card__footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+    .stock-card__exchange {
+        text-align: left;
+    }
+}
+
+/* 접근성: 동작 줄이기 설정에서 카드 애니메이션 제거 */
+@media (prefers-reduced-motion: reduce) {
+    .stock-card,
+    .stock-search__input,
+    .stock-search__toggle,
+    .stock-search__reset {
+        transition: none;
+    }
+}

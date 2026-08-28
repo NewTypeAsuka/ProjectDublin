@@ -1,0 +1,345 @@
+/* layout: 게시글 목록 도입부와 상단 제목 */
+.article-list-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+}
+.article-list-toolbar__heading {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 0;
+}
+.article-list-toolbar__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+    color: rgba(27, 100, 218, 1);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.article-list-toolbar__title {
+    margin: 0;
+    color: rgba(25, 31, 40, 1);
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    font-weight: 780;
+    letter-spacing: -0.055em;
+    line-height: 1.08;
+}
+.article-list-toolbar__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+    padding-bottom: 0.7rem;
+}
+
+/* layout: 게시글 검색 입력창과 아이콘 버튼 */
+.article-list-search {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    flex: 0 1 auto;
+    min-width: 2.75rem;
+}
+.article-list-search__input {
+    box-sizing: border-box;
+    width: 0;
+    min-width: 0;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    opacity: 0;
+    color: rgba(51, 61, 75, 1);
+    background-color: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    pointer-events: none;
+    transition: width 0.22s ease, padding 0.22s ease,
+        border-color 0.18s ease, opacity 0.16s ease;
+}
+.article-list-search.is-open .article-list-search__input {
+    width: clamp(10rem, 24vw, 17rem);
+    padding: 0.55rem 1rem;
+    border-color: rgba(49, 130, 246, 0.2);
+    opacity: 1;
+    pointer-events: auto;
+}
+.article-list-search__input::placeholder {
+    color: rgba(139, 149, 161, 1);
+}
+.article-list-search__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 2.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: rgba(49, 130, 246, 1);
+    background-color: transparent;
+    font-size: 1.05rem;
+    transition: border-color 0.18s ease, color 0.18s ease,
+        background-color 0.18s ease, transform 0.18s ease;
+}
+
+/* interaction: 게시글 검색 컨트롤의 hover·focus·열림 상태 */
+.article-list-search__toggle:hover,
+.article-list-search__toggle:focus,
+.article-list-search.is-open .article-list-search__toggle {
+    border-color: rgba(49, 130, 246, 0.14);
+    color: rgba(27, 100, 218, 1);
+    background-color: rgba(235, 244, 255, 1);
+}
+.article-list-search__toggle:active {
+    transform: scale(0.96);
+}
+
+/* 접근성: 게시글 검색 컨트롤의 키보드 포커스 표시 */
+.article-list-search__input:focus-visible,
+.article-list-search__toggle:focus-visible {
+    outline: 3px solid rgba(49, 130, 246, 0.25);
+    outline-offset: 3px;
+}
+
+/* layout: 게시글 카드 외곽 링크 */
+.article-card-link {
+    display: block;
+    margin-bottom: 1.15rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* interaction: 게시글 카드 링크의 hover·focus 상태 */
+.article-card-link:hover,
+.article-card-link:focus {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* layout: 게시글 카드 표면과 내부 여백 */
+.article-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.07) !important;
+    border-radius: 1.6rem;
+    background-color: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.055) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* interaction: 게시글 카드의 hover·focus 부상 효과 */
+.article-card-link:hover .article-card,
+.article-card-link:focus .article-card,
+.article-card-link:focus-visible .article-card {
+    border-color: rgba(49, 130, 246, 0.22) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1) !important;
+}
+
+/* 접근성: 게시글 카드 링크의 키보드 포커스 표시 */
+.article-card-link:focus-visible {
+    border-radius: 1.6rem;
+    outline: 3px solid rgba(49, 130, 246, 0.28);
+    outline-offset: 4px;
+}
+.article-card__body {
+    padding: clamp(1.35rem, 4vw, 2rem) !important;
+}
+
+/* layout: 게시글 식별자와 고정 표시 */
+.article-card__number {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    min-height: 1.85rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    color: rgba(107, 118, 132, 1);
+    background-color: rgba(242, 244, 246, 1);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.article-card__pin {
+    color: rgba(49, 130, 246, 1);
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+/* layout: 게시글 작성 일시와 작성자 정보 */
+.article-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+}
+.article-card__byline {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    min-width: 0;
+    text-align: right;
+    line-height: 1.55;
+}
+.article-card__date,
+.article-card__author {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+.article-card__author {
+    gap: 0.25rem;
+}
+.article-card__separator {
+    color: rgba(190, 198, 207, 1);
+}
+.author-admin-badge {
+    margin-left: 0.2rem;
+    color: rgba(29, 155, 240, 1);
+    line-height: 1;
+}
+
+/* layout: 게시글 조회수·좋아요·댓글 지표 */
+.article-card__metrics {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.1rem;
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    padding: 0.15rem 0.25rem;
+    border-radius: 999px;
+    background-color: rgba(247, 249, 252, 1);
+    text-align: right;
+    white-space: nowrap;
+}
+.article-card__metric {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 1.9rem;
+    padding: 0.25rem 0.45rem;
+    background-color: transparent;
+}
+.article-card__like-icon {
+    color: rgba(224, 49, 49, 1);
+}
+
+/* layout: 게시글 제목과 미리보기 말줄임 */
+.article-card__title {
+    display: -webkit-box;
+    max-height: 2.8em;
+    margin-bottom: 0.7rem !important;
+    overflow: hidden;
+    color: rgba(25, 31, 40, 1);
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    font-weight: 740;
+    line-height: 1.4;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+.article-card__preview {
+    display: -webkit-box;
+    overflow: hidden;
+    color: rgba(91, 103, 117, 1) !important;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+/* layout: 게시글 피드의 추가 로딩과 빈 목록 상태 */
+.article-feed__controls {
+    min-height: 4.5rem;
+    color: rgba(107, 118, 132, 1);
+}
+.article-feed__sentinel {
+    width: 100%;
+    height: 1px;
+}
+.article-feed__load-button {
+    min-height: 2.75rem;
+    padding: 0.55rem 1rem;
+    border-color: rgba(15, 23, 42, 0.1);
+    color: rgba(51, 61, 75, 1);
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* interaction: 게시글 추가 로딩 버튼의 hover·focus 상태 */
+.article-feed__load-button:hover,
+.article-feed__load-button:focus {
+    border-color: rgba(49, 130, 246, 0.2);
+    color: rgba(27, 100, 218, 1);
+    background-color: rgba(235, 244, 255, 1);
+}
+.article-empty-state {
+    padding: 4rem 1.5rem;
+    border: 1px dashed rgba(15, 23, 42, 0.12);
+    border-radius: 1.6rem;
+    background-color: rgba(255, 255, 255, 0.72);
+    text-align: center;
+}
+.article-empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    border-radius: 1.35rem;
+    color: rgba(49, 130, 246, 1);
+    background-color: rgba(235, 244, 255, 1);
+    font-size: 1.4rem;
+}
+
+/* 반응형layout: 모바일 목록 도입부와 카드 메타데이터 밀도 조정 */
+@media (max-width: 575.98px) {
+    #main-content .article-list-toolbar {
+        margin-bottom: 1.25rem !important;
+    }
+    .article-list-toolbar__title-row {
+        gap: 0.35rem;
+        padding-bottom: 0;
+    }
+    .article-list-search {
+        gap: 0.25rem;
+        min-width: 2.5rem;
+    }
+    .article-list-search__toggle {
+        flex-basis: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    .article-list-search.is-open .article-list-search__input {
+        width: min(12rem, calc(100vw - 11rem));
+        padding-right: 0.8rem;
+        padding-left: 0.8rem;
+    }
+    .article-card__header {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .article-card__byline {
+        justify-content: flex-end;
+        text-align: right;
+    }
+}
