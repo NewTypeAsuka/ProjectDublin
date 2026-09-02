@@ -6,7 +6,7 @@
     <title th:text="${article.id} != null
         ? #{article.form.page.edit.title}
         : #{article.form.page.create.title}">글쓰기 · NewTypeBlog</title>
-    <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 Bootstrap CSS -->
+    <th:block th:replace="~{common :: headLinks}"></th:block> <!-- favicon과 공통 CSS·보안 스크립트 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs4.min.css"> <!-- Summernote CSS -->
     <link rel="stylesheet" href="/css/newArticle.css"> <!-- 게시글 작성·수정 화면 CSS -->
 </head>

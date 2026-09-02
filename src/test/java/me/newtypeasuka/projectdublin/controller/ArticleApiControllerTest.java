@@ -232,6 +232,57 @@ class ArticleApiControllerTest {
         assertThat(document.select("a[href=/logout]")).isEmpty();
     }
 
+    @DisplayName("공통 CSS를 첫 렌더링 전에 직접 로드하고 Tailwind 설정은 인라인으로 제공한다")
+    @Test
+    void loadCommonStylesBeforeFirstRender() throws Exception {
+        MvcResult result = mockMvc.perform(
+                        get("/articles/{id}", article.getId()).with(loginUser(member))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element commonStylesheet = document.selectFirst(
+                "link[rel=stylesheet][href=/css/common.css]"
+        );
+        Element tailwindRuntime = document.selectFirst(
+                "script[src*=\"@tailwindcss/browser\"]"
+        );
+        Element tailwindConfig = document.selectFirst("style[type=text/tailwindcss]");
+
+        // Tailwind 런타임의 비동기 CSS import 전에 공통 화면 스타일을 적용해 FOUC를 방지
+        assertThat(commonStylesheet).isNotNull();
+        assertThat(tailwindRuntime).isNotNull();
+        assertThat(tailwindConfig).isNotNull();
+        assertThat(commonStylesheet.elementSiblingIndex())
+                .isLessThan(tailwindRuntime.elementSiblingIndex());
+        assertThat(tailwindRuntime.elementSiblingIndex())
+                .isLessThan(tailwindConfig.elementSiblingIndex());
+        assertThat(tailwindConfig.data())
+                .contains("@import \"tailwindcss/utilities.css\"")
+                .doesNotContain("@import url(\"/css/common.css\")");
+
+        mockMvc.perform(get("/css/common.css"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        ".site-header > .container"
+                )))
+                .andExpect(content().string(not(containsString("@theme"))));
+    }
+
+    @DisplayName("태블릿·데스크톱 내비게이션 폭을 콘텐츠 카드 영역에 맞춘다")
+    @Test
+    void limitDesktopNavigationToContentWidth() throws Exception {
+        mockMvc.perform(get("/css/common.css"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "@media (min-width: 992px) {\n    .site-nav > .site-nav__inner {\n        max-width: 800px;"
+                )))
+                .andExpect(content().string(containsString(
+                        "@media (min-width: 1200px) {\n    .site-nav > .site-nav__inner {\n        max-width: 855px;"
+                )));
+    }
+
     @DisplayName("로그아웃은 유효한 CSRF 토큰이 포함된 POST 요청만 처리한다")
     @Test
     void requireCsrfTokenForLogout() throws Exception {
