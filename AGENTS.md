@@ -1,4 +1,5 @@
 # ProjectDublin 에이전트 가이드
+# 20261015 v1.0
 
 [//]: # (OpenAI Codex: AGENTS.md)
 [//]: # (GitHub Copilot: .github/copilot-instructions.md / 일부 Copilot 에이전트는 AGENTS.md도 지원)
